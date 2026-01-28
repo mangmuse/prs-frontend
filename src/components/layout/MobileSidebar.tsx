@@ -10,7 +10,7 @@ import { mainNavItems, statsItems } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
 export const MobileSidebar = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
   const location = useLocation();
 
   return (
