@@ -1,4 +1,3 @@
-// src/mocks/test-utils.ts
 import type { RequestHandler } from "msw";
 
 import { server } from "./server";

@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 
 import "./index.css";
-import { AppProviders } from "./providers";
+import { AppProviders } from "./providers/AppProviders";
 import { router } from "./router";
 
 const enableMocking = async () => {

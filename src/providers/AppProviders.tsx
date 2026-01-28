@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { AuthInitializer } from "./AuthInitializer";
 import { QueryProvider } from "./QueryProvider";
 
 interface AppProvidersProps {
@@ -7,5 +8,9 @@ interface AppProvidersProps {
 }
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
-  return <QueryProvider>{children}</QueryProvider>;
+  return (
+    <QueryProvider>
+      <AuthInitializer>{children}</AuthInitializer>
+    </QueryProvider>
+  );
 };
