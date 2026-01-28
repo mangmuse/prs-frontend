@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["cypress"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["cypress/**/*.ts", "cypress/**/*.tsx", "cypress.config.ts"]
+}
