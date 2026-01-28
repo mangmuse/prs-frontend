@@ -1,12 +1,13 @@
 import { apiClient } from "./client";
 
-export interface GuestSession {
+export interface GuestSessionResponse {
   guest_id: string;
-  created_at: string;
+  token: string;
+  expires_at: string;
 }
 
 export const authApi = {
-  createGuestSession: async (): Promise<GuestSession> => {
-    return apiClient.post("auth/guest").json<GuestSession>();
+  createGuestSession: async (): Promise<GuestSessionResponse> => {
+    return apiClient.post("auth/guest").json<GuestSessionResponse>();
   },
 };

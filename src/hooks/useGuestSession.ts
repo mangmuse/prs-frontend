@@ -13,9 +13,10 @@ interface UseGuestSessionResult {
 }
 
 export const useGuestSession = (): UseGuestSessionResult => {
-  const { isInitialized, setGuest, setInitialized } = useAuthStore(
+  const { isInitialized, setAccessToken, setGuest, setInitialized } = useAuthStore(
     useShallow((state) => ({
       isInitialized: state.isInitialized,
+      setAccessToken: state.setAccessToken,
       setGuest: state.setGuest,
       setInitialized: state.setInitialized,
     })),
@@ -32,10 +33,11 @@ export const useGuestSession = (): UseGuestSessionResult => {
 
   useEffect(() => {
     if (query.data && !isInitialized) {
+      setAccessToken(query.data.token);
       setGuest();
       setInitialized();
     }
-  }, [query.data, isInitialized, setGuest, setInitialized]);
+  }, [query.data, isInitialized, setAccessToken, setGuest, setInitialized]);
 
   return {
     isInitializing: query.isPending,
