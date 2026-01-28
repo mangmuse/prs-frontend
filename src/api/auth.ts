@@ -2,8 +2,7 @@ import { apiClient } from "./client";
 
 export interface GuestSessionResponse {
   guest_id: string;
-  token: string;
-  expires_at: string;
+  created_at: string;
 }
 
 export const authApi = {
