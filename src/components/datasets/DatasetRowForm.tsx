@@ -26,9 +26,10 @@ const inputFieldSchema = z.object({
 });
 
 const constraintSchema = z.object({
+  id: z.string(),
   type: z.enum(["contains", "not_contains", "range", "regex", "max_length"]),
   value: z.union([z.string(), z.number()]).optional(),
-  field: z.string().optional(),
+  target: z.string().optional(),
   min: z.number().optional(),
   max: z.number().optional(),
   pattern: z.string().optional(),
@@ -88,7 +89,14 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
           {
             input_data: inputData,
             expected_output: data.expectedOutput,
-            row_constraints: data.constraints,
+            row_constraints: data.constraints.map((constraint) => ({
+              type: constraint.type,
+              value: constraint.value,
+              target: constraint.target,
+              min: constraint.min,
+              max: constraint.max,
+              pattern: constraint.pattern,
+            })),
             tags,
           },
         ],

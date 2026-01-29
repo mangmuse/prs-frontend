@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ConstraintType, LogicConstraint } from "@/types/dataset";
+import type { ConstraintType, LogicConstraint } from "@/types/common";
 
 interface ConstraintsEditorProps {
   constraints: LogicConstraint[];
@@ -26,16 +26,17 @@ const CONSTRAINT_TYPES: { value: ConstraintType; label: string }[] = [
 ];
 
 const createDefaultConstraint = (type: ConstraintType): LogicConstraint => {
+  const id = crypto.randomUUID();
   switch (type) {
     case "contains":
     case "not_contains":
-      return { type, value: "" };
+      return { id, type, value: "" };
     case "range":
-      return { type: "range", field: "", min: undefined, max: undefined };
+      return { id, type: "range", target: "", min: undefined, max: undefined };
     case "regex":
-      return { type: "regex", pattern: "" };
+      return { id, type: "regex", pattern: "" };
     case "max_length":
-      return { type: "max_length", max: 100 };
+      return { id, type: "max_length", max: 100 };
   }
 };
 
@@ -44,20 +45,17 @@ export const ConstraintsEditor = ({ constraints, onChange }: ConstraintsEditorPr
     onChange([...constraints, createDefaultConstraint("contains")]);
   };
 
-  const removeConstraint = (index: number) => {
-    onChange(constraints.filter((_, existingIndex) => existingIndex !== index));
+  const removeConstraint = (id: string) => {
+    onChange(constraints.filter((constraint) => constraint.id !== id));
   };
 
-  const updateConstraint = (index: number, updated: LogicConstraint) => {
-    onChange(
-      constraints.map((existingConstraint, existingIndex) =>
-        existingIndex === index ? updated : existingConstraint,
-      ),
-    );
+  const updateConstraint = (id: string, updated: LogicConstraint) => {
+    onChange(constraints.map((constraint) => (constraint.id === id ? updated : constraint)));
   };
 
-  const changeConstraintType = (index: number, newType: ConstraintType) => {
-    updateConstraint(index, createDefaultConstraint(newType));
+  const changeConstraintType = (id: string, newType: ConstraintType) => {
+    const newConstraint = createDefaultConstraint(newType);
+    onChange(constraints.map((constraint) => (constraint.id === id ? newConstraint : constraint)));
   };
 
   return (
@@ -75,12 +73,17 @@ export const ConstraintsEditor = ({ constraints, onChange }: ConstraintsEditorPr
       )}
 
       <div className="space-y-3">
-        {constraints.map((constraint, index) => (
-          <div key={index} className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3">
+        {constraints.map((constraint) => (
+          <div
+            key={constraint.id}
+            className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3"
+          >
             <div className="flex-1 space-y-2">
               <Select
                 value={constraint.type}
-                onValueChange={(value) => changeConstraintType(index, value as ConstraintType)}
+                onValueChange={(value) =>
+                  changeConstraintType(constraint.id, value as ConstraintType)
+                }
               >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue />
@@ -96,7 +99,7 @@ export const ConstraintsEditor = ({ constraints, onChange }: ConstraintsEditorPr
 
               <ConstraintFields
                 constraint={constraint}
-                onChange={(updated) => updateConstraint(index, updated)}
+                onChange={(updated) => updateConstraint(constraint.id, updated)}
               />
             </div>
 
@@ -105,7 +108,7 @@ export const ConstraintsEditor = ({ constraints, onChange }: ConstraintsEditorPr
               variant="ghost"
               size="icon"
               className="shrink-0 text-destructive hover:text-destructive"
-              onClick={() => removeConstraint(index)}
+              onClick={() => removeConstraint(constraint.id)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -138,8 +141,8 @@ const ConstraintFields = ({ constraint, onChange }: ConstraintFieldsProps) => {
         <div className="flex gap-2">
           <Input
             placeholder="필드명"
-            value={constraint.field ?? ""}
-            onChange={(event) => onChange({ ...constraint, field: event.target.value })}
+            value={constraint.target ?? ""}
+            onChange={(event) => onChange({ ...constraint, target: event.target.value })}
             className="flex-1"
           />
           <Input

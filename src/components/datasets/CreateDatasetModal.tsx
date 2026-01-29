@@ -28,9 +28,10 @@ import { useCreateDatasetWithRows } from "@/hooks/mutations/useCreateDatasetWith
 import { ConstraintsEditor } from "./ConstraintsEditor";
 
 const constraintSchema = z.object({
+  id: z.string(),
   type: z.enum(["contains", "not_contains", "range", "regex", "max_length"]),
   value: z.union([z.string(), z.number()]).optional(),
-  field: z.string().optional(),
+  target: z.string().optional(),
   min: z.number().optional(),
   max: z.number().optional(),
   pattern: z.string().optional(),
@@ -93,7 +94,14 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
       .map((row) => ({
         input_data: { text: row.input.trim() },
         expected_output: row.expected.trim(),
-        row_constraints: row.constraints,
+        row_constraints: row.constraints.map((constraint) => ({
+          type: constraint.type,
+          value: constraint.value,
+          target: constraint.target,
+          min: constraint.min,
+          max: constraint.max,
+          pattern: constraint.pattern,
+        })),
         tags: row.tags
           .split(",")
           .map((tag) => tag.trim())

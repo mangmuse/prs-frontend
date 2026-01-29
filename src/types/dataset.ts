@@ -1,13 +1,4 @@
-export type ConstraintType = "contains" | "not_contains" | "range" | "regex" | "max_length";
-
-export interface LogicConstraint {
-  type: ConstraintType;
-  value?: string | number;
-  field?: string;
-  min?: number;
-  max?: number;
-  pattern?: string;
-}
+import type { LogicConstraint, LogicConstraintInput } from "./common";
 
 export interface Dataset {
   id: number;
@@ -53,7 +44,7 @@ export interface DatasetDetailResponse {
 export interface CreateRowsRequest {
   input_data: Record<string, unknown>;
   expected_output: string;
-  row_constraints: LogicConstraint[];
+  row_constraints: LogicConstraintInput[];
   tags: string[];
 }
 

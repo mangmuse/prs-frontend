@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { datasetQueries } from "@/queries/datasetQueries";
-import type { LogicConstraint } from "@/types/dataset";
+import type { LogicConstraint } from "@/types/common";
 import { buildPaginationState } from "@/utils/pagination";
 
 import { DatasetRowForm } from "./DatasetRowForm";

@@ -1,10 +1,8 @@
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { promptsApi } from "@/api/prompts";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,7 +29,8 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { promptQueries } from "@/queries/promptQueries";
+import { useCreatePrompt } from "@/hooks/mutations/useCreatePrompt";
+import { useCreateVersion } from "@/hooks/mutations/useCreateVersion";
 import type { CreateVersionRequest, OutputSchemaType } from "@/types/prompt";
 
 type ModalState =
@@ -74,7 +73,6 @@ type CreatePromptFormData = z.infer<typeof createPromptSchema>;
 type CreateVersionFormData = z.infer<typeof createVersionSchema>;
 
 export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptModalProps) => {
-  const queryClient = useQueryClient();
   const isVersionMode = state.open && state.mode === "version";
 
   const promptForm = useForm<CreatePromptFormData>({
@@ -94,24 +92,8 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
     },
   });
 
-  const createPromptMutation = useMutation({
-    mutationFn: promptsApi.create,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: promptQueries.all() });
-      handleClose();
-      onSuccess?.();
-    },
-  });
-
-  const createVersionMutation = useMutation({
-    mutationFn: (args: { promptId: number; data: CreateVersionRequest }) =>
-      promptsApi.createVersion(args.promptId, args.data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: promptQueries.all() });
-      handleClose();
-      onSuccess?.();
-    },
-  });
+  const createPromptMutation = useCreatePrompt();
+  const createVersionMutation = useCreateVersion();
 
   const handleClose = () => {
     promptForm.reset();
@@ -120,7 +102,15 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
   };
 
   const onPromptSubmit = (data: CreatePromptFormData) => {
-    createPromptMutation.mutate({ name: data.name });
+    createPromptMutation.mutate(
+      { name: data.name },
+      {
+        onSuccess: () => {
+          handleClose();
+          onSuccess?.();
+        },
+      },
+    );
   };
 
   const onVersionSubmit = (data: CreateVersionFormData) => {
@@ -133,10 +123,18 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
       output_schema: data.output_schema as OutputSchemaType,
       memo: data.memo || undefined,
     };
-    createVersionMutation.mutate({
-      promptId: state.promptId,
-      data: requestData,
-    });
+    createVersionMutation.mutate(
+      {
+        promptId: state.promptId,
+        data: requestData,
+      },
+      {
+        onSuccess: () => {
+          handleClose();
+          onSuccess?.();
+        },
+      },
+    );
   };
 
   const isLoading = createPromptMutation.isPending || createVersionMutation.isPending;

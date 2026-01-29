@@ -93,7 +93,7 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
             </div>
           )}
 
-          <Tabs value={contentTab} onValueChange={(v: "system" | "user") => setContentTab(v)}>
+          <Tabs value={contentTab} onValueChange={(v) => setContentTab(v as "system" | "user")}>
             <TabsList className="w-full">
               <TabsTrigger value="system" className="flex-1 gap-2">
                 <Settings className="h-4 w-4" />
