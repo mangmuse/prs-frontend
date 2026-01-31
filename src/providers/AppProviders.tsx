@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { Toaster } from "sonner";
+
 import { AuthInitializer } from "./AuthInitializer";
 import { QueryProvider } from "./QueryProvider";
 
@@ -11,6 +13,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <QueryProvider>
       <AuthInitializer>{children}</AuthInitializer>
+      <Toaster position="top-right" />
     </QueryProvider>
   );
 };

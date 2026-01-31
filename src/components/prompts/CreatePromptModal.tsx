@@ -44,15 +44,7 @@ interface CreatePromptModalProps {
   onSuccess?: () => void;
 }
 
-const MODEL_OPTIONS = [
-  "gpt-4",
-  "gpt-4-turbo",
-  "gpt-4o",
-  "gpt-3.5-turbo",
-  "claude-3-opus",
-  "claude-3-sonnet",
-  "claude-3-haiku",
-] as const;
+const MODEL_OPTIONS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"] as const;
 
 const SCHEMA_OPTIONS = ["JSON Object", "JSON Array", "Label", "Freeform"] as const;
 
@@ -85,7 +77,7 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
     defaultValues: {
       system_instruction: "",
       user_template: "",
-      model: "gpt-4",
+      model: "gemini-2.5-flash",
       temperature: 1.0,
       output_schema: "JSON Object",
       memo: "",

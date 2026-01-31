@@ -1,12 +1,61 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { useMemo, useState } from "react";
+
+import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+
+import { MobileSidebar } from "@/components/layout/MobileSidebar";
+import { CreateRunModal } from "@/components/runs/CreateRunModal";
+import { RunsTable } from "@/components/runs/RunsTable";
+import { Button } from "@/components/ui/button";
+import { useRunStatusChange } from "@/hooks/useRunStatusChange";
+import { runQueries } from "@/queries/runQueries";
+import { formatPercent } from "@/utils/format";
+
+const POLLING_INTERVAL = 3000;
 
 export const RunsPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data: runs = [] } = useQuery({
+    ...runQueries.list(),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      const hasRunning = data?.some((run) => run.status === "running");
+      return hasRunning ? POLLING_INTERVAL : false;
+    },
+  });
+
+  const statusChangeHandlers = useMemo(
+    () => ({
+      onCompleted: (run: { id: number; pass_rate: number | null }) => {
+        toast.success(`Run #${run.id} 완료 - Pass Rate: ${formatPercent(run.pass_rate)}`);
+      },
+      onFailed: (run: { id: number }) => {
+        toast.error(`Run #${run.id} 실패`);
+      },
+    }),
+    [],
+  );
+
+  useRunStatusChange(runs, statusChangeHandlers);
+
   return (
     <div className="flex flex-col h-full">
-      <PageHeader title="Runs" />
+      <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-6">
+        <div className="flex items-center gap-4">
+          <MobileSidebar />
+          <h1 className="text-xl font-semibold">Runs</h1>
+        </div>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />새 Run 실행
+        </Button>
+      </header>
       <div className="flex-1 p-6">
-        <p className="text-muted-foreground">Evaluation runs history</p>
+        <RunsTable runs={runs} />
       </div>
+
+      <CreateRunModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );
 };

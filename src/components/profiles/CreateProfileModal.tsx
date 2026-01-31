@@ -53,14 +53,16 @@ const CONSTRAINT_TYPES: { value: ConstraintType; label: string }[] = [
   { value: "not_contains", label: "미포함 (not_contains)" },
   { value: "range", label: "범위 (range)" },
   { value: "regex", label: "정규식 (regex)" },
+  { value: "max_length", label: "최대 길이 (max_length)" },
 ];
 
 const constraintSchema = z.object({
-  type: z.enum(["contains", "not_contains", "range", "regex"]),
-  target: z.string().min(1, "대상 필드를 입력하세요"),
-  value: z.string().optional(),
+  type: z.enum(["contains", "not_contains", "range", "regex", "max_length"]),
+  target: z.string().optional(),
+  value: z.union([z.string(), z.number()]).optional(),
   min: z.number().optional(),
   max: z.number().optional(),
+  pattern: z.string().optional(),
 });
 
 const profileSchema = z.object({
