@@ -6,7 +6,7 @@ export interface GuestSessionResponse {
 }
 
 export const authApi = {
-  createGuestSession: async (): Promise<GuestSessionResponse> => {
+  async createGuestSession(): Promise<GuestSessionResponse> {
     return apiClient.post("auth/guest").json<GuestSessionResponse>();
   },
 };

@@ -8,15 +8,13 @@ export const profileQueries = {
   list: () =>
     queryOptions({
       queryKey: [...profileQueries.all(), "list"],
-      queryFn: profilesApi.getList,
-      staleTime: 1000 * 60 * 5,
+      queryFn: () => profilesApi.getList(),
     }),
 
   detail: (id: number) =>
     queryOptions({
       queryKey: [...profileQueries.all(), "detail", id],
       queryFn: () => profilesApi.getDetail(id),
-      staleTime: 1000 * 60 * 5,
       enabled: !!id,
     }),
 };

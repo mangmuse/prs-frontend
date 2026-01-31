@@ -8,15 +8,13 @@ export const promptQueries = {
   list: () =>
     queryOptions({
       queryKey: [...promptQueries.all(), "list"],
-      queryFn: promptsApi.getList,
-      staleTime: 1000 * 60 * 5,
+      queryFn: () => promptsApi.getList(),
     }),
 
   versions: (promptId: number) =>
     queryOptions({
       queryKey: [...promptQueries.all(), "versions", promptId],
       queryFn: () => promptsApi.getVersions(promptId),
-      staleTime: 1000 * 60 * 5,
       enabled: !!promptId,
     }),
 
@@ -24,7 +22,6 @@ export const promptQueries = {
     queryOptions({
       queryKey: [...promptQueries.all(), "versionDetail", promptId, versionId],
       queryFn: () => promptsApi.getVersionDetail(promptId, versionId),
-      staleTime: 1000 * 60 * 5,
       enabled: !!promptId && !!versionId,
     }),
 };

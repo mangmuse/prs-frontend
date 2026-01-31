@@ -23,7 +23,7 @@ export const useGuestSession = (): UseGuestSessionResult => {
 
   const query = useQuery({
     queryKey: ["auth", "guest-session"],
-    queryFn: authApi.createGuestSession,
+    queryFn: () => authApi.createGuestSession(),
     enabled: !isInitialized,
     retry: 3,
     refetchOnWindowFocus: false,

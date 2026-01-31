@@ -8,15 +8,13 @@ export const datasetQueries = {
   list: () =>
     queryOptions({
       queryKey: [...datasetQueries.all(), "list"],
-      queryFn: datasetsApi.getList,
-      staleTime: 1000 * 60 * 5,
+      queryFn: () => datasetsApi.getList(),
     }),
 
   detail: (id: number, page = 1, limit = 50) =>
     queryOptions({
       queryKey: [...datasetQueries.all(), "detail", id, { page, limit }],
       queryFn: () => datasetsApi.getDetail(id, page, limit),
-      staleTime: 1000 * 60 * 5,
       placeholderData: keepPreviousData,
       enabled: !!id,
     }),
