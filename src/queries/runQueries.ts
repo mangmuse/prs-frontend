@@ -5,10 +5,10 @@ import { runsApi } from "@/api/runs";
 export const runQueries = {
   all: () => ["runs"] as const,
 
-  list: () =>
+  list: (grouped: boolean = true) =>
     queryOptions({
-      queryKey: [...runQueries.all(), "list"],
-      queryFn: () => runsApi.getList(),
+      queryKey: [...runQueries.all(), "list", { grouped }],
+      queryFn: () => runsApi.getList(grouped),
       staleTime: 0,
     }),
 
@@ -17,5 +17,13 @@ export const runQueries = {
       queryKey: [...runQueries.all(), "detail", id],
       queryFn: () => runsApi.getDetail(id),
       enabled: !!id,
+      refetchInterval: (query) => (query.state.data?.status === "running" ? 3000 : false),
+    }),
+
+  relatedVersions: (runId: number) =>
+    queryOptions({
+      queryKey: [...runQueries.all(), "relatedVersions", runId],
+      queryFn: () => runsApi.getRelatedVersions(runId),
+      enabled: !!runId,
     }),
 };

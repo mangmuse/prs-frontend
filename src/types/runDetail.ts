@@ -51,6 +51,10 @@ export interface RunMetrics {
 
 export interface RunDetailData {
   id: number;
+  promptId: number;
+  promptVersionId: number;
+  datasetId: number;
+  profileId: number;
   promptName: string;
   versionNumber: number;
   datasetName: string;

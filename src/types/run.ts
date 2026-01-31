@@ -2,6 +2,7 @@ export type RunStatus = "running" | "completed" | "failed";
 
 export interface RunSummary {
   id: number;
+  promptId: number;
   promptVersionId: number;
   promptName: string;
   versionNumber: number;
@@ -36,4 +37,22 @@ export interface CreateRunFormState {
   versionId: number | null;
   datasetId: number | null;
   profileId: number | null;
+}
+
+export interface RelatedRun {
+  id: number;
+  versionNumber: number;
+  status: RunStatus;
+  passRate: number | null;
+  createdAt: string;
+}
+
+export interface UnexecutedVersion {
+  id: number;
+  versionNumber: number;
+}
+
+export interface RelatedVersionsResponse {
+  executedRuns: RelatedRun[];
+  unexecutedVersions: UnexecutedVersion[];
 }
