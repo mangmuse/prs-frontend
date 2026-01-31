@@ -68,8 +68,8 @@ const constraintSchema = z.object({
 const profileSchema = z.object({
   name: z.string().min(1, "프로필 이름을 입력하세요"),
   description: z.string().optional(),
-  semantic_threshold: z.number().min(0).max(1),
-  global_constraints: z.array(constraintSchema),
+  semanticThreshold: z.number().min(0).max(1),
+  globalConstraints: z.array(constraintSchema),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -89,19 +89,19 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
     defaultValues: {
       name: "",
       description: "",
-      semantic_threshold: 0.85,
-      global_constraints: [],
+      semanticThreshold: 0.85,
+      globalConstraints: [],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "global_constraints",
+    name: "globalConstraints",
   });
 
   const watchedConstraints = useWatch({
     control: form.control,
-    name: "global_constraints",
+    name: "globalConstraints",
   });
 
   useEffect(() => {
@@ -109,15 +109,15 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
       form.reset({
         name: existingProfile.name,
         description: existingProfile.description || "",
-        semantic_threshold: existingProfile.semantic_threshold,
-        global_constraints: existingProfile.global_constraints,
+        semanticThreshold: existingProfile.semanticThreshold,
+        globalConstraints: existingProfile.globalConstraints,
       });
     } else if (!isEditMode && state.open) {
       form.reset({
         name: "",
         description: "",
-        semantic_threshold: 0.85,
-        global_constraints: [],
+        semanticThreshold: 0.85,
+        globalConstraints: [],
       });
     }
   }, [isEditMode, existingProfile, state.open, form]);
@@ -149,8 +149,8 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
     const requestData = {
       name: data.name,
       description: data.description || undefined,
-      semantic_threshold: data.semantic_threshold,
-      global_constraints: data.global_constraints.map((constraint) => ({
+      semanticThreshold: data.semanticThreshold,
+      globalConstraints: data.globalConstraints.map((constraint) => ({
         type: constraint.type,
         target: constraint.target,
         ...(constraint.type === "contains" ||
@@ -210,7 +210,7 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
 
             <FormField
               control={form.control}
-              name="semantic_threshold"
+              name="semanticThreshold"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Semantic Threshold: {Math.round(field.value * 100)}%</FormLabel>
@@ -261,7 +261,7 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
                     <div key={field.id} className="flex items-start gap-2 rounded-lg border p-3">
                       <FormField
                         control={form.control}
-                        name={`global_constraints.${index}.type`}
+                        name={`globalConstraints.${index}.type`}
                         render={({ field: typeField }) => (
                           <FormItem className="w-40">
                             <Select value={typeField.value} onValueChange={typeField.onChange}>
@@ -284,7 +284,7 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
 
                       <FormField
                         control={form.control}
-                        name={`global_constraints.${index}.target`}
+                        name={`globalConstraints.${index}.target`}
                         render={({ field: targetField }) => (
                           <FormItem className="flex-1">
                             <FormControl>
@@ -299,7 +299,7 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
                         watchedConstraints?.[index]?.type === "regex") && (
                         <FormField
                           control={form.control}
-                          name={`global_constraints.${index}.value`}
+                          name={`globalConstraints.${index}.value`}
                           render={({ field: valueField }) => (
                             <FormItem className="flex-1">
                               <FormControl>
@@ -314,7 +314,7 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
                         <>
                           <FormField
                             control={form.control}
-                            name={`global_constraints.${index}.min`}
+                            name={`globalConstraints.${index}.min`}
                             render={({ field: minField }) => (
                               <FormItem className="w-20">
                                 <FormControl>
@@ -330,7 +330,7 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
                           />
                           <FormField
                             control={form.control}
-                            name={`global_constraints.${index}.max`}
+                            name={`globalConstraints.${index}.max`}
                             render={({ field: maxField }) => (
                               <FormItem className="w-20">
                                 <FormControl>

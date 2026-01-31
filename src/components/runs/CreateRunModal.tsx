@@ -82,9 +82,9 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
 
     createRun.mutate(
       {
-        prompt_version_id: effectiveVersionId,
-        dataset_id: formState.datasetId!,
-        profile_id: formState.profileId!,
+        promptVersionId: effectiveVersionId,
+        datasetId: formState.datasetId!,
+        profileId: formState.profileId!,
       },
       {
         onSuccess: () => {
@@ -141,7 +141,7 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
               <SelectContent>
                 {versions?.map((version) => (
                   <SelectItem key={version.id} value={version.id.toString()}>
-                    v{version.version_number}
+                    v{version.versionNumber}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -4,20 +4,19 @@ export interface Dataset {
   id: number;
   name: string;
   description?: string;
-  row_count: number;
-  created_at: string;
+  rowCount: number;
+  createdAt: string;
 }
 
 export interface DatasetRow {
   id: number;
-  dataset_id: number;
-  input_data: Record<string, unknown>;
-  expected_output: string;
-  row_constraints: LogicConstraint[];
+  datasetId: number;
+  inputData: Record<string, unknown>;
+  expectedOutput: string;
+  rowConstraints: LogicConstraint[];
   tags: string[];
 }
 
-// API Types
 export interface CreateDatasetRequest {
   name: string;
   description?: string;
@@ -26,7 +25,7 @@ export interface CreateDatasetRequest {
 export interface CreateDatasetResponse {
   id: number;
   name: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface DatasetDetailResponse {
@@ -36,18 +35,18 @@ export interface DatasetDetailResponse {
   pagination: {
     page: number;
     limit: number;
-    total_count: number;
-    total_pages: number;
+    totalCount: number;
+    totalPages: number;
   };
 }
 
 export interface CreateRowsRequest {
-  input_data: Record<string, unknown>;
-  expected_output: string;
-  row_constraints: LogicConstraintInput[];
+  inputData: Record<string, unknown>;
+  expectedOutput: string;
+  rowConstraints: LogicConstraintInput[];
   tags: string[];
 }
 
 export interface CreateRowsResponse {
-  created_count: number;
+  createdCount: number;
 }

@@ -47,12 +47,12 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
         <div className="rounded-lg border bg-card p-4">
           <div className="text-sm text-muted-foreground">Semantic Threshold</div>
           <div className="mt-1 text-3xl font-bold text-primary">
-            {Math.round(profile.semantic_threshold * 100)}%
+            {Math.round(profile.semanticThreshold * 100)}%
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full bg-primary transition-all"
-              style={{ width: `${profile.semantic_threshold * 100}%` }}
+              style={{ width: `${profile.semanticThreshold * 100}%` }}
             />
           </div>
         </div>
@@ -60,7 +60,7 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
         <div className="rounded-lg border bg-card p-4">
           <div className="text-sm text-muted-foreground">Global Constraints</div>
           <div className="mt-1 text-3xl font-bold text-primary">
-            {profile.global_constraints.length}개
+            {profile.globalConstraints.length}개
           </div>
         </div>
       </div>
@@ -71,13 +71,13 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
           Global Logic Constraints
         </div>
 
-        {profile.global_constraints.length === 0 ? (
+        {profile.globalConstraints.length === 0 ? (
           <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
             제약조건이 없습니다.
           </div>
         ) : (
           <div className="space-y-2">
-            {profile.global_constraints.map((constraint: LogicConstraint) => (
+            {profile.globalConstraints.map((constraint: LogicConstraint) => (
               <div
                 key={constraint.id}
                 className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3"

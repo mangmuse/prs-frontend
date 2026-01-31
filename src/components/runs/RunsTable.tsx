@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router";
+
 import {
   Table,
   TableBody,
@@ -17,6 +19,8 @@ interface RunsTableProps {
 }
 
 export const RunsTable = ({ runs }: RunsTableProps) => {
+  const navigate = useNavigate();
+
   return (
     <Table>
       <TableHeader>
@@ -32,18 +36,22 @@ export const RunsTable = ({ runs }: RunsTableProps) => {
       </TableHeader>
       <TableBody>
         {runs.map((run) => (
-          <TableRow key={run.id}>
+          <TableRow
+            key={run.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => void navigate(`/runs/${run.id}`)}
+          >
             <TableCell>
-              {run.prompt_name} v{run.version_number}
+              {run.promptName} v{run.versionNumber}
             </TableCell>
-            <TableCell>{run.dataset_name}</TableCell>
-            <TableCell>{run.profile_name}</TableCell>
+            <TableCell>{run.datasetName}</TableCell>
+            <TableCell>{run.profileName}</TableCell>
             <TableCell>
               <RunStatusBadge status={run.status} />
             </TableCell>
-            <TableCell>{formatPercent(run.pass_rate)}</TableCell>
-            <TableCell>{formatPercent(run.avg_semantic)}</TableCell>
-            <TableCell>{formatRelativeTime(run.created_at)}</TableCell>
+            <TableCell>{formatPercent(run.passRate)}%</TableCell>
+            <TableCell>{formatPercent(run.avgSemantic)}%</TableCell>
+            <TableCell>{formatRelativeTime(run.createdAt)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

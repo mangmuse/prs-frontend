@@ -30,7 +30,7 @@ export const TemplateReferenceSection = ({ onVariableClick }: TemplateReferenceS
   });
 
   const selectedVersion = versions.find((v) => v.id === selectedVersionId);
-  const variables = selectedVersion ? extractTemplateVariables(selectedVersion.user_template) : [];
+  const variables = selectedVersion ? extractTemplateVariables(selectedVersion.userTemplate) : [];
 
   const handlePromptChange = (promptId: number | null) => {
     setSelectedPromptId(promptId);
@@ -74,7 +74,7 @@ export const TemplateReferenceSection = ({ onVariableClick }: TemplateReferenceS
           <SelectContent>
             {versions.map((v) => (
               <SelectItem key={v.id} value={v.id.toString()}>
-                v{v.version_number}
+                v{v.versionNumber}
               </SelectItem>
             ))}
           </SelectContent>

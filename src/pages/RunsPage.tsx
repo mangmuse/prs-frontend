@@ -28,8 +28,8 @@ export const RunsPage = () => {
 
   const statusChangeHandlers = useMemo(
     () => ({
-      onCompleted: (run: { id: number; pass_rate: number | null }) => {
-        toast.success(`Run #${run.id} 완료 - Pass Rate: ${formatPercent(run.pass_rate)}`);
+      onCompleted: (run: { id: number; passRate: number | null }) => {
+        toast.success(`Run #${run.id} 완료 - Pass Rate: ${formatPercent(run.passRate)}%`);
       },
       onFailed: (run: { id: number }) => {
         toast.error(`Run #${run.id} 실패`);

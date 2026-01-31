@@ -50,7 +50,7 @@ export const DatasetSelector = ({ selectedId, onSelect }: DatasetSelectorProps) 
             <span className="flex items-center gap-2">
               <Database className="h-4 w-4" />
               {selectedDataset.name}
-              <span className="text-muted-foreground">({selectedDataset.row_count} rows)</span>
+              <span className="text-muted-foreground">({selectedDataset.rowCount} rows)</span>
             </span>
           ) : (
             <span className="text-muted-foreground">데이터셋 선택</span>
@@ -68,7 +68,7 @@ export const DatasetSelector = ({ selectedId, onSelect }: DatasetSelectorProps) 
             <span className="flex items-center gap-2">
               <Database className="h-4 w-4" />
               {dataset.name}
-              <span className="text-xs text-muted-foreground">({dataset.row_count} rows)</span>
+              <span className="text-xs text-muted-foreground">({dataset.rowCount} rows)</span>
             </span>
             <Check
               className={cn("h-4 w-4", selectedId === dataset.id ? "opacity-100" : "opacity-0")}

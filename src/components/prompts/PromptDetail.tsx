@@ -63,7 +63,7 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
                 : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
-            v{v.version_number}
+            v{v.versionNumber}
           </button>
         ))}
       </div>
@@ -83,7 +83,7 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
             </div>
             <div>
               <span className="text-muted-foreground">스키마</span>
-              <div className="font-medium">{versionDetail.output_schema}</div>
+              <div className="font-medium">{versionDetail.outputSchema}</div>
             </div>
           </div>
 
@@ -106,12 +106,12 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
             </TabsList>
             <TabsContent value="system">
               <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-zinc-900 p-4 font-mono text-sm text-zinc-100">
-                {versionDetail.system_instruction || "(비어있음)"}
+                {versionDetail.systemInstruction || "(비어있음)"}
               </pre>
             </TabsContent>
             <TabsContent value="user">
               <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-zinc-900 p-4 font-mono text-sm text-zinc-100">
-                {versionDetail.user_template || "(비어있음)"}
+                {versionDetail.userTemplate || "(비어있음)"}
               </pre>
             </TabsContent>
           </Tabs>

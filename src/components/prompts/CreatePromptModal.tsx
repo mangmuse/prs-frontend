@@ -53,11 +53,11 @@ const createPromptSchema = z.object({
 });
 
 const createVersionSchema = z.object({
-  system_instruction: z.string(),
-  user_template: z.string(),
+  systemInstruction: z.string(),
+  userTemplate: z.string(),
   model: z.string(),
   temperature: z.number().min(0).max(2),
-  output_schema: z.enum(SCHEMA_OPTIONS),
+  outputSchema: z.enum(SCHEMA_OPTIONS),
   memo: z.string().optional(),
 });
 
@@ -75,11 +75,11 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
   const versionForm = useForm<CreateVersionFormData>({
     resolver: zodResolver(createVersionSchema),
     defaultValues: {
-      system_instruction: "",
-      user_template: "",
+      systemInstruction: "",
+      userTemplate: "",
       model: "gemini-2.5-flash",
       temperature: 1.0,
-      output_schema: "JSON Object",
+      outputSchema: "JSON Object",
       memo: "",
     },
   });
@@ -108,11 +108,11 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
   const onVersionSubmit = (data: CreateVersionFormData) => {
     if (!state.open || state.mode !== "version") return;
     const requestData: CreateVersionRequest = {
-      system_instruction: data.system_instruction,
-      user_template: data.user_template,
+      systemInstruction: data.systemInstruction,
+      userTemplate: data.userTemplate,
       model: data.model,
       temperature: data.temperature,
-      output_schema: data.output_schema as OutputSchemaType,
+      outputSchema: data.outputSchema as OutputSchemaType,
       memo: data.memo || undefined,
     };
     createVersionMutation.mutate(
@@ -222,7 +222,7 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
 
                 <FormField
                   control={versionForm.control}
-                  name="output_schema"
+                  name="outputSchema"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Output Schema</FormLabel>
@@ -248,7 +248,7 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
 
               <FormField
                 control={versionForm.control}
-                name="system_instruction"
+                name="systemInstruction"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>System Instruction</FormLabel>
@@ -262,7 +262,7 @@ export const CreatePromptModal = ({ state, onClose, onSuccess }: CreatePromptMod
 
               <FormField
                 control={versionForm.control}
-                name="user_template"
+                name="userTemplate"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>User Template</FormLabel>

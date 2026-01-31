@@ -95,20 +95,20 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                   </TableCell>
                   <TableCell>
                     <code className="block max-w-md truncate rounded bg-muted px-2 py-1 text-xs">
-                      {JSON.stringify(row.input_data)}
+                      {JSON.stringify(row.inputData)}
                     </code>
                   </TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        row.expected_output === "TRUE"
+                        row.expectedOutput === "TRUE"
                           ? "default"
-                          : row.expected_output === "FALSE"
+                          : row.expectedOutput === "FALSE"
                             ? "destructive"
                             : "secondary"
                       }
                     >
-                      {row.expected_output}
+                      {row.expectedOutput}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -121,7 +121,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <ConstraintsSummary constraints={row.row_constraints} />
+                    <ConstraintsSummary constraints={row.rowConstraints} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -130,11 +130,11 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
         </div>
       )}
 
-      {data.pagination.total_pages > 1 && (
+      {data.pagination.totalPages > 1 && (
         <DatasetPagination
           page={page}
-          totalPages={data.pagination.total_pages}
-          totalCount={data.pagination.total_count}
+          totalPages={data.pagination.totalPages}
+          totalCount={data.pagination.totalCount}
           onPageChange={setPage}
         />
       )}

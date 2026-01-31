@@ -52,13 +52,11 @@ export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProp
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium">{prompt.name}</span>
-                {prompt.latest_version && (
-                  <span className="text-xs text-muted-foreground">v{prompt.latest_version}</span>
+                {prompt.latestVersion && (
+                  <span className="text-xs text-muted-foreground">v{prompt.latestVersion}</span>
                 )}
               </div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                {prompt.version_count}개 버전
-              </div>
+              <div className="mt-1 text-xs text-muted-foreground">{prompt.versionCount}개 버전</div>
             </div>
           ))}
         </div>

@@ -4,31 +4,31 @@ export interface ProfileSummary {
   id: number;
   name: string;
   description: string | null;
-  semantic_threshold: number;
-  constraint_count: number;
-  created_at: string;
+  semanticThreshold: number;
+  constraintCount: number;
+  createdAt: string;
 }
 
 export interface ProfileDetail {
   id: number;
   name: string;
   description: string | null;
-  semantic_threshold: number;
-  global_constraints: LogicConstraint[];
-  created_at: string;
-  updated_at: string | null;
+  semanticThreshold: number;
+  globalConstraints: LogicConstraint[];
+  createdAt: string;
+  updatedAt: string | null;
 }
 
 export interface CreateProfileRequest {
   name: string;
   description?: string;
-  semantic_threshold: number;
-  global_constraints: LogicConstraintInput[];
+  semanticThreshold: number;
+  globalConstraints: LogicConstraintInput[];
 }
 
 export interface UpdateProfileRequest {
   name?: string;
   description?: string;
-  semantic_threshold?: number;
-  global_constraints?: LogicConstraintInput[];
+  semanticThreshold?: number;
+  globalConstraints?: LogicConstraintInput[];
 }

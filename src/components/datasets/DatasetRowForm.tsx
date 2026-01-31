@@ -89,9 +89,9 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
         datasetId,
         rows: [
           {
-            input_data: inputData,
-            expected_output: data.expectedOutput,
-            row_constraints: data.constraints.map((constraint) => ({
+            inputData: inputData,
+            expectedOutput: data.expectedOutput,
+            rowConstraints: data.constraints.map((constraint) => ({
               type: constraint.type,
               value: constraint.value,
               target: constraint.target,

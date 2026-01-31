@@ -53,7 +53,7 @@ export const ProfileList = ({ selectedId, onSelect, onCreateNew }: ProfileListPr
               <div className="flex items-center justify-between">
                 <span className="font-medium">{profile.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {Math.round(profile.semantic_threshold * 100)}%
+                  {Math.round(profile.semanticThreshold * 100)}%
                 </span>
               </div>
               {profile.description && (
@@ -62,7 +62,7 @@ export const ProfileList = ({ selectedId, onSelect, onCreateNew }: ProfileListPr
                 </div>
               )}
               <div className="mt-2 text-xs text-muted-foreground">
-                {profile.constraint_count}개 제약조건
+                {profile.constraintCount}개 제약조건
               </div>
             </div>
           ))}

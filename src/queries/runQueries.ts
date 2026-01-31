@@ -11,4 +11,11 @@ export const runQueries = {
       queryFn: () => runsApi.getList(),
       staleTime: 0,
     }),
+
+  detail: (id: number) =>
+    queryOptions({
+      queryKey: [...runQueries.all(), "detail", id],
+      queryFn: () => runsApi.getDetail(id),
+      enabled: !!id,
+    }),
 };

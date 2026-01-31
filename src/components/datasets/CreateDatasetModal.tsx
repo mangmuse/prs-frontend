@@ -74,13 +74,13 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
     const validRows = data.rows
       .filter((row) => row.inputFields.some((f) => f.value.trim()))
       .map((row) => ({
-        input_data: Object.fromEntries(
+        inputData: Object.fromEntries(
           row.inputFields
             .filter((f) => f.key && f.value.trim())
             .map((f) => [f.key, f.value.trim()]),
         ),
-        expected_output: row.expected.trim(),
-        row_constraints: row.constraints.map((constraint) => ({
+        expectedOutput: row.expected.trim(),
+        rowConstraints: row.constraints.map((constraint) => ({
           type: constraint.type,
           value: constraint.value,
           target: constraint.target,

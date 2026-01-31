@@ -4,31 +4,31 @@ export interface PromptSummary {
   id: number;
   name: string;
   description: string | null;
-  latest_version: number | null;
-  version_count: number;
-  created_at: string;
+  latestVersion: number | null;
+  versionCount: number;
+  createdAt: string;
 }
 
 export interface VersionSummary {
   id: number;
-  version_number: number;
+  versionNumber: number;
   model: string;
   memo: string | null;
-  user_template: string;
-  created_at: string;
+  userTemplate: string;
+  createdAt: string;
 }
 
 export interface VersionDetail {
   id: number;
-  prompt_id: number;
-  version_number: number;
-  system_instruction: string;
-  user_template: string;
+  promptId: number;
+  versionNumber: number;
+  systemInstruction: string;
+  userTemplate: string;
   model: string;
   temperature: number;
-  output_schema: OutputSchemaType;
+  outputSchema: OutputSchemaType;
   memo: string | null;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface CreatePromptRequest {
@@ -39,14 +39,14 @@ export interface CreatePromptRequest {
 export interface CreatePromptResponse {
   id: number;
   name: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface CreateVersionRequest {
-  system_instruction: string;
-  user_template: string;
+  systemInstruction: string;
+  userTemplate: string;
   model: string;
   temperature: number;
-  output_schema: OutputSchemaType;
+  outputSchema: OutputSchemaType;
   memo?: string;
 }
