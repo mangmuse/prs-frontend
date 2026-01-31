@@ -14,6 +14,7 @@ export interface VersionSummary {
   version_number: number;
   model: string;
   memo: string | null;
+  user_template: string;
   created_at: string;
 }
 

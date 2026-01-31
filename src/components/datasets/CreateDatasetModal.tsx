@@ -3,7 +3,6 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ListFilter, Plus, Trash2, X } from "lucide-react";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,31 +25,10 @@ import {
 import { useCreateDatasetWithRows } from "@/hooks/mutations/useCreateDatasetWithRows";
 
 import { ConstraintsEditor } from "./ConstraintsEditor";
-
-const constraintSchema = z.object({
-  id: z.string(),
-  type: z.enum(["contains", "not_contains", "range", "regex", "max_length"]),
-  value: z.union([z.string(), z.number()]).optional(),
-  target: z.string().optional(),
-  min: z.number().optional(),
-  max: z.number().optional(),
-  pattern: z.string().optional(),
-});
-
-const rowSchema = z.object({
-  input: z.string(),
-  expected: z.string(),
-  tags: z.string(),
-  constraints: z.array(constraintSchema),
-});
-
-const createDatasetSchema = z.object({
-  name: z.string().min(1, "이름은 필수입니다"),
-  description: z.string(),
-  rows: z.array(rowSchema).min(1),
-});
-
-type CreateDatasetFormData = z.infer<typeof createDatasetSchema>;
+import { InputFieldsCell } from "./InputFieldsCell";
+import { TemplateReferenceSection } from "./TemplateReferenceSection";
+import { createDatasetSchema } from "./types";
+import type { CreateDatasetFormData } from "./types";
 
 interface CreateDatasetModalProps {
   open: boolean;
@@ -67,13 +45,17 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
     handleSubmit,
     reset,
     control,
+    setValue,
+    getValues,
     formState: { errors, isValid },
   } = useForm<CreateDatasetFormData>({
     resolver: zodResolver(createDatasetSchema),
     defaultValues: {
       name: "",
       description: "",
-      rows: [{ input: "", expected: "", tags: "", constraints: [] }],
+      rows: [
+        { inputFields: [{ key: "input", value: "" }], expected: "", tags: "", constraints: [] },
+      ],
     },
     mode: "onChange",
   });
@@ -90,9 +72,13 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
 
   const onSubmit = (data: CreateDatasetFormData) => {
     const validRows = data.rows
-      .filter((row) => row.input.trim())
+      .filter((row) => row.inputFields.some((f) => f.value.trim()))
       .map((row) => ({
-        input_data: { text: row.input.trim() },
+        input_data: Object.fromEntries(
+          row.inputFields
+            .filter((f) => f.key && f.value.trim())
+            .map((f) => [f.key, f.value.trim()]),
+        ),
         expected_output: row.expected.trim(),
         row_constraints: row.constraints.map((constraint) => ({
           type: constraint.type,
@@ -138,8 +124,21 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
     onOpenChange(newOpen);
   };
 
+  const handleVariableClick = (variableName: string) => {
+    const currentRows = getValues("rows");
+    currentRows.forEach((row, index) => {
+      const hasKey = row.inputFields.some((f) => f.key === variableName);
+      if (!hasKey) {
+        const emptyIndex = row.inputFields.findIndex((f) => !f.key || f.key === "input");
+        if (emptyIndex >= 0) {
+          setValue(`rows.${index}.inputFields.${emptyIndex}.key`, variableName);
+        }
+      }
+    });
+  };
+
   const addRow = () => {
-    append({ input: "", expected: "", tags: "", constraints: [] });
+    append({ inputFields: [{ key: "input", value: "" }], expected: "", tags: "", constraints: [] });
   };
 
   const handleRemoveRow = (index: number) => {
@@ -180,6 +179,8 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
               </div>
             </div>
 
+            <TemplateReferenceSection onVariableClick={handleVariableClick} />
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>테스트 데이터</Label>
@@ -204,12 +205,8 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
                     {fields.map((field, index) => (
                       <TableRow key={field.id}>
                         <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                        <TableCell>
-                          <Input
-                            {...register(`rows.${index}.input`)}
-                            placeholder="입력 텍스트"
-                            className="h-8"
-                          />
+                        <TableCell className="align-top">
+                          <InputFieldsCell control={control} rowIndex={index} register={register} />
                         </TableCell>
                         <TableCell>
                           <Input

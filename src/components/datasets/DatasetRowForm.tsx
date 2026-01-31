@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAddRows } from "@/hooks/mutations/useAddRows";
 
 import { ConstraintsEditor } from "./ConstraintsEditor";
+import { TemplateReferenceSection } from "./TemplateReferenceSection";
 
 const inputFieldSchema = z.object({
   key: z.string().min(1, "키는 필수입니다"),
@@ -58,6 +59,7 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors },
   } = useForm<DatasetRowFormData>({
     resolver: zodResolver(datasetRowSchema),
@@ -113,6 +115,15 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
     );
   };
 
+  const handleVariableClick = (variableName: string) => {
+    const emptyFieldIndex = fields.findIndex((f) => !f.key || f.key === "input");
+    if (emptyFieldIndex >= 0) {
+      setValue(`inputFields.${emptyFieldIndex}.key`, variableName);
+    } else {
+      append({ key: variableName, value: "" });
+    }
+  };
+
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       reset();
@@ -130,6 +141,7 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            <TemplateReferenceSection onVariableClick={handleVariableClick} />
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label>Input *</Label>
