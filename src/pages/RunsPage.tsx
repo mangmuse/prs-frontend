@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -8,6 +8,7 @@ import { MobileSidebar } from "@/components/layout/MobileSidebar";
 import { CreateRunModal } from "@/components/runs/CreateRunModal";
 import { RunsTable } from "@/components/runs/RunsTable";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/hooks/modals/useModal";
 import { useRunStatusChange } from "@/hooks/useRunStatusChange";
 import { runQueries } from "@/queries/runQueries";
 import { formatPercent } from "@/utils/format";
@@ -15,7 +16,7 @@ import { formatPercent } from "@/utils/format";
 const POLLING_INTERVAL = 3000;
 
 export const RunsPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { state, open, onOpenChange } = useModal();
 
   const { data: runs = [] } = useQuery({
     ...runQueries.list(),
@@ -47,7 +48,7 @@ export const RunsPage = () => {
           <MobileSidebar />
           <h1 className="text-xl font-semibold">Runs</h1>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => open()}>
           <Plus className="w-4 h-4 mr-2" />새 Run 실행
         </Button>
       </header>
@@ -55,7 +56,7 @@ export const RunsPage = () => {
         <RunsTable runs={runs} />
       </div>
 
-      <CreateRunModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+      <CreateRunModal open={state.open} onOpenChange={onOpenChange} />
     </div>
   );
 };

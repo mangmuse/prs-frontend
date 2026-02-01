@@ -6,22 +6,19 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { CreatePromptModal, type ModalState } from "@/components/prompts/CreatePromptModal";
 import { PromptDetail } from "@/components/prompts/PromptDetail";
 import { PromptList } from "@/components/prompts/PromptList";
+import { useModal } from "@/hooks/modals/useModal";
 import { promptQueries } from "@/queries/promptQueries";
 
 export const PromptsPage = () => {
   const [selectedPromptId, setSelectedPromptId] = useState<number | null>(null);
-  const [modalState, setModalState] = useState<ModalState>({ open: false });
+  const {
+    state: modalState,
+    open: openModal,
+    close: closeModal,
+  } = useModal<ModalState>({ open: false });
 
   const { data: prompts } = useQuery(promptQueries.list());
   const selectedPrompt = prompts?.find((p) => p.id === selectedPromptId);
-
-  const openCreateModal = () => setModalState({ open: true, mode: "create" });
-  const openVersionModal = () => {
-    if (selectedPromptId) {
-      setModalState({ open: true, mode: "version", promptId: selectedPromptId });
-    }
-  };
-  const closeModal = () => setModalState({ open: false });
 
   return (
     <div className="flex h-full flex-col">
@@ -31,7 +28,7 @@ export const PromptsPage = () => {
         <PromptList
           selectedId={selectedPromptId}
           onSelect={setSelectedPromptId}
-          onCreateNew={openCreateModal}
+          onCreateNew={() => openModal({ mode: "create" })}
         />
 
         <div className="col-span-2">
@@ -39,7 +36,11 @@ export const PromptsPage = () => {
             <PromptDetail
               promptId={selectedPromptId}
               promptName={selectedPrompt.name}
-              onCreateVersion={openVersionModal}
+              onCreateVersion={() => {
+                if (selectedPromptId) {
+                  openModal({ mode: "version", promptId: selectedPromptId });
+                }
+              }}
             />
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
