@@ -167,7 +167,7 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
                   <span className="text-sm text-muted-foreground">-</span>
                 )}
               </div>
-              {result.isFormatPassed && result.logicResults.results.length > 0 && (
+              {result.isFormatPassed && result.logicResults?.results?.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {result.logicResults.results.map((constraint, idx) => (
                     <div key={idx} className="flex items-center justify-between text-xs">

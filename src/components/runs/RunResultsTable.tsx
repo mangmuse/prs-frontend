@@ -13,10 +13,18 @@ import { getLayerStatus, isSemanticPassed } from "@/utils/evaluation";
 import { InputPreview } from "./InputPreview";
 import { LayerStatusIcon } from "./LayerStatusIcon";
 
+interface RowChange {
+  category: "regressed" | "improved" | "changed" | "unchanged";
+  baseStatus: string;
+  targetStatus: string;
+}
+
 interface RunResultsTableProps {
   results: RunResultRow[];
   selectedId: number | null;
   onSelect: (id: number) => void;
+  compareMode?: boolean;
+  rowChanges?: Map<number, RowChange>;
 }
 
 const STATUS_CONFIG = {
@@ -26,13 +34,27 @@ const STATUS_CONFIG = {
   logic: { label: "Logic", className: "bg-red-100 text-red-800 border-red-200" },
 } as const;
 
-export const RunResultsTable = ({ results, selectedId, onSelect }: RunResultsTableProps) => (
+const CATEGORY_BADGE = {
+  regressed: { label: "회귀", className: "bg-red-100 text-red-700 border-red-200" },
+  improved: { label: "개선", className: "bg-green-100 text-green-700 border-green-200" },
+  changed: { label: "변경", className: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  unchanged: { label: "", className: "" },
+};
+
+export const RunResultsTable = ({
+  results,
+  selectedId,
+  onSelect,
+  compareMode = false,
+  rowChanges,
+}: RunResultsTableProps) => (
   <Table>
     <TableHeader>
       <TableRow>
         <TableHead className="w-10">#</TableHead>
         <TableHead>Input</TableHead>
         <TableHead className="w-20 text-center">상태</TableHead>
+        {compareMode && <TableHead className="w-24 text-center">변화</TableHead>}
         <TableHead className="w-16 text-center">Format</TableHead>
         <TableHead className="w-20 text-center">Semantic</TableHead>
         <TableHead className="w-14 text-center">Logic</TableHead>
@@ -43,6 +65,7 @@ export const RunResultsTable = ({ results, selectedId, onSelect }: RunResultsTab
         const config = STATUS_CONFIG[result.status];
         const semanticStatus = getLayerStatus(result, "semantic");
         const logicStatus = getLayerStatus(result, "logic");
+        const rowChange = rowChanges?.get(result.rowIndex);
 
         return (
           <TableRow
@@ -61,6 +84,22 @@ export const RunResultsTable = ({ results, selectedId, onSelect }: RunResultsTab
                 {config.label}
               </Badge>
             </TableCell>
+            {compareMode && (
+              <TableCell className="text-center">
+                {rowChange && rowChange.category !== "unchanged" ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <Badge
+                      variant="outline"
+                      className={CATEGORY_BADGE[rowChange.category].className}
+                    >
+                      {CATEGORY_BADGE[rowChange.category].label}
+                    </Badge>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+            )}
             <TableCell className="text-center">
               <LayerStatusIcon status={result.isFormatPassed ? "pass" : "fail"} />
             </TableCell>

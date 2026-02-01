@@ -1,3 +1,4 @@
+import type { RegressionComparisonResponse } from "@/types/regression";
 import type {
   CreateRunRequest,
   CreateRunResponse,
@@ -24,5 +25,11 @@ export const runsApi = {
 
   async create(data: CreateRunRequest): Promise<CreateRunResponse> {
     return apiClient.post("runs", { json: data }).json<CreateRunResponse>();
+  },
+
+  async compareRuns(baseRunId: number, targetRunId: number): Promise<RegressionComparisonResponse> {
+    return apiClient
+      .get(`runs/${targetRunId}/compare/${baseRunId}`)
+      .json<RegressionComparisonResponse>();
   },
 };

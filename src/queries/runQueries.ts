@@ -26,4 +26,11 @@ export const runQueries = {
       queryFn: () => runsApi.getRelatedVersions(runId),
       enabled: !!runId,
     }),
+
+  comparison: (baseRunId: number, targetRunId: number) =>
+    queryOptions({
+      queryKey: [...runQueries.all(), "comparison", baseRunId, targetRunId],
+      queryFn: () => runsApi.compareRuns(baseRunId, targetRunId),
+      enabled: !!baseRunId && !!targetRunId,
+    }),
 };

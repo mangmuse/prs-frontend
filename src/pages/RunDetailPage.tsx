@@ -2,18 +2,87 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  HelpCircle,
+  Minus,
+  RefreshCcw,
+  TrendingDown,
+  TrendingUp,
+  X,
+} from "lucide-react";
 
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
-import { RunMetricsCards } from "@/components/runs/RunMetricsCards";
 import { RunResultDetailPanel } from "@/components/runs/RunResultDetailPanel";
 import { RunResultsTable } from "@/components/runs/RunResultsTable";
 import { RunVersionTabs } from "@/components/runs/RunVersionTabs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useCreateRun } from "@/hooks/mutations/useCreateRun";
 import { runQueries } from "@/queries/runQueries";
+import type { RowChange } from "@/types/regression";
+import { calculateSummary, classifyCategory } from "@/utils/regression";
 
-type StatusFilter = "all" | "pass" | "fail";
+type StatusFilter = "all" | "pass" | "fail" | "regressed" | "improved";
+
+const getStatisticsMessage = (pValue: number) => {
+  if (pValue < 0.01) {
+    return {
+      icon: CheckCircle,
+      color: "bg-green-50 border-green-200 text-green-800",
+      title: "매우 유의미한 변화 감지",
+      description: `신뢰수준 99% 이상 (p=${pValue})`,
+    };
+  }
+  if (pValue < 0.05) {
+    return {
+      icon: CheckCircle,
+      color: "bg-green-50 border-green-200 text-green-800",
+      title: "유의미한 변화 감지",
+      description: `신뢰수준 95% 이상 (p=${pValue})`,
+    };
+  }
+  if (pValue < 0.1) {
+    return {
+      icon: AlertTriangle,
+      color: "bg-yellow-50 border-yellow-200 text-yellow-800",
+      title: "변화 가능성 있음",
+      description: `신뢰수준 90% (p=${pValue}), 추가 데이터 권장`,
+    };
+  }
+  return {
+    icon: HelpCircle,
+    color: "bg-gray-50 border-gray-200 text-gray-600",
+    title: "유의미한 차이 없음",
+    description: "관찰된 차이는 통계적 오차 범위 내에 있습니다",
+  };
+};
+
+const CATEGORY_CONFIG = {
+  regressed: {
+    label: "Regressed",
+    color: "bg-red-50 hover:bg-red-100 border-red-200 text-red-700",
+    icon: TrendingDown,
+  },
+  improved: {
+    label: "Improved",
+    color: "bg-green-50 hover:bg-green-100 border-green-200 text-green-700",
+    icon: TrendingUp,
+  },
+  changed: {
+    label: "Changed",
+    color: "bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700",
+    icon: RefreshCcw,
+  },
+  unchanged: {
+    label: "Unchanged",
+    color: "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600",
+    icon: Minus,
+  },
+};
 
 export const RunDetailPage = () => {
   const navigate = useNavigate();
@@ -22,10 +91,53 @@ export const RunDetailPage = () => {
 
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [compareTargetId, setCompareTargetId] = useState<number | null>(null);
 
   const { data: run, isPending, isError } = useQuery(runQueries.detail(runId));
   const { data: relatedVersions } = useQuery(runQueries.relatedVersions(runId));
+  const { data: comparisonData } = useQuery({
+    ...runQueries.comparison(compareTargetId!, runId),
+    enabled: compareTargetId !== null,
+  });
+  const { data: baseRun } = useQuery({
+    ...runQueries.detail(compareTargetId!),
+    enabled: compareTargetId !== null,
+  });
   const createRun = useCreateRun();
+
+  const isCompareMode = compareTargetId !== null;
+  const compareTarget = relatedVersions?.executedRuns.find((r) => r.id === compareTargetId);
+
+  let rowChanges: Map<number, RowChange> | undefined;
+  let summary:
+    | { regressed: number; improved: number; changed: number; unchanged: number }
+    | undefined;
+  let metricsDelta:
+    | { passRate: number; formatPassRate: number; semanticPassRate: number; logicPassRate: number }
+    | undefined;
+
+  if (comparisonData) {
+    rowChanges = new Map(
+      comparisonData.rowComparisons.map((r) => [
+        r.rowIndex,
+        {
+          category: classifyCategory(r.baseStatus, r.targetStatus),
+          baseStatus: r.baseStatus,
+          targetStatus: r.targetStatus,
+        },
+      ]),
+    );
+    summary = calculateSummary(comparisonData.rowComparisons);
+  }
+
+  if (run && baseRun) {
+    metricsDelta = {
+      passRate: run.metrics.passRate - baseRun.metrics.passRate,
+      formatPassRate: run.metrics.formatPassRate - baseRun.metrics.formatPassRate,
+      semanticPassRate: run.metrics.semanticPassRate - baseRun.metrics.semanticPassRate,
+      logicPassRate: run.metrics.logicPassRate - baseRun.metrics.logicPassRate,
+    };
+  }
 
   const handleExecuteVersion = (versionId: number) => {
     if (!run) return;
@@ -45,6 +157,18 @@ export const RunDetailPage = () => {
 
   const handleBackToList = () => {
     void navigate("/runs");
+  };
+
+  const handleCompareSelect = (targetId: string) => {
+    if (targetId) {
+      setCompareTargetId(Number(targetId));
+      setStatusFilter("all");
+    }
+  };
+
+  const handleCancelCompare = () => {
+    setCompareTargetId(null);
+    setStatusFilter("all");
   };
 
   if (isPending) {
@@ -68,7 +192,14 @@ export const RunDetailPage = () => {
   const filteredResults = run.results.filter((r) => {
     if (statusFilter === "all") return true;
     if (statusFilter === "pass") return r.status === "pass";
-    return r.status !== "pass";
+    if (statusFilter === "fail") return r.status !== "pass";
+    if (statusFilter === "regressed") {
+      return rowChanges?.get(r.rowIndex)?.category === "regressed";
+    }
+    if (statusFilter === "improved") {
+      return rowChanges?.get(r.rowIndex)?.category === "improved";
+    }
+    return true;
   });
 
   const passCount = run.results.filter((r) => r.status === "pass").length;
@@ -81,6 +212,15 @@ export const RunDetailPage = () => {
     logicPassRate: run.metrics.logicPassRate * 100,
     avgSemantic: run.metrics.avgSemantic,
   };
+
+  const formatDelta = (delta: number) => {
+    if (delta === 0) return null;
+    const percent = (delta * 100).toFixed(0);
+    if (delta > 0) return <span className="text-green-600">↑{percent}</span>;
+    return <span className="text-red-600">↓{Math.abs(Number(percent))}</span>;
+  };
+
+  const stats = comparisonData ? getStatisticsMessage(comparisonData.pValue) : null;
 
   return (
     <div className="flex h-full flex-col">
@@ -98,18 +238,142 @@ export const RunDetailPage = () => {
 
       <div className="flex-1 overflow-auto p-6">
         <div className="space-y-6">
-          {relatedVersions && (
-            <RunVersionTabs
-              currentRunId={runId}
-              currentVersionNumber={run.versionNumber}
-              executedRuns={relatedVersions.executedRuns}
-              unexecutedVersions={relatedVersions.unexecutedVersions}
-              onExecuteVersion={handleExecuteVersion}
-            />
+          <div className="flex items-center justify-between">
+            {relatedVersions && (
+              <RunVersionTabs
+                currentRunId={runId}
+                currentVersionNumber={run.versionNumber}
+                executedRuns={relatedVersions.executedRuns}
+                unexecutedVersions={relatedVersions.unexecutedVersions}
+                onExecuteVersion={handleExecuteVersion}
+              />
+            )}
+
+            {relatedVersions && relatedVersions.executedRuns.length > 1 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">비교:</span>
+                {isCompareMode ? (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">
+                      v{run.versionNumber} vs v{compareTarget?.versionNumber}
+                    </Badge>
+                    <Button variant="ghost" size="sm" onClick={handleCancelCompare}>
+                      <X className="h-4 w-4" />
+                      취소
+                    </Button>
+                  </div>
+                ) : (
+                  <select
+                    className="rounded-md border px-3 py-1.5 text-sm"
+                    onChange={(e) => handleCompareSelect(e.target.value)}
+                    value=""
+                  >
+                    <option value="" disabled>
+                      버전 선택
+                    </option>
+                    {relatedVersions.executedRuns
+                      .filter((r) => r.id !== runId)
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>
+                          v{r.versionNumber}와 비교
+                        </option>
+                      ))}
+                  </select>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 비교 모드: 통계 결론 배너 */}
+          {isCompareMode && stats && (
+            <div className={`flex items-start gap-3 rounded-lg border p-4 ${stats.color}`}>
+              <stats.icon className="mt-0.5 h-5 w-5" />
+              <div>
+                <p className="font-semibold">{stats.title}</p>
+                <p className="text-sm opacity-80">{stats.description}</p>
+              </div>
+            </div>
           )}
 
-          <RunMetricsCards {...metricsAsPercent} />
+          {/* 비교 모드: 카테고리 요약 카드 */}
+          {isCompareMode && summary && (
+            <div className="grid grid-cols-4 gap-4">
+              {(Object.entries(summary) as [keyof typeof CATEGORY_CONFIG, number][]).map(
+                ([category, count]) => {
+                  const config = CATEGORY_CONFIG[category];
+                  return (
+                    <Card
+                      key={category}
+                      className={`cursor-pointer border p-4 transition-all hover:shadow-sm ${config.color} ${
+                        statusFilter === category ? "ring-2 ring-offset-1 ring-current" : ""
+                      }`}
+                      onClick={() =>
+                        setStatusFilter(
+                          category === "regressed" || category === "improved" ? category : "all",
+                        )
+                      }
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="rounded-full bg-white/60 p-1.5">
+                            <config.icon className="h-4 w-4" />
+                          </div>
+                          <span className="text-sm font-medium">{config.label}</span>
+                        </div>
+                        <span className="text-2xl font-bold">{count}</span>
+                      </div>
+                    </Card>
+                  );
+                },
+              )}
+            </div>
+          )}
 
+          {/* Metrics Cards (with delta in compare mode) */}
+          <div className="grid grid-cols-5 gap-4">
+            <Card className="p-4">
+              <p className="text-sm text-muted-foreground">Pass Rate</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold">{metricsAsPercent.passRate.toFixed(1)}%</span>
+                {metricsDelta && formatDelta(metricsDelta.passRate)}
+              </div>
+            </Card>
+            <Card className="p-4">
+              <p className="text-sm text-muted-foreground">Format Pass</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold">
+                  {metricsAsPercent.formatPassRate.toFixed(1)}%
+                </span>
+                {metricsDelta && formatDelta(metricsDelta.formatPassRate)}
+              </div>
+            </Card>
+            <Card className="p-4">
+              <p className="text-sm text-muted-foreground">Semantic Pass</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold">
+                  {metricsAsPercent.semanticPassRate.toFixed(1)}%
+                </span>
+                {metricsDelta && formatDelta(metricsDelta.semanticPassRate)}
+              </div>
+            </Card>
+            <Card className="p-4">
+              <p className="text-sm text-muted-foreground">Logic Pass</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold">
+                  {metricsAsPercent.logicPassRate.toFixed(1)}%
+                </span>
+                {metricsDelta && formatDelta(metricsDelta.logicPassRate)}
+              </div>
+            </Card>
+            <Card className="p-4">
+              <p className="text-sm text-muted-foreground">Avg Semantic</p>
+              <p className="text-2xl font-bold">
+                {(metricsAsPercent.avgSemantic * 100).toFixed(1)}%
+              </p>
+            </Card>
+          </div>
+
+          {/* Filter Tabs */}
           <div className="mb-4 flex gap-2">
             <Button
               size="sm"
@@ -132,14 +396,37 @@ export const RunDetailPage = () => {
             >
               Fail ({failCount})
             </Button>
+            {isCompareMode && summary && (
+              <>
+                <Button
+                  size="sm"
+                  variant={statusFilter === "regressed" ? "default" : "outline"}
+                  className={statusFilter !== "regressed" ? "border-red-200 text-red-600" : ""}
+                  onClick={() => setStatusFilter("regressed")}
+                >
+                  회귀 ({summary.regressed})
+                </Button>
+                <Button
+                  size="sm"
+                  variant={statusFilter === "improved" ? "default" : "outline"}
+                  className={statusFilter !== "improved" ? "border-green-200 text-green-600" : ""}
+                  onClick={() => setStatusFilter("improved")}
+                >
+                  개선 ({summary.improved})
+                </Button>
+              </>
+            )}
           </div>
 
+          {/* Results Table */}
           <div className="flex gap-4">
             <div className="flex-1 rounded-lg border bg-white">
               <RunResultsTable
                 results={filteredResults}
                 selectedId={selectedResultId}
                 onSelect={setSelectedResultId}
+                compareMode={isCompareMode}
+                rowChanges={rowChanges}
               />
             </div>
 
