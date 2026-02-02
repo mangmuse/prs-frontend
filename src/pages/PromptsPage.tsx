@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { PageHeader } from "@/components/layout/PageHeader";
-import { CreatePromptModal, type ModalState } from "@/components/prompts/CreatePromptModal";
+import { CreatePromptModal } from "@/components/prompts/CreatePromptModal";
+import { CreateVersionModal } from "@/components/prompts/CreateVersionModal";
 import { PromptDetail } from "@/components/prompts/PromptDetail";
 import { PromptList } from "@/components/prompts/PromptList";
 import { useModal } from "@/hooks/modals/useModal";
@@ -11,11 +12,12 @@ import { promptQueries } from "@/queries/promptQueries";
 
 export const PromptsPage = () => {
   const [selectedPromptId, setSelectedPromptId] = useState<number | null>(null);
-  const {
-    state: modalState,
-    open: openModal,
-    close: closeModal,
-  } = useModal<ModalState>({ open: false });
+
+  const promptModal = useModal();
+  const versionModal = useModal<{ open: boolean; promptId: number }>({
+    open: false,
+    promptId: 0,
+  });
 
   const { data: prompts } = useQuery(promptQueries.list());
   const selectedPrompt = prompts?.find((p) => p.id === selectedPromptId);
@@ -28,7 +30,7 @@ export const PromptsPage = () => {
         <PromptList
           selectedId={selectedPromptId}
           onSelect={setSelectedPromptId}
-          onCreateNew={() => openModal({ mode: "create" })}
+          onCreateNew={() => promptModal.open()}
         />
 
         <div className="col-span-2">
@@ -36,11 +38,7 @@ export const PromptsPage = () => {
             <PromptDetail
               promptId={selectedPromptId}
               promptName={selectedPrompt.name}
-              onCreateVersion={() => {
-                if (selectedPromptId) {
-                  openModal({ mode: "version", promptId: selectedPromptId });
-                }
-              }}
+              onCreateVersion={() => versionModal.open({ promptId: selectedPromptId })}
             />
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
@@ -50,7 +48,15 @@ export const PromptsPage = () => {
         </div>
       </div>
 
-      <CreatePromptModal state={modalState} onClose={closeModal} />
+      <CreatePromptModal open={promptModal.state.open} onClose={promptModal.close} />
+
+      {versionModal.state.promptId > 0 && (
+        <CreateVersionModal
+          open={versionModal.state.open}
+          promptId={versionModal.state.promptId}
+          onClose={versionModal.close}
+        />
+      )}
     </div>
   );
 };

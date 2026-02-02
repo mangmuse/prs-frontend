@@ -1,4 +1,4 @@
-import type { LogicConstraint } from "./common";
+import type { LogicConstraintInput } from "./constraint";
 import type { RunStatus } from "./run";
 
 export interface AssembledPrompt {
@@ -38,7 +38,7 @@ export interface ProfileInRun {
   id: number;
   name: string;
   semanticThreshold: number;
-  globalConstraints: LogicConstraint[];
+  globalConstraints: LogicConstraintInput[];
 }
 
 export interface RunMetrics {

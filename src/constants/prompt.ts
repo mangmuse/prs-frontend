@@ -1,0 +1,3 @@
+export const MODEL_OPTIONS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"] as const;
+
+export const SCHEMA_OPTIONS = ["JSON Object", "JSON Array", "Label", "Freeform"] as const;
