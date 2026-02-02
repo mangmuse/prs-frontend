@@ -1,3 +1,4 @@
+// TODO: Dataset rowConstraints 기능 삭제 후 이 컴포넌트 제거 예정
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,11 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ConstraintType, LogicConstraint } from "@/types/common";
+import type { ConstraintType, LogicConstraint } from "@/types/constraint";
+
+// UI 내부용 타입 (동적 추가/삭제를 위한 id 포함)
+type ConstraintWithId = LogicConstraint & { id: string };
 
 interface ConstraintsEditorProps {
-  constraints: LogicConstraint[];
-  onChange: (constraints: LogicConstraint[]) => void;
+  constraints: ConstraintWithId[];
+  onChange: (constraints: ConstraintWithId[]) => void;
 }
 
 const CONSTRAINT_TYPES: { value: ConstraintType; label: string }[] = [
@@ -25,18 +29,18 @@ const CONSTRAINT_TYPES: { value: ConstraintType; label: string }[] = [
   { value: "max_length", label: "Max Length" },
 ];
 
-const createDefaultConstraint = (type: ConstraintType): LogicConstraint => {
+const createDefaultConstraint = (type: ConstraintType): ConstraintWithId => {
   const id = crypto.randomUUID();
   switch (type) {
     case "contains":
     case "not_contains":
-      return { id, type, value: "" };
+      return { id, type, target: "", value: "" };
     case "range":
       return { id, type: "range", target: "", min: undefined, max: undefined };
     case "regex":
-      return { id, type: "regex", pattern: "" };
+      return { id, type: "regex", target: "", pattern: "" };
     case "max_length":
-      return { id, type: "max_length", max: 100 };
+      return { id, type: "max_length", target: "", max: 100 };
   }
 };
 
@@ -49,7 +53,7 @@ export const ConstraintsEditor = ({ constraints, onChange }: ConstraintsEditorPr
     onChange(constraints.filter((constraint) => constraint.id !== id));
   };
 
-  const updateConstraint = (id: string, updated: LogicConstraint) => {
+  const updateConstraint = (id: string, updated: ConstraintWithId) => {
     onChange(constraints.map((constraint) => (constraint.id === id ? updated : constraint)));
   };
 
@@ -120,8 +124,8 @@ export const ConstraintsEditor = ({ constraints, onChange }: ConstraintsEditorPr
 };
 
 interface ConstraintFieldsProps {
-  constraint: LogicConstraint;
-  onChange: (constraint: LogicConstraint) => void;
+  constraint: ConstraintWithId;
+  onChange: (constraint: ConstraintWithId) => void;
 }
 
 const ConstraintFields = ({ constraint, onChange }: ConstraintFieldsProps) => {
