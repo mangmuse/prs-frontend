@@ -3,7 +3,7 @@ import { Edit, Filter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { profileQueries } from "@/queries/profileQueries";
-import type { LogicConstraint } from "@/types/common";
+import type { LogicConstraint } from "@/types/constraint";
 
 const CONSTRAINT_TYPE_LABELS: Record<string, string> = {
   contains: "포함",
@@ -77,9 +77,9 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
           </div>
         ) : (
           <div className="space-y-2">
-            {profile.globalConstraints.map((constraint: LogicConstraint) => (
+            {profile.globalConstraints.map((constraint: LogicConstraint, index: number) => (
               <div
-                key={constraint.id}
+                key={index}
                 className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3"
               >
                 <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">

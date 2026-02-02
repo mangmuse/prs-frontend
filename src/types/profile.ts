@@ -1,4 +1,4 @@
-import type { LogicConstraint, LogicConstraintInput } from "./common";
+import type { LogicConstraint } from "./constraint";
 
 export interface ProfileSummary {
   id: number;
@@ -23,12 +23,12 @@ export interface CreateProfileRequest {
   name: string;
   description?: string;
   semanticThreshold: number;
-  globalConstraints: LogicConstraintInput[];
+  globalConstraints: LogicConstraint[];
 }
 
 export interface UpdateProfileRequest {
   name?: string;
   description?: string;
   semanticThreshold?: number;
-  globalConstraints?: LogicConstraintInput[];
+  globalConstraints?: LogicConstraint[];
 }
