@@ -136,7 +136,7 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
         <div className="flex items-center justify-between border-b px-4 py-3 bg-slate-50">
           <div className="flex items-center gap-2">
             <FlaskConical className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">Live Profile Tuner</h3>
+            <h3 className="font-semibold text-sm">실시간 프로필 튜너</h3>
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -146,13 +146,13 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
         {/* Stats Banner */}
         <div className="grid grid-cols-2 gap-px bg-slate-200 border-b">
           <div className="bg-white p-3 text-center">
-            <div className="text-xs text-muted-foreground">New Pass Rate</div>
+            <div className="text-xs text-muted-foreground">새 통과율</div>
             <div className={cn("text-lg font-bold", isCalculating && "opacity-50")}>
               {diffStats.newPassRate}%
             </div>
           </div>
           <div className={cn("bg-white p-3 text-center", diffStats.changed > 0 && "bg-yellow-50")}>
-            <div className="text-xs text-muted-foreground">Impacted Rows</div>
+            <div className="text-xs text-muted-foreground">영향받은 행</div>
             <div
               className={cn(
                 "text-lg font-bold",
@@ -170,7 +170,7 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
             <div className="space-y-6 p-4">
               <div className="space-y-4">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  Basic Info & Threshold
+                  기본 정보 및 유사도 임계값
                 </h4>
                 <ProfileForm control={form.control} />
               </div>
@@ -185,7 +185,7 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
           {isCalculating && (
             <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
               <div className="text-xs font-medium text-muted-foreground animate-pulse">
-                Calculating...
+                계산 중...
               </div>
             </div>
           )}

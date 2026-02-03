@@ -25,7 +25,7 @@ export const ProfileConstraintsList = ({ control }: ProfileConstraintsListProps)
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium leading-none">Global Logic Constraints</label>
+        <label className="text-sm font-medium leading-none">제약조건</label>
         <Button type="button" variant="outline" size="sm" onClick={handleAddConstraint}>
           <Plus className="mr-1 h-4 w-4" />
           제약조건 추가

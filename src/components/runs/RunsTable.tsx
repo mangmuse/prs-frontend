@@ -25,12 +25,12 @@ export const RunsTable = ({ runs }: RunsTableProps) => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Prompt</TableHead>
-          <TableHead>Dataset</TableHead>
-          <TableHead>Profile</TableHead>
+          <TableHead>프롬프트</TableHead>
+          <TableHead>데이터셋</TableHead>
+          <TableHead>프로필</TableHead>
           <TableHead>상태</TableHead>
-          <TableHead>Pass Rate</TableHead>
-          <TableHead>Avg Semantic</TableHead>
+          <TableHead>통과율</TableHead>
+          <TableHead>평균 유사도</TableHead>
           <TableHead>날짜</TableHead>
         </TableRow>
       </TableHeader>

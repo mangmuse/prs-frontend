@@ -39,7 +39,7 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Semantic Threshold</div>
+          <div className="text-sm text-muted-foreground">유사도 임계값</div>
           <div className="mt-1 text-3xl font-bold text-primary">
             {Math.round(profile.semanticThreshold * 100)}%
           </div>
@@ -52,7 +52,7 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
         </div>
 
         <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Global Constraints</div>
+          <div className="text-sm text-muted-foreground">제약조건</div>
           <div className="mt-1 text-3xl font-bold text-primary">
             {profile.globalConstraints.length}개
           </div>
@@ -62,7 +62,7 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm font-medium">
           <Filter className="h-4 w-4" />
-          Global Logic Constraints
+          제약조건
         </div>
 
         {profile.globalConstraints.length === 0 ? (

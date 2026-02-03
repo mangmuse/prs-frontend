@@ -43,9 +43,9 @@ export const DatasetRowsTable = ({ control, register }: DatasetRowsTableProps) =
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">#</TableHead>
-              <TableHead>Input *</TableHead>
-              <TableHead className="w-28">Expected</TableHead>
-              <TableHead className="w-28">Tags</TableHead>
+              <TableHead>입력값 *</TableHead>
+              <TableHead className="w-28">기대값</TableHead>
+              <TableHead className="w-28">태그</TableHead>
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>

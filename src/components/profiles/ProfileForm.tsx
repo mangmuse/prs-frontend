@@ -47,7 +47,7 @@ export const ProfileForm = ({ control }: ProfileFormProps) => {
         name="semanticThreshold"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Semantic Threshold: {Math.round(field.value * 100)}%</FormLabel>
+            <FormLabel>유사도 임계값: {Math.round(field.value * 100)}%</FormLabel>
             <FormControl>
               <Slider
                 value={[field.value]}

@@ -73,22 +73,22 @@ const getStatisticsMessage = (pValue: number) => {
 
 const CATEGORY_CONFIG = {
   regressed: {
-    label: "Regressed",
+    label: "회귀",
     color: "bg-red-50 hover:bg-red-100 border-red-200 text-red-700",
     icon: TrendingDown,
   },
   improved: {
-    label: "Improved",
+    label: "개선",
     color: "bg-green-50 hover:bg-green-100 border-green-200 text-green-700",
     icon: TrendingUp,
   },
   changed: {
-    label: "Changed",
+    label: "변경",
     color: "bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700",
     icon: RefreshCcw,
   },
   unchanged: {
-    label: "Unchanged",
+    label: "유지",
     color: "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600",
     icon: Minus,
   },
@@ -120,7 +120,6 @@ export const RunDetailPage = () => {
   const isCompareMode = compareTargetId !== null;
   const compareTarget = relatedVersions?.executedRuns.find((r) => r.id === compareTargetId);
 
-  // Use previewResults if Live Editor is active and calculation done
   const activeResults = isLiveEditorOpen && previewResults ? previewResults : run?.results || [];
 
   let rowChanges: Map<number, RowChange> | undefined;
@@ -347,7 +346,7 @@ export const RunDetailPage = () => {
               <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-primary">
                 <FlaskConical className="h-5 w-5" />
                 <div>
-                  <p className="font-semibold">Live Simulation Mode</p>
+                  <p className="font-semibold">실시간 시뮬레이션 모드</p>
                   <p className="text-sm opacity-90">
                     현재 수정을 통해 결과가 어떻게 변하는지 미리보고 있습니다. (원본 Run 데이터는
                     보존됩니다)
@@ -404,7 +403,7 @@ export const RunDetailPage = () => {
             {/* Metrics Cards (with delta in compare mode) */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <Card className="p-4">
-                <p className="text-sm text-muted-foreground">Pass Rate</p>
+                <p className="text-sm text-muted-foreground">통과율</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold">
                     {metricsAsPercent.passRate.toFixed(1)}%
@@ -413,7 +412,7 @@ export const RunDetailPage = () => {
                 </div>
               </Card>
               <Card className="p-4">
-                <p className="text-sm text-muted-foreground">Format Pass</p>
+                <p className="text-sm text-muted-foreground">출력형식 통과</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold">
                     {metricsAsPercent.formatPassRate.toFixed(1)}%
@@ -422,7 +421,7 @@ export const RunDetailPage = () => {
                 </div>
               </Card>
               <Card className="p-4">
-                <p className="text-sm text-muted-foreground">Semantic Pass</p>
+                <p className="text-sm text-muted-foreground">유사도 통과</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold">
                     {metricsAsPercent.semanticPassRate.toFixed(1)}%
@@ -431,7 +430,7 @@ export const RunDetailPage = () => {
                 </div>
               </Card>
               <Card className="p-4">
-                <p className="text-sm text-muted-foreground">Logic Pass</p>
+                <p className="text-sm text-muted-foreground">제약조건 통과</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold">
                     {metricsAsPercent.logicPassRate.toFixed(1)}%
@@ -440,7 +439,7 @@ export const RunDetailPage = () => {
                 </div>
               </Card>
               <Card className="p-4">
-                <p className="text-sm text-muted-foreground">Avg Semantic</p>
+                <p className="text-sm text-muted-foreground">평균 유사도</p>
                 <p className="text-2xl font-bold">
                   {(metricsAsPercent.avgSemantic * 100).toFixed(1)}%
                 </p>
@@ -461,14 +460,14 @@ export const RunDetailPage = () => {
                 variant={statusFilter === "pass" ? "default" : "outline"}
                 onClick={() => setStatusFilter("pass")}
               >
-                Pass ({passCount})
+                통과 ({passCount})
               </Button>
               <Button
                 size="sm"
                 variant={statusFilter === "fail" ? "default" : "outline"}
                 onClick={() => setStatusFilter("fail")}
               >
-                Fail ({failCount})
+                실패 ({failCount})
               </Button>
               {isCompareMode && summary && (
                 <>
@@ -492,7 +491,6 @@ export const RunDetailPage = () => {
               )}
             </div>
 
-            {/* Results Table */}
             <div className="flex gap-4">
               <div className="flex-1 rounded-lg border bg-white">
                 <RunResultsTable

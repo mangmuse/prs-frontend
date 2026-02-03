@@ -24,7 +24,7 @@ export const PromptsPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <PageHeader title="Prompts" />
+      <PageHeader title="프롬프트" />
 
       <div className="flex-1 grid grid-cols-3 gap-6 p-6">
         <PromptList

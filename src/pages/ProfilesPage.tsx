@@ -16,7 +16,7 @@ export const ProfilesPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <PageHeader title="Profiles" />
+      <PageHeader title="프로필" />
 
       <div className="flex-1 grid grid-cols-3 gap-6 p-6">
         <ProfileList

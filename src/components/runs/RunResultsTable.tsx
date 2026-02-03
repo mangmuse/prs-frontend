@@ -28,10 +28,22 @@ interface RunResultsTableProps {
 }
 
 const STATUS_CONFIG = {
-  pass: { label: "Pass", className: "bg-green-100 text-green-800 border-green-200" },
-  format: { label: "Format", className: "bg-orange-100 text-orange-800 border-orange-200" },
-  semantic: { label: "Semantic", className: "bg-purple-100 text-purple-800 border-purple-200" },
-  logic: { label: "Logic", className: "bg-red-100 text-red-800 border-red-200" },
+  pass: {
+    label: "통과",
+    className: "bg-green-100 text-green-800 border-green-200 whitespace-nowrap",
+  },
+  format: {
+    label: "출력형식",
+    className: "bg-orange-100 text-orange-800 border-orange-200 whitespace-nowrap",
+  },
+  semantic: {
+    label: "유사도",
+    className: "bg-purple-100 text-purple-800 border-purple-200 whitespace-nowrap",
+  },
+  logic: {
+    label: "제약조건",
+    className: "bg-red-100 text-red-800 border-red-200 whitespace-nowrap",
+  },
 } as const;
 
 const CATEGORY_BADGE = {
@@ -52,12 +64,12 @@ export const RunResultsTable = ({
     <TableHeader>
       <TableRow>
         <TableHead className="w-10">#</TableHead>
-        <TableHead>Input</TableHead>
+        <TableHead>입력값</TableHead>
         <TableHead className="w-20 text-center">상태</TableHead>
         {compareMode && <TableHead className="w-24 text-center">변화</TableHead>}
-        <TableHead className="w-16 text-center">Format</TableHead>
-        <TableHead className="w-20 text-center">Semantic</TableHead>
-        <TableHead className="w-14 text-center">Logic</TableHead>
+        <TableHead className="w-24 text-center">출력형식</TableHead>
+        <TableHead className="w-20 text-center">유사도</TableHead>
+        <TableHead className="w-24 text-center">제약조건</TableHead>
       </TableRow>
     </TableHeader>
     <TableBody>

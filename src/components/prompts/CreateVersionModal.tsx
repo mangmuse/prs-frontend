@@ -153,7 +153,7 @@ export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionMod
                 name="outputSchema"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Output Schema</FormLabel>
+                    <FormLabel>출력 형식</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>

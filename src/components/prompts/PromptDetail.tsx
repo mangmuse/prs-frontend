@@ -82,7 +82,7 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
               <div className="font-medium">{versionDetail.temperature}</div>
             </div>
             <div>
-              <span className="text-muted-foreground">스키마</span>
+              <span className="text-muted-foreground">출력 형식</span>
               <div className="font-medium">{versionDetail.outputSchema}</div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { BarChart3, Database, FileText, type LucideIcon, Play, UserCircle } from "lucide-react";
+import { Database, FileText, type LucideIcon, Play, UserCircle } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -6,20 +6,9 @@ export interface NavItem {
   icon: LucideIcon;
 }
 
-export interface StatItem {
-  label: string;
-  value: string;
-  icon: LucideIcon;
-}
-
 export const mainNavItems: NavItem[] = [
-  { label: "Prompts", href: "/prompts", icon: FileText },
-  { label: "Datasets", href: "/datasets", icon: Database },
-  { label: "Profiles", href: "/profiles", icon: UserCircle },
-  { label: "Runs", href: "/runs", icon: Play },
-];
-
-export const statsItems: StatItem[] = [
-  { label: "Total Runs", value: "0", icon: BarChart3 },
-  { label: "Avg Pass Rate", value: "0%", icon: BarChart3 },
+  { label: "프롬프트", href: "/prompts", icon: FileText },
+  { label: "데이터셋", href: "/datasets", icon: Database },
+  { label: "평가 프로필", href: "/profiles", icon: UserCircle },
+  { label: "실행 기록", href: "/runs", icon: Play },
 ];

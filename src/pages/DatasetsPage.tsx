@@ -13,7 +13,7 @@ export const DatasetsPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <PageHeader title="Datasets" />
+      <PageHeader title="데이터셋" />
 
       <div className="flex-1 space-y-6 p-6">
         <div className="flex items-center justify-between">

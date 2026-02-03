@@ -46,7 +46,7 @@ export const RunsPage = () => {
       <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-6">
         <div className="flex items-center gap-4">
           <MobileSidebar />
-          <h1 className="text-xl font-semibold">Runs</h1>
+          <h1 className="text-xl font-semibold">실행 기록</h1>
         </div>
         <Button onClick={() => open()}>
           <Plus className="w-4 h-4 mr-2" />새 Run 실행

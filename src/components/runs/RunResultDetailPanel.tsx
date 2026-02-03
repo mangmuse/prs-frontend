@@ -29,8 +29,8 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
         {/* Input */}
         <div>
           <div className="flex items-center justify-between">
-            <Label className="text-sm text-muted-foreground">Input</Label>
-            <ExpandableViewer title="Input Data">
+            <Label className="text-sm text-muted-foreground">입력값</Label>
+            <ExpandableViewer title="입력 데이터">
               <div className="space-y-3">
                 {Object.entries(result.inputSnapshot).map(([key, value]) => (
                   <div key={key}>
@@ -98,7 +98,7 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
 
         <div className="space-y-3">
           <div>
-            <Label className="text-sm text-muted-foreground">Expected</Label>
+            <Label className="text-sm text-muted-foreground">기대값</Label>
             <JsonViewer
               data={
                 typeof result.expectedSnapshot === "string"
@@ -110,8 +110,8 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <Label className="text-sm text-muted-foreground">Actual (Raw Output)</Label>
-              <ExpandableViewer title="Raw Output">
+              <Label className="text-sm text-muted-foreground">실제 출력</Label>
+              <ExpandableViewer title="실제 출력">
                 <JsonViewer data={result.rawOutput} maxHeight="60vh" />
               </ExpandableViewer>
             </div>
@@ -125,16 +125,16 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
           <Label className="mb-2 block text-sm font-medium">3단계 평가 결과</Label>
           <div className="space-y-2">
             <div className="flex items-center justify-between rounded bg-muted/50 p-2">
-              <span className="text-sm">Format</span>
+              <span className="text-sm">출력형식</span>
               <Badge variant={result.isFormatPassed ? "default" : "destructive"}>
-                {result.isFormatPassed ? "Pass" : "Fail"}
+                {result.isFormatPassed ? "통과" : "실패"}
               </Badge>
             </div>
 
             {/* Semantic */}
             <div className="flex items-center justify-between rounded bg-muted/50 p-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm">Semantic</span>
+                <span className="text-sm">유사도</span>
                 {result.isFormatPassed ? (
                   <span
                     className={`font-mono text-xs ${
@@ -149,7 +149,7 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
               </div>
               {result.isFormatPassed ? (
                 <Badge variant={isSemanticPassed(result) ? "default" : "secondary"}>
-                  {isSemanticPassed(result) ? "Pass" : "Fail"}
+                  {isSemanticPassed(result) ? "통과" : "실패"}
                 </Badge>
               ) : (
                 <span className="text-sm text-muted-foreground">-</span>
@@ -158,10 +158,10 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
 
             <div className="rounded bg-muted/50 p-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm">Logic</span>
+                <span className="text-sm">제약조건</span>
                 {result.isFormatPassed ? (
                   <Badge variant={isLogicPassed(result) ? "default" : "destructive"}>
-                    {isLogicPassed(result) ? "Pass" : "Fail"}
+                    {isLogicPassed(result) ? "통과" : "실패"}
                   </Badge>
                 ) : (
                   <span className="text-sm text-muted-foreground">-</span>
