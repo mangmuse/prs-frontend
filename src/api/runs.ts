@@ -1,3 +1,4 @@
+import type { LogicConstraint } from "@/types/constraint";
 import type { RegressionComparisonResponse } from "@/types/regression";
 import type {
   CreateRunRequest,
@@ -5,7 +6,7 @@ import type {
   RelatedVersionsResponse,
   RunSummary,
 } from "@/types/run";
-import type { RunDetailData } from "@/types/runDetail";
+import type { ReEvaluateResponse, RunDetailData } from "@/types/runDetail";
 
 import { apiClient } from "./client";
 
@@ -31,5 +32,19 @@ export const runsApi = {
     return apiClient
       .get(`runs/${targetRunId}/compare/${baseRunId}`)
       .json<RegressionComparisonResponse>();
+  },
+
+  async updateProfileSnapshot(
+    runId: number,
+    data: { semanticThreshold: number; globalConstraints: LogicConstraint[] },
+  ): Promise<void> {
+    await apiClient.patch(`runs/${runId}/profile-snapshot`, { json: data });
+  },
+
+  async reEvaluate(
+    runId: number,
+    data: { semanticThreshold: number; globalConstraints: LogicConstraint[] },
+  ): Promise<ReEvaluateResponse> {
+    return apiClient.post(`runs/${runId}/re-evaluate`, { json: data }).json<ReEvaluateResponse>();
   },
 };

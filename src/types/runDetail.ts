@@ -64,3 +64,14 @@ export interface RunDetailData {
   metrics: RunMetrics;
   results: RunResultRow[];
 }
+
+export interface ReEvaluatedRow {
+  id: number;
+  status: "pass" | "format" | "semantic" | "logic";
+  logicResults: Record<string, unknown> | null;
+}
+
+export interface ReEvaluateResponse {
+  results: ReEvaluatedRow[];
+  passRate: number;
+}
