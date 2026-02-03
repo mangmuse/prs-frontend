@@ -32,13 +32,19 @@ import { calculateSummary, classifyCategory } from "@/utils/regression";
 
 type StatusFilter = "all" | "pass" | "fail" | "regressed" | "improved";
 
+const formatPValue = (pValue: number): string => {
+  if (pValue < 0.001) return "< 0.001";
+  return pValue.toFixed(3);
+};
+
 const getStatisticsMessage = (pValue: number) => {
+  const formatted = formatPValue(pValue);
   if (pValue < 0.01) {
     return {
       icon: CheckCircle,
       color: "bg-green-50 border-green-200 text-green-800",
       title: "매우 유의미한 변화 감지",
-      description: `신뢰수준 99% 이상 (p=${pValue})`,
+      description: `신뢰수준 99% 이상 (p=${formatted})`,
     };
   }
   if (pValue < 0.05) {
@@ -46,7 +52,7 @@ const getStatisticsMessage = (pValue: number) => {
       icon: CheckCircle,
       color: "bg-green-50 border-green-200 text-green-800",
       title: "유의미한 변화 감지",
-      description: `신뢰수준 95% 이상 (p=${pValue})`,
+      description: `신뢰수준 95% 이상 (p=${formatted})`,
     };
   }
   if (pValue < 0.1) {
@@ -54,7 +60,7 @@ const getStatisticsMessage = (pValue: number) => {
       icon: AlertTriangle,
       color: "bg-yellow-50 border-yellow-200 text-yellow-800",
       title: "변화 가능성 있음",
-      description: `신뢰수준 90% (p=${pValue}), 추가 데이터 권장`,
+      description: `신뢰수준 90% (p=${formatted}), 추가 데이터 권장`,
     };
   }
   return {
