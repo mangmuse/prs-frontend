@@ -1,8 +1,12 @@
-import { http, passthrough } from "msw";
+import { HttpResponse, http, passthrough } from "msw";
 
 export const handlers = [
   http.get("http://localhost:8000/health", () => passthrough()),
-  http.post("http://localhost:8000/auth/guest", () => passthrough()),
+  http.post("http://localhost:8000/auth/guest", () => {
+    return HttpResponse.json({
+      guest_id: "00000000-0000-0000-0000-000000000000",
+    });
+  }),
   http.get("http://localhost:8000/datasets", () => passthrough()),
   http.post("http://localhost:8000/datasets", () => passthrough()),
   http.get("http://localhost:8000/datasets/:id", () => passthrough()),
