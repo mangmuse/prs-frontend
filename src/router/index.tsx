@@ -1,8 +1,7 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { DatasetsPage } from "@/pages/DatasetsPage";
-import { HomePage } from "@/pages/HomePage";
 import { ProfilesPage } from "@/pages/ProfilesPage";
 import { PromptsPage } from "@/pages/PromptsPage";
 import { RunDetailPage } from "@/pages/RunDetailPage";
@@ -13,7 +12,7 @@ export const router = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, loader: () => redirect("/prompts") },
       { path: "prompts", element: <PromptsPage /> },
       { path: "datasets", element: <DatasetsPage /> },
       { path: "profiles", element: <ProfilesPage /> },
