@@ -131,8 +131,16 @@ export const RunDetailPage = () => {
     | undefined;
 
   if (comparisonData) {
+    const effectiveComparisons = comparisonData.rowComparisons.map((r) => {
+      if (previewResults) {
+        const simulated = previewResults.find((p) => p.rowIndex === r.rowIndex);
+        return { ...r, targetStatus: simulated?.status ?? r.targetStatus };
+      }
+      return r;
+    });
+
     rowChanges = new Map(
-      comparisonData.rowComparisons.map((r) => [
+      effectiveComparisons.map((r) => [
         r.rowIndex,
         {
           category: classifyCategory(r.baseStatus, r.targetStatus),
@@ -141,7 +149,7 @@ export const RunDetailPage = () => {
         },
       ]),
     );
-    summary = calculateSummary(comparisonData.rowComparisons);
+    summary = calculateSummary(effectiveComparisons);
   }
 
   if (run && baseRun) {
