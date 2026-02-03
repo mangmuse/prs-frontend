@@ -2,16 +2,6 @@ import { z } from "zod";
 
 export type ConstraintType = "contains" | "not_contains" | "range" | "regex" | "max_length";
 
-// BE와 일치 (id 없음, target 필수)
-export type LogicConstraint =
-  | { type: "contains"; target: string; value: string }
-  | { type: "not_contains"; target: string; value: string }
-  | { type: "range"; target: string; min?: number; max?: number }
-  | { type: "regex"; target: string; pattern: string }
-  | { type: "max_length"; target: string; max: number };
-
-export type ProfileConstraint = LogicConstraint;
-
 export const logicConstraintSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("contains"),
@@ -41,4 +31,4 @@ export const logicConstraintSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-export const profileConstraintSchema = logicConstraintSchema;
+export type LogicConstraint = z.infer<typeof logicConstraintSchema>;

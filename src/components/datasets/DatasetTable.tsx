@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { datasetQueries } from "@/queries/datasetQueries";
-import type { LogicConstraint } from "@/types/constraint";
 import { buildPaginationState } from "@/utils/pagination";
 
 import { DatasetRowForm } from "./DatasetRowForm";
@@ -84,8 +83,6 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                 <TableHead>Input</TableHead>
                 <TableHead className="w-28">Expected</TableHead>
                 <TableHead className="w-40">Tags</TableHead>
-                {/* TODO: rowConstraints 미사용으로 삭제 예정 */}
-                <TableHead className="w-48">Constraints</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -121,9 +118,6 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <ConstraintsSummary constraints={row.rowConstraints} />
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -141,23 +135,6 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
       )}
 
       <DatasetRowForm datasetId={datasetId} open={isAddRowOpen} onOpenChange={setIsAddRowOpen} />
-    </div>
-  );
-};
-
-// TODO: rowConstraints 미사용으로 삭제 예정
-const ConstraintsSummary = ({ constraints }: { constraints: LogicConstraint[] | null }) => {
-  if (!constraints || constraints.length === 0) {
-    return <span className="text-xs text-muted-foreground">없음</span>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-1">
-      {constraints.map((c, i) => (
-        <Badge key={i} variant="outline" className="text-xs">
-          {c.type}
-        </Badge>
-      ))}
     </div>
   );
 };

@@ -107,8 +107,8 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
       await Promise.all([
         profilesApi.update(run.profile.id, data),
         runsApi.updateProfileSnapshot(run.id, {
-          semanticThreshold: data.semanticThreshold,
-          globalConstraints: constraints,
+          semanticThreshold: data.semanticThreshold ?? run.profile.semanticThreshold,
+          globalConstraints: constraints ?? run.profile.globalConstraints,
         }),
       ]);
     },
@@ -124,22 +124,7 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
       name: data.name,
       description: data.description,
       semanticThreshold: data.semanticThreshold,
-      globalConstraints: data.globalConstraints.map((c) => {
-        const base = { type: c.type, target: c.target };
-        switch (c.type) {
-          case "contains":
-          case "not_contains":
-            return { ...base, value: c.value };
-          case "range":
-            return { ...base, min: c.min, max: c.max };
-          case "regex":
-            return { ...base, pattern: c.pattern };
-          case "max_length":
-            return { ...base, max: c.max };
-          default:
-            return base;
-        }
-      }),
+      globalConstraints: data.globalConstraints,
     };
     updateMutation.mutate(requestData);
   };

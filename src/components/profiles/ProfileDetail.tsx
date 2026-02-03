@@ -4,13 +4,7 @@ import { Edit, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { profileQueries } from "@/queries/profileQueries";
 import type { LogicConstraint } from "@/types/constraint";
-
-const CONSTRAINT_TYPE_LABELS: Record<string, string> = {
-  contains: "포함",
-  not_contains: "미포함",
-  range: "범위",
-  regex: "정규식",
-};
+import { CONSTRAINT_TYPE_LABELS, getConstraintValueDisplay } from "@/utils/constraintUtils";
 
 interface ProfileDetailProps {
   profileId: number;
@@ -83,15 +77,12 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
                 className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3"
               >
                 <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                  {CONSTRAINT_TYPE_LABELS[constraint.type] || constraint.type}
+                  {CONSTRAINT_TYPE_LABELS[constraint.type]}
                 </span>
                 <span className="text-sm font-medium">{constraint.target}</span>
-                {constraint.value && (
-                  <span className="text-sm text-muted-foreground">: {constraint.value}</span>
-                )}
-                {constraint.min !== undefined && constraint.max !== undefined && (
+                {getConstraintValueDisplay(constraint) && (
                   <span className="text-sm text-muted-foreground">
-                    : {constraint.min} ~ {constraint.max}
+                    : {getConstraintValueDisplay(constraint)}
                   </span>
                 )}
               </div>

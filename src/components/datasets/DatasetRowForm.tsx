@@ -1,4 +1,4 @@
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
@@ -18,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddRows } from "@/hooks/mutations/useAddRows";
 
-import { ConstraintsEditor } from "./ConstraintsEditor";
 import { TemplateReferenceSection } from "./TemplateReferenceSection";
 
 const inputFieldSchema = z.object({
@@ -26,21 +25,10 @@ const inputFieldSchema = z.object({
   value: z.string(),
 });
 
-const constraintSchema = z.object({
-  id: z.string(),
-  type: z.enum(["contains", "not_contains", "range", "regex", "max_length"]),
-  value: z.union([z.string(), z.number()]).optional(),
-  target: z.string().optional(),
-  min: z.number().optional(),
-  max: z.number().optional(),
-  pattern: z.string().optional(),
-});
-
 const datasetRowSchema = z.object({
   inputFields: z.array(inputFieldSchema).min(1, "최소 1개의 입력 필드가 필요합니다"),
   expectedOutput: z.string().min(1, "Expected output은 필수입니다"),
   tags: z.string(),
-  constraints: z.array(constraintSchema),
 });
 
 type DatasetRowFormData = z.infer<typeof datasetRowSchema>;
@@ -67,7 +55,6 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
       inputFields: [{ key: "input", value: "" }],
       expectedOutput: "",
       tags: "",
-      constraints: [],
     },
   });
 
@@ -91,14 +78,6 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
           {
             inputData: inputData,
             expectedOutput: data.expectedOutput,
-            rowConstraints: data.constraints.map((constraint) => ({
-              type: constraint.type,
-              value: constraint.value,
-              target: constraint.target,
-              min: constraint.min,
-              max: constraint.max,
-              pattern: constraint.pattern,
-            })),
             tags,
           },
         ],
@@ -217,14 +196,6 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
               <Label htmlFor="tags">Tags (쉼표로 구분)</Label>
               <Input id="tags" placeholder="edge-case, korean, important" {...register("tags")} />
             </div>
-
-            <Controller
-              name="constraints"
-              control={control}
-              render={({ field }) => (
-                <ConstraintsEditor constraints={field.value} onChange={field.onChange} />
-              )}
-            />
           </div>
 
           <DialogFooter>

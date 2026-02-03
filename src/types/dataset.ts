@@ -1,5 +1,3 @@
-import type { LogicConstraint } from "./constraint";
-
 export interface Dataset {
   id: number;
   name: string;
@@ -14,8 +12,6 @@ export interface DatasetRow {
   inputData: Record<string, unknown>;
   expectedOutput: string;
   tags: string[];
-  // TODO: UI 삭제 후 제거 예정
-  rowConstraints?: LogicConstraint[];
 }
 
 export interface CreateDatasetRequest {

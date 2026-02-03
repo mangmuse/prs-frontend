@@ -26,7 +26,6 @@ export const DatasetRowsTable = ({ control, register }: DatasetRowsTableProps) =
       inputFields: [{ key: "input", value: "" }],
       expected: "",
       tags: "",
-      constraints: [],
     });
   };
 
@@ -47,7 +46,6 @@ export const DatasetRowsTable = ({ control, register }: DatasetRowsTableProps) =
               <TableHead>Input *</TableHead>
               <TableHead className="w-28">Expected</TableHead>
               <TableHead className="w-28">Tags</TableHead>
-              <TableHead className="w-32">Constraints</TableHead>
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>

@@ -41,9 +41,7 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
     defaultValues: {
       name: "",
       description: "",
-      rows: [
-        { inputFields: [{ key: "input", value: "" }], expected: "", tags: "", constraints: [] },
-      ],
+      rows: [{ inputFields: [{ key: "input", value: "" }], expected: "", tags: "" }],
     },
     mode: "onChange",
   });
@@ -58,14 +56,6 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
             .map((f) => [f.key, f.value.trim()]),
         ),
         expectedOutput: row.expected.trim(),
-        rowConstraints: row.constraints.map((constraint) => ({
-          type: constraint.type,
-          value: constraint.value,
-          target: constraint.target,
-          min: constraint.min,
-          max: constraint.max,
-          pattern: constraint.pattern,
-        })),
         tags: row.tags
           .split(",")
           .map((tag) => tag.trim())
