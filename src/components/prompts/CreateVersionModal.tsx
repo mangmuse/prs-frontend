@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -29,8 +30,9 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { MODEL_OPTIONS, SCHEMA_OPTIONS } from "@/constants/prompt";
+import { SCHEMA_OPTIONS } from "@/constants/prompt";
 import { useCreateVersion } from "@/hooks/mutations/useCreateVersion";
+import { llmQueries } from "@/queries/llmQueries";
 import type { CreateVersionRequest, OutputSchemaType } from "@/types/prompt";
 
 interface CreateVersionModalProps {
@@ -42,7 +44,7 @@ interface CreateVersionModalProps {
 const createVersionSchema = z.object({
   systemInstruction: z.string(),
   userTemplate: z.string(),
-  model: z.string(),
+  model: z.string().min(1, "모델을 선택해주세요"),
   temperature: z.number().min(0).max(2),
   outputSchema: z.enum(SCHEMA_OPTIONS),
   memo: z.string().optional(),
@@ -51,12 +53,15 @@ const createVersionSchema = z.object({
 type CreateVersionFormData = z.infer<typeof createVersionSchema>;
 
 export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionModalProps) => {
+  const { data: modelsData, isPending: modelsLoading } = useQuery(llmQueries.models());
+  const models = modelsData?.models ?? [];
+
   const form = useForm<CreateVersionFormData>({
     resolver: zodResolver(createVersionSchema),
     defaultValues: {
       systemInstruction: "",
       userTemplate: "",
-      model: "gemini-2.5-flash",
+      model: "",
       temperature: 1.0,
       outputSchema: "JSON Object",
       memo: "",
@@ -99,16 +104,20 @@ export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionMod
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>모델</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={modelsLoading}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="모델을 선택하세요" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {MODEL_OPTIONS.map((m) => (
-                          <SelectItem key={m} value={m}>
-                            {m}
+                      <SelectContent className="max-h-96 overflow-y-auto">
+                        {models.map((m) => (
+                          <SelectItem key={m.id} value={m.id}>
+                            {m.displayName}
                           </SelectItem>
                         ))}
                       </SelectContent>
