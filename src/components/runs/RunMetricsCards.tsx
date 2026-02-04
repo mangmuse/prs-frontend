@@ -66,7 +66,7 @@ export const RunMetricsCards = ({
       variant={getVariantByRate(semanticPassRate)}
     />
     <RunMetricCard
-      label="Logic Pass"
+      label="Constraint Pass"
       value={logicPassRate}
       variant={getVariantByRate(logicPassRate)}
     />

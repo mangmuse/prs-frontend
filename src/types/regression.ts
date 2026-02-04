@@ -1,5 +1,5 @@
 export type RegressionCategory = "regressed" | "improved" | "changed" | "unchanged";
-export type ResultStatus = "pass" | "format" | "semantic" | "logic";
+export type ResultStatus = "pass" | "format" | "semantic" | "constraint";
 
 export interface RowComparisonData {
   rowIndex: number;

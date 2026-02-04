@@ -40,7 +40,7 @@ const STATUS_CONFIG = {
     label: "유사도",
     className: "bg-purple-100 text-purple-800 border-purple-200 whitespace-nowrap",
   },
-  logic: {
+  constraint: {
     label: "제약조건",
     className: "bg-red-100 text-red-800 border-red-200 whitespace-nowrap",
   },
@@ -76,7 +76,7 @@ export const RunResultsTable = ({
       {results.map((result) => {
         const config = STATUS_CONFIG[result.status];
         const semanticStatus = getLayerStatus(result, "semantic");
-        const logicStatus = getLayerStatus(result, "logic");
+        const logicStatus = getLayerStatus(result, "constraint");
         const rowChange = rowChanges?.get(result.rowIndex);
 
         return (

@@ -22,12 +22,12 @@ describe("getLayerStatus", () => {
   it("format 실패 시 semantic/logic은 skipped", () => {
     const result = createMockResult({ isFormatPassed: false, status: "format" });
     expect(getLayerStatus(result, "semantic")).toBe("skipped");
-    expect(getLayerStatus(result, "logic")).toBe("skipped");
+    expect(getLayerStatus(result, "constraint")).toBe("skipped");
   });
 
   it("format 통과 시 semantic 상태 반환", () => {
     const passed = createMockResult({ status: "pass" });
-    const passedLogic = createMockResult({ status: "logic" });
+    const passedLogic = createMockResult({ status: "constraint" });
     const failed = createMockResult({ status: "semantic" });
 
     expect(getLayerStatus(passed, "semantic")).toBe("pass");
@@ -35,19 +35,19 @@ describe("getLayerStatus", () => {
     expect(getLayerStatus(failed, "semantic")).toBe("fail");
   });
 
-  it("format 통과 시 logic 상태 반환", () => {
+  it("format 통과 시 constraint 상태 반환", () => {
     const passed = createMockResult({ status: "pass" });
-    const failed = createMockResult({ status: "logic" });
+    const failed = createMockResult({ status: "constraint" });
 
-    expect(getLayerStatus(passed, "logic")).toBe("pass");
-    expect(getLayerStatus(failed, "logic")).toBe("fail");
+    expect(getLayerStatus(passed, "constraint")).toBe("pass");
+    expect(getLayerStatus(failed, "constraint")).toBe("fail");
   });
 });
 
 describe("isSemanticPassed", () => {
   it("status가 pass 또는 logic이면 true", () => {
     expect(isSemanticPassed(createMockResult({ status: "pass" }))).toBe(true);
-    expect(isSemanticPassed(createMockResult({ status: "logic" }))).toBe(true);
+    expect(isSemanticPassed(createMockResult({ status: "constraint" }))).toBe(true);
   });
 
   it("status가 format 또는 semantic이면 false", () => {
@@ -62,7 +62,7 @@ describe("isLogicPassed", () => {
   });
 
   it("status가 pass가 아니면 false", () => {
-    expect(isLogicPassed(createMockResult({ status: "logic" }))).toBe(false);
+    expect(isLogicPassed(createMockResult({ status: "constraint" }))).toBe(false);
     expect(isLogicPassed(createMockResult({ status: "semantic" }))).toBe(false);
     expect(isLogicPassed(createMockResult({ status: "format" }))).toBe(false);
   });

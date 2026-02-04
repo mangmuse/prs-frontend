@@ -26,7 +26,7 @@ export interface RunResultRow {
   inputSnapshot: Record<string, unknown>;
   expectedSnapshot: Record<string, unknown> | string | null;
   assembledPrompt: AssembledPrompt;
-  status: "pass" | "format" | "semantic" | "logic";
+  status: "pass" | "format" | "semantic" | "constraint";
   isFormatPassed: boolean;
   semanticScore: number;
   logicResults: LogicLayerResult;
@@ -67,7 +67,7 @@ export interface RunDetailData {
 
 export interface ReEvaluatedRow {
   id: number;
-  status: "pass" | "format" | "semantic" | "logic";
+  status: "pass" | "format" | "semantic" | "constraint";
   logicResults: Record<string, unknown> | null;
 }
 
