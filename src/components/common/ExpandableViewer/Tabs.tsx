@@ -18,9 +18,9 @@ interface TabsProps {
 
 const isTabElement = (child: React.ReactNode): child is React.ReactElement<TabProps> => {
   if (!React.isValidElement(child)) return false;
-  const hasRequiredProps =
-    typeof child.props?.id === "string" && typeof child.props?.label === "string";
-  return child.type === Tab || hasRequiredProps;
+  if (child.type === Tab) return true;
+  const props = child.props as Record<string, unknown>;
+  return typeof props.id === "string" && typeof props.label === "string";
 };
 
 export const TabsComponent = ({ defaultTab, children }: TabsProps) => {

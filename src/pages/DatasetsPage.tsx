@@ -2,7 +2,9 @@ import { useState } from "react";
 
 import { Plus } from "lucide-react";
 
-import { CreateDatasetModal, DatasetSelector, DatasetTable } from "@/components/datasets";
+import { CreateDatasetModal } from "@/components/datasets/CreateDatasetModal";
+import { DatasetSelector } from "@/components/datasets/DatasetSelector";
+import { DatasetTable } from "@/components/datasets/DatasetTable";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/modals/useModal";
@@ -32,13 +34,7 @@ export const DatasetsPage = () => {
         )}
       </div>
 
-      <CreateDatasetModal
-        open={state.open}
-        onOpenChange={onOpenChange}
-        onSuccess={() => {
-          // 새로 생성된 데이터셋 자동 선택 (optional)
-        }}
-      />
+      <CreateDatasetModal open={state.open} onOpenChange={onOpenChange} onSuccess={() => {}} />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { DatasetsPage } from "@/pages/DatasetsPage";
 import { ProfilesPage } from "@/pages/ProfilesPage";
 import { PromptsPage } from "@/pages/PromptsPage";
-import { RunDetailPage } from "@/pages/RunDetailPage";
+import { RunDetailPage } from "@/pages/RunDetailPage/RunDetailPage";
 import { RunsPage } from "@/pages/RunsPage";
 
 export const router = createBrowserRouter([

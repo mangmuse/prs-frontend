@@ -75,3 +75,20 @@ export interface ReEvaluateResponse {
   results: ReEvaluatedRow[];
   passRate: number;
 }
+
+export type StatusFilter = "all" | "pass" | "fail" | "regressed" | "improved";
+
+export type MetricsAsPercent = {
+  passRate: number;
+  formatPassRate: number;
+  semanticPassRate: number;
+  logicPassRate: number;
+  avgSemantic: number;
+};
+
+export type MetricsDelta = {
+  passRate: number;
+  formatPassRate: number;
+  semanticPassRate: number;
+  logicPassRate: number;
+};
