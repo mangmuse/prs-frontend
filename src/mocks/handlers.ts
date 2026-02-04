@@ -4,7 +4,8 @@ export const handlers = [
   http.get("http://localhost:8000/health", () => passthrough()),
   http.post("http://localhost:8000/auth/guest", () => {
     return HttpResponse.json({
-      guest_id: "00000000-0000-0000-0000-000000000000",
+      guestId: "00000000-0000-0000-0000-000000000000",
+      createdAt: new Date().toISOString(),
     });
   }),
   http.get("http://localhost:8000/datasets", () => passthrough()),

@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Maximize2, Plus } from "lucide-react";
 
+import { ExpandableViewer } from "@/components/common/ExpandableViewer";
+import { JsonViewer } from "@/components/runs/JsonViewer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +27,8 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { datasetQueries } from "@/queries/datasetQueries";
+import type { DatasetRow } from "@/types/dataset";
+import { isJsonString } from "@/utils/json";
 import { buildPaginationState } from "@/utils/pagination";
 
 import { DatasetRowForm } from "./DatasetRowForm";
@@ -35,6 +39,37 @@ interface DatasetTableProps {
 
 const ROWS_PER_PAGE = 10;
 const PAGE_GROUP_SIZE = 5;
+
+interface DatasetRowDetailViewerProps {
+  row: DatasetRow;
+  defaultTab: "input" | "expected";
+  trigger: React.ReactNode;
+}
+
+const DatasetRowDetailViewer = ({ row, defaultTab, trigger }: DatasetRowDetailViewerProps) => (
+  <ExpandableViewer.Root title="데이터셋 상세" maxWidth="max-w-3xl" trigger={trigger}>
+    <ExpandableViewer.Tabs defaultTab={defaultTab}>
+      <ExpandableViewer.Tab id="input" label="Input Data">
+        <ExpandableViewer.ScrollContent>
+          <div className="space-y-4">
+            {Object.entries(row.inputData).map(([key, value]) => (
+              <div key={key} className="space-y-1.5">
+                <h4 className="text-sm font-medium text-muted-foreground">{key}</h4>
+                <JsonViewer
+                  data={typeof value === "string" ? value : JSON.stringify(value, null, 2)}
+                  maxHeight="auto"
+                />
+              </div>
+            ))}
+          </div>
+        </ExpandableViewer.ScrollContent>
+      </ExpandableViewer.Tab>
+      <ExpandableViewer.Tab id="expected" label="Expected Output">
+        <ExpandableViewer.JsonContent data={row.expectedOutput} />
+      </ExpandableViewer.Tab>
+    </ExpandableViewer.Tabs>
+  </ExpandableViewer.Root>
+);
 
 export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
   const [isAddRowOpen, setIsAddRowOpen] = useState<boolean>(false);
@@ -92,22 +127,43 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                     {(page - 1) * ROWS_PER_PAGE + index + 1}
                   </TableCell>
                   <TableCell>
-                    <code className="block max-w-md truncate rounded bg-muted px-2 py-1 text-xs">
-                      {JSON.stringify(row.inputData)}
-                    </code>
+                    <DatasetRowDetailViewer
+                      row={row}
+                      defaultTab="input"
+                      trigger={
+                        <div className="group relative cursor-pointer">
+                          <code className="block max-w-md truncate rounded bg-muted px-2 py-1 text-xs transition-colors group-hover:bg-muted/80">
+                            {JSON.stringify(row.inputData)}
+                          </code>
+                          <Maximize2 className="absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100" />
+                        </div>
+                      }
+                    />
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        row.expectedOutput === "TRUE"
-                          ? "default"
-                          : row.expectedOutput === "FALSE"
-                            ? "destructive"
-                            : "secondary"
-                      }
-                    >
-                      {row.expectedOutput}
-                    </Badge>
+                    {isJsonString(row.expectedOutput) ? (
+                      <DatasetRowDetailViewer
+                        row={row}
+                        defaultTab="expected"
+                        trigger={
+                          <Button variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs">
+                            JSON <Maximize2 className="h-3 w-3" />
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <Badge
+                        variant={
+                          row.expectedOutput === "TRUE"
+                            ? "default"
+                            : row.expectedOutput === "FALSE"
+                              ? "destructive"
+                              : "secondary"
+                        }
+                      >
+                        {row.expectedOutput}
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">

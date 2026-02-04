@@ -8,11 +8,163 @@ import { isLogicPassed, isSemanticPassed } from "@/utils/evaluation";
 import { isJsonString, tryFormatJson } from "@/utils/json";
 
 import { ExpandableViewer } from "../common/ExpandableViewer";
+import { ExpandablePromptViewer } from "./ExpandablePromptViewer";
 import { JsonViewer } from "./JsonViewer";
 
 interface RunResultDetailPanelProps {
   result: RunResultRow;
 }
+
+const InputSection = ({ inputSnapshot }: { inputSnapshot: RunResultRow["inputSnapshot"] }) => {
+  const entries = Object.entries(inputSnapshot);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <Label className="text-sm text-muted-foreground">입력값</Label>
+        <ExpandableViewer.Root title="입력 데이터">
+          <div className="space-y-3">
+            {entries.map(([key, value]) => (
+              <div key={key}>
+                <Label className="text-sm text-muted-foreground">{key}</Label>
+                <pre
+                  className={`mt-1 whitespace-pre-wrap rounded-lg p-3 text-sm ${
+                    isJsonString(String(value))
+                      ? "border bg-slate-50 font-mono text-slate-700"
+                      : "bg-muted/50"
+                  }`}
+                >
+                  {tryFormatJson(String(value))}
+                </pre>
+              </div>
+            ))}
+          </div>
+        </ExpandableViewer.Root>
+      </div>
+      <div className="mt-1 space-y-1">
+        {entries.map(([key, value]) => (
+          <div key={key} className="flex gap-2">
+            <span className="shrink-0 font-mono text-sm text-muted-foreground">{key}:</span>
+            <span className="line-clamp-2 text-sm">{String(value)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ExpectedActualSection = ({
+  expectedSnapshot,
+  rawOutput,
+}: Pick<RunResultRow, "expectedSnapshot" | "rawOutput">) => {
+  const expectedText =
+    typeof expectedSnapshot === "string"
+      ? expectedSnapshot
+      : (JSON.stringify(expectedSnapshot, null, 2) ?? "");
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label>기대값 vs 실제 출력</Label>
+        <ExpandableViewer.JsonTabs
+          title="기대값 vs 실제 출력 비교"
+          maxWidth="max-w-3xl"
+          tabs={[
+            { id: "expected", label: "기대값", data: expectedSnapshot },
+            { id: "actual", label: "실제 출력", data: rawOutput },
+          ]}
+          defaultTab="expected"
+        />
+      </div>
+
+      <div className="rounded-lg border p-4">
+        <Label className="mb-2 text-sm text-muted-foreground">기대값</Label>
+        <div className="max-h-[80px] overflow-hidden">
+          <JsonViewer data={expectedText} maxHeight="80px" />
+        </div>
+      </div>
+
+      <div className="rounded-lg border p-4">
+        <Label className="mb-2 text-sm text-muted-foreground">실제 출력</Label>
+        <div className="max-h-[80px] overflow-hidden">
+          <JsonViewer data={rawOutput} maxHeight="80px" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EvaluationSection = ({ result }: { result: RunResultRow }) => {
+  const semanticPassed = isSemanticPassed(result);
+  const logicPassed = isLogicPassed(result);
+  const showLogicResults = result.isFormatPassed && result.logicResults?.results?.length > 0;
+  const semanticScoreText = `(${(result.semanticScore * 100).toFixed(0)}%)`;
+
+  return (
+    <div>
+      <Label className="mb-2 block text-sm font-medium">3단계 평가 결과</Label>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between rounded bg-muted/50 p-2">
+          <span className="text-sm">출력형식</span>
+          <Badge variant={result.isFormatPassed ? "default" : "destructive"}>
+            {result.isFormatPassed ? "통과" : "실패"}
+          </Badge>
+        </div>
+
+        <div className="flex items-center justify-between rounded bg-muted/50 p-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">유사도</span>
+            {result.isFormatPassed ? (
+              <span
+                className={`font-mono text-xs ${semanticPassed ? "text-green-600" : "text-red-500"}`}
+              >
+                {semanticScoreText}
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">(미측정)</span>
+            )}
+          </div>
+          {result.isFormatPassed ? (
+            <Badge variant={semanticPassed ? "default" : "secondary"}>
+              {semanticPassed ? "통과" : "실패"}
+            </Badge>
+          ) : (
+            <span className="text-sm text-muted-foreground">-</span>
+          )}
+        </div>
+
+        <div className="rounded bg-muted/50 p-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm">제약조건</span>
+            {result.isFormatPassed ? (
+              <Badge variant={logicPassed ? "default" : "destructive"}>
+                {logicPassed ? "통과" : "실패"}
+              </Badge>
+            ) : (
+              <span className="text-sm text-muted-foreground">-</span>
+            )}
+          </div>
+          {showLogicResults && (
+            <div className="mt-2 space-y-1">
+              {result.logicResults?.results?.map((constraint, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs">
+                  <span className="font-mono text-muted-foreground">
+                    {constraint.constraintType}: "{constraint.target}"
+                  </span>
+                  {constraint.passed ? (
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <XCircle className="h-3 w-3 text-red-500" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
   const PassIcon = result.status === "pass" ? CheckCircle : XCircle;
@@ -26,166 +178,26 @@ export const RunResultDetailPanel = ({ result }: RunResultDetailPanelProps) => {
       </div>
 
       <div className="space-y-4">
-        {/* Input */}
-        <div>
-          <div className="flex items-center justify-between">
-            <Label className="text-sm text-muted-foreground">입력값</Label>
-            <ExpandableViewer title="입력 데이터">
-              <div className="space-y-3">
-                {Object.entries(result.inputSnapshot).map(([key, value]) => (
-                  <div key={key}>
-                    <Label className="text-sm text-muted-foreground">{key}</Label>
-                    <pre
-                      className={`mt-1 whitespace-pre-wrap rounded-lg p-3 text-sm ${
-                        isJsonString(String(value))
-                          ? "border bg-slate-50 font-mono text-slate-700"
-                          : "bg-muted/50"
-                      }`}
-                    >
-                      {tryFormatJson(String(value))}
-                    </pre>
-                  </div>
-                ))}
-              </div>
-            </ExpandableViewer>
-          </div>
-          <div className="mt-1 space-y-1">
-            {Object.entries(result.inputSnapshot).map(([key, value]) => (
-              <div key={key} className="flex gap-2">
-                <span className="shrink-0 font-mono text-sm text-muted-foreground">{key}:</span>
-                <span className="line-clamp-2 text-sm">{String(value)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <InputSection inputSnapshot={result.inputSnapshot} />
 
         <Separator />
 
-        {/* 조립된 프롬프트 */}
-        <div>
-          <div className="flex items-center justify-between">
-            <Label className="text-sm text-muted-foreground">조립된 프롬프트</Label>
-            <ExpandableViewer title="조립된 프롬프트" maxWidth="max-w-3xl">
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-sm text-muted-foreground">System Instruction</Label>
-                  <pre className="mt-1 whitespace-pre-wrap rounded-lg bg-blue-50 p-4 text-sm">
-                    {result.assembledPrompt.systemInstruction}
-                  </pre>
-                </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">User Message</Label>
-                  <pre className="mt-1 whitespace-pre-wrap rounded-lg bg-green-50 p-4 text-sm">
-                    {result.assembledPrompt.userMessage}
-                  </pre>
-                </div>
-              </div>
-            </ExpandableViewer>
-          </div>
-          <div className="mt-1 rounded-lg border">
-            <div className="border-b bg-blue-50/50 p-2">
-              <p className="text-xs font-medium text-blue-700">System</p>
-              <p className="line-clamp-2 text-sm">{result.assembledPrompt.systemInstruction}</p>
-            </div>
-            <div className="bg-green-50/50 p-2">
-              <p className="text-xs font-medium text-green-700">User</p>
-              <p className="line-clamp-2 text-sm">{result.assembledPrompt.userMessage}</p>
-            </div>
-          </div>
-        </div>
+        <ExpandablePromptViewer
+          systemInstruction={result.assembledPrompt.systemInstruction}
+          userTemplate={result.assembledPrompt.userMessage}
+          labelClassName="text-sm text-muted-foreground"
+        />
 
         <Separator />
 
-        <div className="space-y-3">
-          <div>
-            <Label className="text-sm text-muted-foreground">기대값</Label>
-            <JsonViewer
-              data={
-                typeof result.expectedSnapshot === "string"
-                  ? result.expectedSnapshot
-                  : (JSON.stringify(result.expectedSnapshot, null, 2) ?? "")
-              }
-              maxHeight="80px"
-            />
-          </div>
-          <div>
-            <div className="flex items-center justify-between">
-              <Label className="text-sm text-muted-foreground">실제 출력</Label>
-              <ExpandableViewer title="실제 출력">
-                <JsonViewer data={result.rawOutput} maxHeight="60vh" />
-              </ExpandableViewer>
-            </div>
-            <JsonViewer data={result.rawOutput} maxHeight="80px" />
-          </div>
-        </div>
+        <ExpectedActualSection
+          expectedSnapshot={result.expectedSnapshot}
+          rawOutput={result.rawOutput}
+        />
 
         <Separator />
 
-        <div>
-          <Label className="mb-2 block text-sm font-medium">3단계 평가 결과</Label>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between rounded bg-muted/50 p-2">
-              <span className="text-sm">출력형식</span>
-              <Badge variant={result.isFormatPassed ? "default" : "destructive"}>
-                {result.isFormatPassed ? "통과" : "실패"}
-              </Badge>
-            </div>
-
-            {/* Semantic */}
-            <div className="flex items-center justify-between rounded bg-muted/50 p-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">유사도</span>
-                {result.isFormatPassed ? (
-                  <span
-                    className={`font-mono text-xs ${
-                      isSemanticPassed(result) ? "text-green-600" : "text-red-500"
-                    }`}
-                  >
-                    ({(result.semanticScore * 100).toFixed(0)}%)
-                  </span>
-                ) : (
-                  <span className="text-xs text-muted-foreground">(미측정)</span>
-                )}
-              </div>
-              {result.isFormatPassed ? (
-                <Badge variant={isSemanticPassed(result) ? "default" : "secondary"}>
-                  {isSemanticPassed(result) ? "통과" : "실패"}
-                </Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">-</span>
-              )}
-            </div>
-
-            <div className="rounded bg-muted/50 p-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">제약조건</span>
-                {result.isFormatPassed ? (
-                  <Badge variant={isLogicPassed(result) ? "default" : "destructive"}>
-                    {isLogicPassed(result) ? "통과" : "실패"}
-                  </Badge>
-                ) : (
-                  <span className="text-sm text-muted-foreground">-</span>
-                )}
-              </div>
-              {result.isFormatPassed && result.logicResults?.results?.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {result.logicResults.results.map((constraint, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs">
-                      <span className="font-mono text-muted-foreground">
-                        {constraint.constraintType}: "{constraint.target}"
-                      </span>
-                      {constraint.passed ? (
-                        <CheckCircle className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <XCircle className="h-3 w-3 text-red-500" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <EvaluationSection result={result} />
       </div>
     </div>
   );

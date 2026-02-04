@@ -5,31 +5,31 @@ import { ExpandableViewer } from "../common/ExpandableViewer";
 interface ExpandablePromptViewerProps {
   systemInstruction: string;
   userTemplate: string;
+  labelClassName: string;
 }
 
 export const ExpandablePromptViewer = ({
   systemInstruction,
   userTemplate,
+  labelClassName,
 }: ExpandablePromptViewerProps) => (
   <div className="space-y-3">
     <div className="flex items-center justify-between">
-      <Label className="text-sm font-medium">조립된 프롬프트</Label>
-      <ExpandableViewer title="조립된 프롬프트" maxWidth="max-w-3xl">
-        <div className="space-y-4">
-          <div>
-            <Label className="text-sm text-muted-foreground">System Instruction</Label>
-            <pre className="mt-1 whitespace-pre-wrap rounded-lg bg-blue-50 p-4 text-sm">
-              {systemInstruction}
-            </pre>
-          </div>
-          <div>
-            <Label className="text-sm text-muted-foreground">User Message</Label>
-            <pre className="mt-1 whitespace-pre-wrap rounded-lg bg-green-50 p-4 text-sm">
-              {userTemplate}
-            </pre>
-          </div>
-        </div>
-      </ExpandableViewer>
+      <Label className={labelClassName}>조립된 프롬프트</Label>
+      <ExpandableViewer.TextTabs
+        title="조립된 프롬프트"
+        maxWidth="max-w-3xl"
+        tabs={[
+          {
+            id: "system",
+            label: "System Instruction",
+            content: systemInstruction,
+            variant: "blue",
+          },
+          { id: "user", label: "User Message", content: userTemplate, variant: "green" },
+        ]}
+        defaultTab="system"
+      />
     </div>
 
     <div className="rounded-lg border">

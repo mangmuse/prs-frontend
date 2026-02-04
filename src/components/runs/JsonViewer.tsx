@@ -24,7 +24,10 @@ export const JsonViewer = ({ data, maxHeight = "200px" }: JsonViewerProps) => {
       >
         {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
       </Button>
-      <pre className="overflow-auto p-3 text-sm" style={{ maxHeight }}>
+      <pre
+        className="overflow-auto whitespace-pre-wrap break-all p-3 text-sm"
+        style={{ maxHeight }}
+      >
         <code className={isJson ? "text-blue-600" : ""}>{isJson ? tryFormatJson(data) : data}</code>
       </pre>
     </div>
