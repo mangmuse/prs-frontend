@@ -9,7 +9,6 @@ export const runQueries = {
     queryOptions({
       queryKey: [...runQueries.all(), "list", { grouped }],
       queryFn: () => runsApi.getList(grouped),
-      staleTime: 0,
     }),
 
   detail: (id: number) =>

@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { FlaskConical, Save, X } from "lucide-react";
 
-import { profilesApi } from "@/api/profiles";
 import { runsApi } from "@/api/runs";
+import { useUpdateProfile } from "@/hooks/mutations/useUpdateProfile";
 import { ProfileConstraintsList } from "@/components/profiles/ProfileConstraintsList";
 import { ProfileForm } from "@/components/profiles/ProfileForm";
 import type { ProfileFormData } from "@/components/profiles/profileSchema";
@@ -16,10 +16,8 @@ import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { profileQueries } from "@/queries/profileQueries";
 import { runQueries } from "@/queries/runQueries";
 import type { LogicConstraint } from "@/types/constraint";
-import type { UpdateProfileRequest } from "@/types/profile";
 import type { ReEvaluateResponse, RunDetailData, RunResultRow } from "@/types/runDetail";
 
 interface LiveProfileEditorProps {
@@ -100,33 +98,27 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
     };
   }, [watchedThreshold, watchedConstraints, reEvaluate]);
 
-  const updateMutation = useMutation({
-    mutationFn: async (data: UpdateProfileRequest) => {
-      const constraints = data.globalConstraints as LogicConstraint[];
+  const updateProfileMutation = useUpdateProfile();
 
-      await Promise.all([
-        profilesApi.update(run.profile.id, data),
-        runsApi.updateProfileSnapshot(run.id, {
-          semanticThreshold: data.semanticThreshold ?? run.profile.semanticThreshold,
-          globalConstraints: constraints ?? run.profile.globalConstraints,
-        }),
-      ]);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
-      void queryClient.invalidateQueries({ queryKey: runQueries.detail(run.id).queryKey });
-      onClose();
-    },
-  });
+  const onSubmit = async (data: ProfileFormData) => {
+    await Promise.all([
+      updateProfileMutation.mutateAsync({
+        id: run.profile.id,
+        data: {
+          name: data.name,
+          description: data.description,
+          semanticThreshold: data.semanticThreshold,
+          globalConstraints: data.globalConstraints,
+        },
+      }),
+      runsApi.updateProfileSnapshot(run.id, {
+        semanticThreshold: data.semanticThreshold,
+        globalConstraints: data.globalConstraints,
+      }),
+    ]);
 
-  const onSubmit = (data: ProfileFormData) => {
-    const requestData: UpdateProfileRequest = {
-      name: data.name,
-      description: data.description,
-      semanticThreshold: data.semanticThreshold,
-      globalConstraints: data.globalConstraints,
-    };
-    updateMutation.mutate(requestData);
+    void queryClient.invalidateQueries({ queryKey: runQueries.detail(run.id).queryKey });
+    onClose();
   };
 
   return (
@@ -198,10 +190,10 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
             onClick={(e) => {
               void form.handleSubmit(onSubmit)(e);
             }}
-            disabled={updateMutation.isPending}
+            disabled={updateProfileMutation.isPending}
           >
             <Save className="mr-2 h-4 w-4" />
-            {updateMutation.isPending ? "저장 중..." : "프로필 업데이트"}
+            {updateProfileMutation.isPending ? "저장 중..." : "프로필 업데이트"}
           </Button>
           <p className="mt-2 text-[10px] text-center text-muted-foreground">
             * 프로필 설정과 현재 Run의 스냅샷이 함께 업데이트됩니다.
