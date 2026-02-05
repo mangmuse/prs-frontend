@@ -46,7 +46,7 @@ export interface RunMetrics {
   avgSemantic: number;
   formatPassRate: number;
   semanticPassRate: number;
-  logicPassRate: number;
+  constraintPassRate: number;
 }
 
 export interface RunDetailData {
@@ -82,7 +82,7 @@ export type MetricsAsPercent = {
   passRate: number;
   formatPassRate: number;
   semanticPassRate: number;
-  logicPassRate: number;
+  constraintPassRate: number;
   avgSemantic: number;
 };
 
@@ -90,5 +90,5 @@ export type MetricsDelta = {
   passRate: number;
   formatPassRate: number;
   semanticPassRate: number;
-  logicPassRate: number;
+  constraintPassRate: number;
 };

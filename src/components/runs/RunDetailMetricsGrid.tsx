@@ -43,8 +43,10 @@ export const RunDetailMetricsGrid = ({
       <Card className="p-4">
         <p className="text-sm text-muted-foreground">제약조건 통과</p>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold">{metricsAsPercent.logicPassRate.toFixed(1)}%</span>
-          {formatDelta(metricsDelta?.logicPassRate)}
+          <span className="text-2xl font-bold">
+            {metricsAsPercent.constraintPassRate.toFixed(1)}%
+          </span>
+          {formatDelta(metricsDelta?.constraintPassRate)}
         </div>
       </Card>
       <Card className="p-4">

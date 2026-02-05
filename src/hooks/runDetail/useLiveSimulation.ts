@@ -43,7 +43,7 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
         passRate: 0,
         formatPassRate: 0,
         semanticPassRate: 0,
-        logicPassRate: 0,
+        constraintPassRate: 0,
         avgSemantic: 0,
       };
     }
@@ -60,7 +60,7 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
         passRate: passRate * 100,
         formatPassRate: formatPassRate * 100,
         semanticPassRate: semanticPassRate * 100,
-        logicPassRate: passRate * 100,
+        constraintPassRate: passRate * 100,
         avgSemantic: run?.metrics.avgSemantic ?? 0,
       };
     }
@@ -69,7 +69,7 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
       passRate: 0,
       formatPassRate: 0,
       semanticPassRate: 0,
-      logicPassRate: 0,
+      constraintPassRate: 0,
       avgSemantic: 0,
     };
 
@@ -77,7 +77,7 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
       passRate: metrics.passRate * 100,
       formatPassRate: metrics.formatPassRate * 100,
       semanticPassRate: metrics.semanticPassRate * 100,
-      logicPassRate: metrics.logicPassRate * 100,
+      constraintPassRate: metrics.constraintPassRate * 100,
       avgSemantic: metrics.avgSemantic,
     };
   }, [activeResults, isLiveEditorOpen, previewResults, passCount, run?.metrics]);

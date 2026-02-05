@@ -15,7 +15,7 @@ export interface RunSummary {
   avgSemantic: number | null;
   formatPassRate: number | null;
   semanticPassRate: number | null;
-  logicPassRate: number | null;
+  constraintPassRate: number | null;
   totalRows: number;
   createdAt: string;
 }

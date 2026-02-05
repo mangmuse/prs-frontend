@@ -6,7 +6,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FlaskConical, Save, X } from "lucide-react";
 
 import { runsApi } from "@/api/runs";
-import { useUpdateProfile } from "@/hooks/mutations/useUpdateProfile";
 import { ProfileConstraintsList } from "@/components/profiles/ProfileConstraintsList";
 import { ProfileForm } from "@/components/profiles/ProfileForm";
 import type { ProfileFormData } from "@/components/profiles/profileSchema";
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useUpdateProfile } from "@/hooks/mutations/useUpdateProfile";
 import { cn } from "@/lib/utils";
 import { runQueries } from "@/queries/runQueries";
 import type { LogicConstraint } from "@/types/constraint";

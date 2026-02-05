@@ -133,7 +133,7 @@ export const useCompareMode = ({
       passRate: run.metrics.passRate - baseRun.metrics.passRate,
       formatPassRate: run.metrics.formatPassRate - baseRun.metrics.formatPassRate,
       semanticPassRate: run.metrics.semanticPassRate - baseRun.metrics.semanticPassRate,
-      logicPassRate: run.metrics.logicPassRate - baseRun.metrics.logicPassRate,
+      constraintPassRate: run.metrics.constraintPassRate - baseRun.metrics.constraintPassRate,
     };
   }, [run, baseRun]);
 

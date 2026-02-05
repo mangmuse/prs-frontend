@@ -42,7 +42,7 @@ interface RunMetricsCardsProps {
   passRate: number;
   formatPassRate: number;
   semanticPassRate: number;
-  logicPassRate: number;
+  constraintPassRate: number;
   avgSemantic: number;
 }
 
@@ -50,7 +50,7 @@ export const RunMetricsCards = ({
   passRate,
   formatPassRate,
   semanticPassRate,
-  logicPassRate,
+  constraintPassRate,
   avgSemantic,
 }: RunMetricsCardsProps) => (
   <div className="grid grid-cols-5 gap-4">
@@ -67,8 +67,8 @@ export const RunMetricsCards = ({
     />
     <RunMetricCard
       label="Constraint Pass"
-      value={logicPassRate}
-      variant={getVariantByRate(logicPassRate)}
+      value={constraintPassRate}
+      variant={getVariantByRate(constraintPassRate)}
     />
     <RunMetricCard label="Avg Semantic" value={formatPercent(avgSemantic)} />
   </div>
