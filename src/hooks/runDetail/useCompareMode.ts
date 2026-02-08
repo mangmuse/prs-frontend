@@ -27,10 +27,11 @@ interface UseCompareModeResult {
   isCompareMode: boolean;
   compareTargetId: number | null;
   compareTargetVersionNumber: number | undefined;
-  rowChanges: Map<number, RowChange> | undefined;
+  rowChanges: Map<number, RowChange>;
   summary: RegressionSummary | undefined;
   metricsDelta: MetricsDelta | undefined;
   stats: StatsMessage | null;
+  getBaseResult: (datasetRowId: number) => RunResultRow | undefined;
   handleCompareSelect: (targetId: string) => void;
   handleCancelCompare: () => void;
 }
@@ -98,7 +99,7 @@ export const useCompareMode = ({
 
   const { rowChanges, summary } = useMemo(() => {
     if (!comparisonData) {
-      return { rowChanges: undefined, summary: undefined };
+      return { rowChanges: new Map(), summary: undefined };
     }
 
     const effectiveComparisons = comparisonData.rowComparisons.map((r) => {
@@ -149,6 +150,10 @@ export const useCompareMode = ({
     setCompareTargetId(null);
   };
 
+  const getBaseResult = (datasetRowId: number): RunResultRow | undefined => {
+    return baseRun?.results.find((r) => r.datasetRowId === datasetRowId);
+  };
+
   return {
     isCompareMode,
     compareTargetId,
@@ -157,6 +162,7 @@ export const useCompareMode = ({
     summary,
     metricsDelta,
     stats,
+    getBaseResult,
     handleCompareSelect,
     handleCancelCompare,
   };

@@ -54,6 +54,11 @@ export const RunDetailPage = () => {
 
   const selectedResult = liveSimulation.activeResults.find((r) => r.id === selectedResultId);
 
+  const baseResult =
+    selectedResult && compareMode.isCompareMode
+      ? compareMode.getBaseResult(selectedResult.datasetRowId)
+      : undefined;
+
   const handleBackToList = () => {
     void navigate("/runs");
   };
@@ -159,6 +164,7 @@ export const RunDetailPage = () => {
               isCompareMode={compareMode.isCompareMode}
               rowChanges={compareMode.rowChanges}
               selectedResult={selectedResult}
+              baseResult={baseResult}
             />
           </div>
         </div>
