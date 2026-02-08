@@ -49,7 +49,7 @@ interface DatasetRowDetailViewerProps {
 const DatasetRowDetailViewer = ({ row, defaultTab, trigger }: DatasetRowDetailViewerProps) => (
   <ExpandableViewer.Root title="데이터셋 상세" maxWidth="max-w-3xl" trigger={trigger}>
     <ExpandableViewer.Tabs defaultTab={defaultTab}>
-      <ExpandableViewer.Tab id="input" label="Input Data">
+      <ExpandableViewer.Tab id="input" label="입력 데이터">
         <ExpandableViewer.ScrollContent>
           <div className="space-y-4">
             {Object.entries(row.inputData).map(([key, value]) => (
@@ -64,7 +64,7 @@ const DatasetRowDetailViewer = ({ row, defaultTab, trigger }: DatasetRowDetailVi
           </div>
         </ExpandableViewer.ScrollContent>
       </ExpandableViewer.Tab>
-      <ExpandableViewer.Tab id="expected" label="Expected Output">
+      <ExpandableViewer.Tab id="expected" label="기대 출력">
         <ExpandableViewer.JsonContent data={row.expectedOutput} />
       </ExpandableViewer.Tab>
     </ExpandableViewer.Tabs>
@@ -115,9 +115,9 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>Input</TableHead>
-                <TableHead className="w-28">Expected</TableHead>
-                <TableHead className="w-40">Tags</TableHead>
+                <TableHead>입력값</TableHead>
+                <TableHead className="w-28">기대값</TableHead>
+                <TableHead className="w-40">태그</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

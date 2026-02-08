@@ -97,11 +97,11 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
             <TabsList className="w-full">
               <TabsTrigger value="system" className="flex-1 gap-2">
                 <Settings className="h-4 w-4" />
-                System Instruction
+                시스템 지시문(System Instruction)
               </TabsTrigger>
               <TabsTrigger value="user" className="flex-1 gap-2">
                 <User className="h-4 w-4" />
-                User Template
+                사용자 템플릿(User Template)
               </TabsTrigger>
             </TabsList>
             <TabsContent value="system">

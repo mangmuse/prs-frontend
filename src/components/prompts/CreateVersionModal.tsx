@@ -138,7 +138,7 @@ export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionMod
                         value={[field.value]}
                         onValueChange={(v: number[]) => field.onChange(v[0])}
                         min={0}
-                        max={1}
+                        max={2}
                         step={0.1}
                         className="mt-2"
                       />
@@ -179,7 +179,7 @@ export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionMod
               name="systemInstruction"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>System Instruction</FormLabel>
+                  <FormLabel>시스템 지시문(System Instruction)</FormLabel>
                   <FormControl>
                     <Textarea placeholder="시스템 지시사항을 입력하세요..." rows={4} {...field} />
                   </FormControl>
@@ -193,7 +193,7 @@ export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionMod
               name="userTemplate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>User Template</FormLabel>
+                  <FormLabel>사용자 템플릿(User Template)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="사용자 템플릿을 입력하세요. {{변수}} 형태로 플레이스홀더 사용"

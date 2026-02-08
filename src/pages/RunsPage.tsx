@@ -30,10 +30,10 @@ export const RunsPage = () => {
   const statusChangeHandlers = useMemo(
     () => ({
       onCompleted: (run: { id: number; passRate: number | null }) => {
-        toast.success(`Run #${run.id} 완료 - Pass Rate: ${formatPercent(run.passRate)}%`);
+        toast.success(`실행 #${run.id} 완료 - 통과율: ${formatPercent(run.passRate)}%`);
       },
       onFailed: (run: { id: number }) => {
-        toast.error(`Run #${run.id} 실패`);
+        toast.error(`실행 #${run.id} 실패`);
       },
     }),
     [],
@@ -49,7 +49,7 @@ export const RunsPage = () => {
           <h1 className="text-xl font-semibold">실행 기록</h1>
         </div>
         <Button onClick={() => open()}>
-          <Plus className="w-4 h-4 mr-2" />새 Run 실행
+          <Plus className="w-4 h-4 mr-2" />새 실행
         </Button>
       </header>
       <div className="flex-1 p-6">

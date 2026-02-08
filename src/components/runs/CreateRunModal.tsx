@@ -88,12 +88,12 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
       },
       {
         onSuccess: () => {
-          toast.success("Run이 시작되었습니다");
+          toast.success("실행이 시작되었습니다");
           onOpenChange(false);
           setFormState(initialFormState);
         },
         onError: () => {
-          toast.error("Run 실행에 실패했습니다");
+          toast.error("실행에 실패했습니다");
         },
       },
     );
@@ -108,15 +108,15 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>새 Run 실행</DialogTitle>
+          <DialogTitle>새 실행</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label>Prompt</Label>
+            <Label>프롬프트</Label>
             <Select value={formState.promptId?.toString() ?? ""} onValueChange={handlePromptChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Prompt 선택" />
+                <SelectValue placeholder="프롬프트 선택" />
               </SelectTrigger>
               <SelectContent>
                 {prompts?.map((prompt) => (
@@ -129,14 +129,14 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
           </div>
 
           <div className="grid gap-2">
-            <Label>Version</Label>
+            <Label>버전</Label>
             <Select
               value={effectiveVersionId?.toString() ?? ""}
               onValueChange={handleVersionChange}
               disabled={!formState.promptId}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Version 선택" />
+                <SelectValue placeholder="버전 선택" />
               </SelectTrigger>
               <SelectContent>
                 {versions?.map((version) => (
@@ -149,13 +149,13 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
           </div>
 
           <div className="grid gap-2">
-            <Label>Dataset</Label>
+            <Label>데이터셋</Label>
             <Select
               value={formState.datasetId?.toString() ?? ""}
               onValueChange={handleDatasetChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Dataset 선택" />
+                <SelectValue placeholder="데이터셋 선택" />
               </SelectTrigger>
               <SelectContent>
                 {datasets?.map((dataset) => (
@@ -168,13 +168,13 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
           </div>
 
           <div className="grid gap-2">
-            <Label>Evaluator Profile</Label>
+            <Label>평가 프로필</Label>
             <Select
               value={formState.profileId?.toString() ?? ""}
               onValueChange={handleProfileChange}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Profile 선택" />
+                <SelectValue placeholder="프로필 선택" />
               </SelectTrigger>
               <SelectContent>
                 {profiles?.map((profile) => (

@@ -43,7 +43,7 @@ export const RunDetailHeader = ({
         className="gap-2"
       >
         <Settings2 className="h-4 w-4" />
-        {isLiveEditorOpen ? "Editor 닫기" : "평가 기준 튜닝"}
+        {isLiveEditorOpen ? "편집기 닫기" : "평가 기준 튜닝"}
       </Button>
     </div>
   </header>
