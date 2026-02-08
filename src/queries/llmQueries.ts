@@ -9,6 +9,7 @@ export const llmQueries = {
     queryOptions({
       queryKey: [...llmQueries.all(), "models"],
       queryFn: () => llmApi.getModels(),
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 30, // 30분 (외부 API 의존, 모델 출시 빈도 고려)
+      gcTime: Infinity,
     }),
 };

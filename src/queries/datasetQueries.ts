@@ -17,5 +17,6 @@ export const datasetQueries = {
       queryFn: () => datasetsApi.getDetail(id, page, limit),
       placeholderData: keepPreviousData,
       enabled: !!id,
+      gcTime: page === 1 ? Infinity : 1000 * 60 * 10, // 1페이지만 영구 보관
     }),
 };

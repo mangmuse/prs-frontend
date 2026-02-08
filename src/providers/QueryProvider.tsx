@@ -15,7 +15,7 @@ export const QueryProvider = ({ children }: QueryProviderProps) => {
         defaultOptions: {
           queries: {
             staleTime: Infinity,
-            gcTime: 1000 * 60 * 5,
+            gcTime: Infinity,
             retry: 1,
             refetchOnWindowFocus: false,
           },
