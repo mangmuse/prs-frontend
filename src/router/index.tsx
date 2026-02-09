@@ -6,6 +6,7 @@ import { ProfilesPage } from "@/pages/ProfilesPage";
 import { PromptsPage } from "@/pages/PromptsPage";
 import { RunDetailPage } from "@/pages/RunDetailPage/RunDetailPage";
 import { RunsPage } from "@/pages/RunsPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       { path: "profiles", element: <ProfilesPage /> },
       { path: "runs", element: <RunsPage /> },
       { path: "runs/:id", element: <RunDetailPage /> },
+      { path: "settings", element: <SettingsPage /> },
     ],
   },
 ]);

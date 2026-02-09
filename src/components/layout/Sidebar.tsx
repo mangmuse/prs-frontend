@@ -1,11 +1,15 @@
 import { Link, useLocation } from "react-router";
 
+import { Settings } from "lucide-react";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mainNavItems } from "@/config/navigation";
 import { cn } from "@/lib/utils";
+import { useHasAnyKey } from "@/stores/apiKeyStore";
 
 export const Sidebar = () => {
   const location = useLocation();
+  const hasAnyKey = useHasAnyKey();
 
   return (
     <aside className="flex h-full w-64 flex-col border-r bg-white">
@@ -43,6 +47,27 @@ export const Sidebar = () => {
           })}
         </nav>
       </ScrollArea>
+
+      <div className="border-t px-3 py-3">
+        <Link
+          to="/settings"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            location.pathname === "/settings"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
+        >
+          <Settings className="h-4 w-4" />
+          설정
+          <span
+            className={cn(
+              "ml-auto h-2 w-2 rounded-full",
+              hasAnyKey ? "bg-green-500" : "bg-gray-300",
+            )}
+          />
+        </Link>
+      </div>
     </aside>
   );
 };

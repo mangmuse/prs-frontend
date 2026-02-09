@@ -23,7 +23,9 @@ import { useCreateRun } from "@/hooks/mutations/useCreateRun";
 import { datasetQueries } from "@/queries/datasetQueries";
 import { profileQueries } from "@/queries/profileQueries";
 import { promptQueries } from "@/queries/promptQueries";
+import { useApiKeyByProvider } from "@/stores/apiKeyStore";
 import type { CreateRunFormState } from "@/types/run";
+import { extractProvider } from "@/utils/provider";
 
 const initialFormState: CreateRunFormState = {
   promptId: null,
@@ -47,15 +49,18 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
 
   const createRun = useCreateRun();
 
-  // 파생값: versionId가 null이면 첫 번째 버전을 기본값으로 사용
   const effectiveVersionId = formState.versionId ?? versions?.[0]?.id ?? null;
+
+  const selectedVersion = versions?.find((v) => v.id === effectiveVersionId);
+  const requiredProvider = selectedVersion ? extractProvider(selectedVersion.model) : null;
+  const apiKey = useApiKeyByProvider(requiredProvider);
 
   const handlePromptChange = (value: string) => {
     const promptId = parseInt(value, 10);
     setFormState((prev) => ({
       ...prev,
       promptId,
-      versionId: null, // 버전 초기화 → 파생값이 새 versions[0] 사용
+      versionId: null,
     }));
   };
 
@@ -85,6 +90,7 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
         promptVersionId: effectiveVersionId,
         datasetId: formState.datasetId!,
         profileId: formState.profileId!,
+        ...(apiKey && { apiKey }),
       },
       {
         onSuccess: () => {
@@ -186,6 +192,12 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
             </Select>
           </div>
         </div>
+
+        {requiredProvider && !apiKey && (
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            {requiredProvider} API Key가 설정되지 않았습니다. 설정 페이지에서 입력해주세요.
+          </div>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>

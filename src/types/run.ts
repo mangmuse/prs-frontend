@@ -24,6 +24,7 @@ export interface CreateRunRequest {
   promptVersionId: number;
   datasetId: number;
   profileId: number;
+  apiKey?: string;
 }
 
 export interface CreateRunResponse {

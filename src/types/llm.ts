@@ -7,3 +7,8 @@ export interface ModelInfo {
 export interface ModelsResponse {
   models: ModelInfo[];
 }
+
+export interface VerifyKeyResponse {
+  valid: boolean;
+  error: string | null;
+}
