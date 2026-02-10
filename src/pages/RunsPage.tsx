@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { MobileSidebar } from "@/components/layout/MobileSidebar";
 import { CreateRunModal } from "@/components/runs/CreateRunModal";
 import { RunsTable } from "@/components/runs/RunsTable";
 import { Button } from "@/components/ui/button";
@@ -45,7 +44,6 @@ export const RunsPage = () => {
     <div className="flex flex-col h-full">
       <header className="flex h-16 items-center justify-between gap-4 border-b bg-white px-6">
         <div className="flex items-center gap-4">
-          <MobileSidebar />
           <h1 className="text-xl font-semibold">실행 기록</h1>
         </div>
         <Button onClick={() => open()}>

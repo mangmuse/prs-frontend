@@ -1,6 +1,5 @@
 import { ArrowLeft, Settings2 } from "lucide-react";
 
-import { MobileSidebar } from "@/components/layout/MobileSidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -21,7 +20,6 @@ export const RunDetailHeader = ({
 }) => (
   <header className="flex h-16 items-center gap-4 border-b bg-white px-6 justify-between shrink-0">
     <div className="flex items-center gap-4">
-      <MobileSidebar />
       <Button variant="ghost" size="icon" onClick={onBack}>
         <ArrowLeft className="h-5 w-5" />
       </Button>
