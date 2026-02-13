@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
-import { useGuestSession } from "@/hooks/useGuestSession";
+import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
+import { useAuthStore } from "@/stores/authStore";
 
 interface AuthInitializerProps {
   children: ReactNode;
@@ -11,7 +12,19 @@ export const AuthInitializer = ({
   children,
   fallback = <DefaultLoadingFallback />,
 }: AuthInitializerProps) => {
-  const { isInitializing, error, retry } = useGuestSession();
+  const isInitialized = useAuthStore((s) => s.isInitialized);
+  const { isInitializing, error, retry } = useAuthBootstrap();
+  const hasCompletedInitialBootstrap = useRef(isInitialized);
+
+  useEffect(() => {
+    if (isInitialized) {
+      hasCompletedInitialBootstrap.current = true;
+    }
+  }, [isInitialized]);
+
+  if (hasCompletedInitialBootstrap.current) {
+    return <>{children}</>;
+  }
 
   if (isInitializing) {
     return <>{fallback}</>;
@@ -37,13 +50,13 @@ interface ErrorFallbackProps {
 
 const ErrorFallback = ({ error, onRetry }: ErrorFallbackProps) => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 gap-4">
-    <div className="text-red-500">Session initialization failed</div>
+    <div className="text-red-500">세션 초기화에 실패했습니다</div>
     <div className="text-gray-600 text-sm">{error.message}</div>
     <button
       onClick={onRetry}
       className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
     >
-      Retry
+      다시 시도
     </button>
   </div>
 );

@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 
 import { AppLayout } from "@/components/layout/AppLayout";
+import { AuthCallbackPage } from "@/pages/AuthCallbackPage";
 import { DatasetsPage } from "@/pages/DatasetsPage";
 import { HomePage } from "@/pages/HomePage";
 import { ProfilesPage } from "@/pages/ProfilesPage";
@@ -10,6 +11,10 @@ import { RunsPage } from "@/pages/RunsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
 export const router = createBrowserRouter([
+  {
+    path: "auth/callback",
+    element: <AuthCallbackPage />,
+  },
   {
     path: "/",
     element: <AppLayout />,

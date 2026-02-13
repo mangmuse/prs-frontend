@@ -8,6 +8,18 @@ export const handlers = [
       createdAt: new Date().toISOString(),
     });
   }),
+  http.post("http://localhost:8000/auth/refresh", () => {
+    return HttpResponse.json({ detail: "리프레시 토큰이 없습니다" }, { status: 401 });
+  }),
+  http.get("http://localhost:8000/auth/me", () => {
+    return HttpResponse.json({
+      id: 1,
+      email: "test@example.com",
+      name: "테스트 사용자",
+      pictureUrl: null,
+    });
+  }),
+  http.post("http://localhost:8000/auth/logout", () => new HttpResponse(null, { status: 204 })),
   http.get("http://localhost:8000/datasets", () => passthrough()),
   http.post("http://localhost:8000/datasets", () => passthrough()),
   http.get("http://localhost:8000/datasets/:id", () => passthrough()),

@@ -9,7 +9,6 @@ interface AuthState {
 
   setAccessToken: (token: string) => void;
   setGuest: () => void;
-  clearAuth: () => void;
   setInitialized: () => void;
 }
 
@@ -26,9 +25,6 @@ export const useAuthStore = create<AuthState>()(
 
       setGuest: () =>
         set({ accessToken: null, isAuthenticated: false, isGuest: true }, false, "setGuest"),
-
-      clearAuth: () =>
-        set({ accessToken: null, isAuthenticated: false, isGuest: false }, false, "clearAuth"),
 
       setInitialized: () => set({ isInitialized: true }, false, "setInitialized"),
     }),
