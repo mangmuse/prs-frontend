@@ -27,7 +27,7 @@ export const useAuthCallback = (code: string | null): UseAuthCallbackResult => {
 
   const tokenQuery = useQuery({
     ...authQueries.tokenExchange(code),
-    enabled: !!code && !isAuthenticated,
+    enabled: !!code,
   });
 
   const wasGuest = tokenQuery.data?.wasGuest ?? false;
