@@ -2,7 +2,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { profilesApi } from "@/api/profiles";
 import { profileQueries } from "@/queries/profileQueries";
-import type { UpdateProfileRequest } from "@/types/profile";
+import type { CreateProfileRequest, UpdateProfileRequest } from "@/types/profile";
+
+export const useCreateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateProfileRequest) => profilesApi.create(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
+    },
+  });
+};
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();

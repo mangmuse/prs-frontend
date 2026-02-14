@@ -2,10 +2,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { profilesApi } from "@/api/profiles";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,8 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
+import { useCreateProfile, useUpdateProfile } from "@/hooks/mutations/profileMutations";
 import { profileQueries } from "@/queries/profileQueries";
-import type { CreateProfileRequest, UpdateProfileRequest } from "@/types/profile";
+import type { CreateProfileRequest } from "@/types/profile";
 
 import { ProfileConstraintsList } from "./ProfileConstraintsList";
 import { ProfileForm } from "./ProfileForm";
@@ -31,10 +31,15 @@ interface CreateProfileModalProps {
   state: ModalState;
   onClose: () => void;
   onSuccess?: () => void;
+  onCreated?: (id: number) => void;
 }
 
-export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileModalProps) => {
-  const queryClient = useQueryClient();
+export const CreateProfileModal = ({
+  state,
+  onClose,
+  onSuccess,
+  onCreated,
+}: CreateProfileModalProps) => {
   const isEditMode = state.open && state.mode === "edit";
   const profileId = isEditMode ? state.profileId : null;
 
@@ -71,38 +76,15 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
     }
   }, [isEditMode, existingProfile, state.open, form]);
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateProfileRequest) => profilesApi.create(data),
-    onSuccess: () => {
-      toast.success("프로필이 생성되었습니다");
-      void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
-      handleClose();
-      onSuccess?.();
-    },
-    onError: () => {
-      toast.error("프로필 생성에 실패했습니다");
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: UpdateProfileRequest) => profilesApi.update(profileId!, data),
-    onSuccess: () => {
-      toast.success("프로필이 수정되었습니다");
-      void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
-      handleClose();
-      onSuccess?.();
-    },
-    onError: () => {
-      toast.error("프로필 수정에 실패했습니다");
-    },
-  });
+  const createMutation = useCreateProfile();
+  const updateMutation = useUpdateProfile();
 
   const handleClose = () => {
     form.reset();
     onClose();
   };
 
-  const onSubmit = (data: ProfileFormData) => {
+  const onSubmit = async (data: ProfileFormData) => {
     const requestData = {
       name: data.name,
       description: data.description || undefined,
@@ -139,10 +121,19 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
       }),
     };
 
-    if (isEditMode) {
-      updateMutation.mutate(requestData);
-    } else {
-      createMutation.mutate(requestData as CreateProfileRequest);
+    try {
+      if (isEditMode) {
+        await updateMutation.mutateAsync({ id: profileId!, data: requestData });
+        toast.success("프로필이 수정되었습니다");
+      } else {
+        const created = await createMutation.mutateAsync(requestData as CreateProfileRequest);
+        toast.success("프로필이 생성되었습니다");
+        onCreated?.(created.id);
+      }
+      handleClose();
+      onSuccess?.();
+    } catch {
+      toast.error(isEditMode ? "프로필 수정에 실패했습니다" : "프로필 생성에 실패했습니다");
     }
   };
 
