@@ -3,6 +3,16 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Maximize2, Pencil, Plus, Trash2 } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useModal } from "@/hooks/modals/useModal";
+import { useDeleteDatasetRow } from "@/hooks/mutations/useDeleteDatasetRow";
 import { datasetQueries } from "@/queries/datasetQueries";
 import type { DatasetRow } from "@/types/dataset";
 import { isJsonString } from "@/utils/json";
@@ -40,6 +51,8 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
     onOpenChange: onRowFormOpenChange,
   } = useModal<RowFormState>({ open: false });
   const [page, setPage] = useState<number>(1);
+  const [deletingRowId, setDeletingRowId] = useState<number | null>(null);
+  const deleteRow = useDeleteDatasetRow();
 
   const { data, isPending, error } = useQuery(
     datasetQueries.detail(datasetId, page, ROWS_PER_PAGE),
@@ -157,6 +170,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                         size="icon"
                         className="h-7 w-7 text-destructive hover:text-destructive"
                         aria-label="삭제"
+                        onClick={() => setDeletingRowId(row.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -186,6 +200,35 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
           rowFormState.open && rowFormState.mode === "edit" ? rowFormState.row : undefined
         }
       />
+
+      <AlertDialog
+        open={deletingRowId !== null}
+        onOpenChange={(open) => !open && setDeletingRowId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>행을 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              이 작업은 되돌릴 수 없습니다. 해당 행이 영구적으로 삭제됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingRowId === null) return;
+                deleteRow.mutate(
+                  { datasetId, rowId: deletingRowId },
+                  { onSuccess: () => setDeletingRowId(null) },
+                );
+              }}
+            >
+              삭제하기
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
