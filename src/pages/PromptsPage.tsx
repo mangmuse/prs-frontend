@@ -38,7 +38,9 @@ export const PromptsPage = () => {
             <PromptDetail
               promptId={selectedPromptId}
               promptName={selectedPrompt.name}
+              promptDescription={selectedPrompt.description}
               onCreateVersion={() => versionModal.open({ promptId: selectedPromptId })}
+              onDelete={() => setSelectedPromptId(null)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">

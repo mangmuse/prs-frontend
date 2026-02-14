@@ -3,6 +3,8 @@ import type {
   CreatePromptResponse,
   CreateVersionRequest,
   PromptSummary,
+  UpdatePromptRequest,
+  UpdatePromptResponse,
   VersionDetail,
   VersionSummary,
 } from "@/types/prompt";
@@ -28,6 +30,10 @@ export const promptsApi = {
 
   async createVersion(promptId: number, data: CreateVersionRequest): Promise<VersionDetail> {
     return apiClient.post(`prompts/${promptId}/versions`, { json: data }).json<VersionDetail>();
+  },
+
+  async update(promptId: number, data: UpdatePromptRequest): Promise<UpdatePromptResponse> {
+    return apiClient.patch(`prompts/${promptId}`, { json: data }).json<UpdatePromptResponse>();
   },
 
   async delete(promptId: number): Promise<void> {

@@ -1,22 +1,52 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Settings, User } from "lucide-react";
+import { Pencil, Plus, Settings, Trash2, User } from "lucide-react";
 
+import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
+import { EditMetaDialog } from "@/components/common/EditMetaDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDeletePrompt } from "@/hooks/mutations/useDeletePrompt";
+import { useUpdatePrompt } from "@/hooks/mutations/useUpdatePrompt";
 import { cn } from "@/lib/utils";
 import { promptQueries } from "@/queries/promptQueries";
 
 interface PromptDetailProps {
   promptId: number;
   promptName: string;
+  promptDescription: string | null;
   onCreateVersion: () => void;
+  onDelete: () => void;
 }
 
-export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDetailProps) => {
+export const PromptDetail = ({
+  promptId,
+  promptName,
+  promptDescription,
+  onCreateVersion,
+  onDelete,
+}: PromptDetailProps) => {
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
   const [contentTab, setContentTab] = useState<"system" | "user">("system");
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  const [isDeletingPrompt, setIsDeletingPrompt] = useState(false);
+
+  const deletePrompt = useDeletePrompt();
+  const updatePrompt = useUpdatePrompt();
+
+  const handlePromptDelete = () => {
+    deletePrompt.mutate(promptId, {
+      onSuccess: () => {
+        setIsDeletingPrompt(false);
+        onDelete();
+      },
+    });
+  };
+
+  const handlePromptUpdate = (data: { name: string; description: string }) => {
+    updatePrompt.mutate({ promptId, data }, { onSuccess: () => setIsEditingPrompt(false) });
+  };
 
   const { data: versions, isPending: versionsLoading } = useQuery(promptQueries.versions(promptId));
 
@@ -46,9 +76,29 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{promptName}</h2>
-        <Button size="sm" onClick={onCreateVersion}>
-          <Plus className="mr-1 h-4 w-4" />새 버전
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            aria-label="수정"
+            onClick={() => setIsEditingPrompt(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-destructive hover:text-destructive"
+            aria-label="삭제"
+            onClick={() => setIsDeletingPrompt(true)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button size="sm" onClick={onCreateVersion}>
+            <Plus className="mr-1 h-4 w-4" />새 버전
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-2 border-b">
@@ -117,6 +167,24 @@ export const PromptDetail = ({ promptId, promptName, onCreateVersion }: PromptDe
           </Tabs>
         </div>
       ) : null}
+
+      <ConfirmDeleteDialog
+        open={isDeletingPrompt}
+        onOpenChange={(open) => !open && setIsDeletingPrompt(false)}
+        isPending={deletePrompt.isPending}
+        onConfirm={handlePromptDelete}
+        title="프롬프트를 삭제하시겠습니까?"
+        description="이 작업은 되돌릴 수 없습니다. 프롬프트와 모든 버전이 영구적으로 삭제됩니다."
+      />
+      <EditMetaDialog
+        open={isEditingPrompt}
+        onOpenChange={(open) => !open && setIsEditingPrompt(false)}
+        onSubmit={handlePromptUpdate}
+        isPending={updatePrompt.isPending}
+        title="프롬프트 수정"
+        initialName={promptName}
+        initialDescription={promptDescription ?? ""}
+      />
     </div>
   );
 };

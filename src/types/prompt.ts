@@ -42,6 +42,18 @@ export interface CreatePromptResponse {
   createdAt: string;
 }
 
+export interface UpdatePromptRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface UpdatePromptResponse {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+}
+
 export interface CreateVersionRequest {
   systemInstruction: string;
   userTemplate: string;
