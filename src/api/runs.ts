@@ -41,6 +41,10 @@ export const runsApi = {
     await apiClient.patch(`runs/${runId}/profile-snapshot`, { json: data });
   },
 
+  async delete(runId: number): Promise<void> {
+    await apiClient.delete(`runs/${runId}`);
+  },
+
   async reEvaluate(
     runId: number,
     data: { semanticThreshold: number; globalConstraints: LogicConstraint[] },
