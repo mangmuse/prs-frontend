@@ -1,5 +1,4 @@
-import type { Control } from "react-hook-form";
-import { useWatch } from "react-hook-form";
+import { type Control, useWatch } from "react-hook-form";
 
 import { Trash2 } from "lucide-react";
 
@@ -14,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CONSTRAINT_TYPE_OPTIONS } from "@/constants/constraint";
-import type { ConstraintType } from "@/types/constraint";
+import type { ConstraintType, LogicConstraint } from "@/types/constraint";
 import { getDefaultConstraint } from "@/utils/constraintUtils";
 
 import type { ProfileFormData } from "./profileSchema";
@@ -23,9 +22,15 @@ interface ProfileConstraintItemProps {
   control: Control<ProfileFormData>;
   index: number;
   onRemove: () => void;
+  onTypeChange: (newConstraint: LogicConstraint) => void;
 }
 
-export const ProfileConstraintItem = ({ control, index, onRemove }: ProfileConstraintItemProps) => {
+export const ProfileConstraintItem = ({
+  control,
+  index,
+  onRemove,
+  onTypeChange,
+}: ProfileConstraintItemProps) => {
   const constraintType = useWatch({
     control,
     name: `globalConstraints.${index}.type`,
@@ -41,12 +46,7 @@ export const ProfileConstraintItem = ({ control, index, onRemove }: ProfileConst
             <Select
               value={field.value}
               onValueChange={(newType: ConstraintType) => {
-                const newConstraint = getDefaultConstraint(newType);
-                field.onChange(newType);
-
-                const form = control._formValues as ProfileFormData;
-                const constraints = [...form.globalConstraints];
-                constraints[index] = newConstraint;
+                onTypeChange(getDefaultConstraint(newType));
               }}
             >
               <FormControl>

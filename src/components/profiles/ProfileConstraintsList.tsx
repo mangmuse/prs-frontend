@@ -13,7 +13,7 @@ interface ProfileConstraintsListProps {
 }
 
 export const ProfileConstraintsList = ({ control }: ProfileConstraintsListProps) => {
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control,
     name: "globalConstraints",
   });
@@ -45,6 +45,7 @@ export const ProfileConstraintsList = ({ control }: ProfileConstraintsListProps)
               control={control}
               index={index}
               onRemove={() => remove(index)}
+              onTypeChange={(newConstraint) => update(index, newConstraint)}
             />
           ))}
         </div>
