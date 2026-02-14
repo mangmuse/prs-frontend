@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
 import { renderWithClient } from "@/test/utils";
@@ -41,6 +41,42 @@ const setupHandlers = () => {
   );
 };
 
+describe("DatasetTable - 데이터셋 삭제", () => {
+  it("Dataset 삭제 버튼 클릭 시 확인 모달이 표시되고 확인하면 삭제되어야 한다", async () => {
+    let deleteCalled = false;
+    const onDelete = vi.fn();
+    server.use(
+      http.get(`${API}/datasets/1`, () => HttpResponse.json(mockDetailResponse)),
+      http.delete(`${API}/datasets/1`, () => {
+        deleteCalled = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithClient(<DatasetTable datasetId={1} onDelete={onDelete} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("테스트 데이터셋")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "데이터셋 삭제" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("데이터셋을 삭제하시겠습니까?")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "삭제하기" }));
+
+    await waitFor(() => {
+      expect(deleteCalled).toBe(true);
+    });
+
+    await waitFor(() => {
+      expect(onDelete).toHaveBeenCalled();
+    });
+  });
+});
+
 describe("DatasetTable - 행 삭제", () => {
   it("행 삭제 버튼 클릭 시 확인 모달이 표시되고 확인하면 삭제되어야 한다", async () => {
     let deleteCalled = false;
@@ -52,7 +88,7 @@ describe("DatasetTable - 행 삭제", () => {
       }),
     );
     const user = userEvent.setup();
-    renderWithClient(<DatasetTable datasetId={1} />);
+    renderWithClient(<DatasetTable datasetId={1} onDelete={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByText("테스트 데이터셋")).toBeInTheDocument();
@@ -80,7 +116,7 @@ describe("DatasetTable - 행 수정", () => {
   it("행 수정 버튼 클릭 후 내용을 변경하고 저장하면 업데이트되어야 한다", async () => {
     setupHandlers();
     const user = userEvent.setup();
-    renderWithClient(<DatasetTable datasetId={1} />);
+    renderWithClient(<DatasetTable datasetId={1} onDelete={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByText("테스트 데이터셋")).toBeInTheDocument();

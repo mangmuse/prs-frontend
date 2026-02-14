@@ -1,9 +1,10 @@
+import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Plus, Trash2 } from "lucide-react";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
-import { useConfirmDelete } from "@/hooks/modals/useConfirmDelete";
 import { useDeletePrompt } from "@/hooks/mutations/useDeletePrompt";
 import { cn } from "@/lib/utils";
 import { promptQueries } from "@/queries/promptQueries";
@@ -16,7 +17,15 @@ interface PromptListProps {
 
 export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProps) => {
   const { data: prompts, isPending } = useQuery(promptQueries.list());
-  const confirmDelete = useConfirmDelete(useDeletePrompt());
+  const [deletingPromptId, setDeletingPromptId] = useState<number | null>(null);
+  const deletePrompt = useDeletePrompt();
+
+  const handlePromptDelete = () => {
+    if (deletingPromptId === null) return;
+    deletePrompt.mutate(deletingPromptId, {
+      onSuccess: () => setDeletingPromptId(null),
+    });
+  };
 
   if (isPending) {
     return (
@@ -67,7 +76,7 @@ export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProp
                     aria-label="삭제"
                     onClick={(e) => {
                       e.stopPropagation();
-                      confirmDelete.open(prompt.id);
+                      setDeletingPromptId(prompt.id);
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -80,7 +89,10 @@ export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProp
         </div>
       )}
       <ConfirmDeleteDialog
-        {...confirmDelete.dialogProps}
+        open={deletingPromptId !== null}
+        onOpenChange={(open) => !open && setDeletingPromptId(null)}
+        isPending={deletePrompt.isPending}
+        onConfirm={handlePromptDelete}
         title="프롬프트를 삭제하시겠습니까?"
         description="이 작업은 되돌릴 수 없습니다. 프롬프트와 모든 버전이 영구적으로 삭제됩니다."
       />

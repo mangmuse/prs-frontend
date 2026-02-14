@@ -37,4 +37,8 @@ export const datasetsApi = {
   async deleteRow(datasetId: number, rowId: number): Promise<void> {
     await apiClient.delete(`datasets/${datasetId}/rows/${rowId}`);
   },
+
+  async delete(datasetId: number): Promise<void> {
+    await apiClient.delete(`datasets/${datasetId}`);
+  },
 };

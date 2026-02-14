@@ -14,8 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useConfirmDelete } from "@/hooks/modals/useConfirmDelete";
 import { useModal } from "@/hooks/modals/useModal";
+import { useDeleteDataset } from "@/hooks/mutations/useDeleteDataset";
 import { useDeleteDatasetRow } from "@/hooks/mutations/useDeleteDatasetRow";
 import { datasetQueries } from "@/queries/datasetQueries";
 import type { DatasetRow } from "@/types/dataset";
@@ -32,25 +32,43 @@ type RowFormState =
 
 interface DatasetTableProps {
   datasetId: number;
+  onDelete: () => void;
 }
 
 const ROWS_PER_PAGE = 10;
 
-export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
+export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
   const {
     state: rowFormState,
     open: openRowForm,
     onOpenChange: onRowFormOpenChange,
   } = useModal<RowFormState>({ open: false });
   const [page, setPage] = useState<number>(1);
-  const confirmDelete = useConfirmDelete(useDeleteDatasetRow(), (rowId: number) => ({
-    datasetId,
-    rowId,
-  }));
+  const [deletingRowId, setDeletingRowId] = useState<number | null>(null);
+  const deleteRow = useDeleteDatasetRow();
+  const [isDeletingDataset, setIsDeletingDataset] = useState(false);
+  const deleteDataset = useDeleteDataset();
 
   const { data, isPending, error } = useQuery(
     datasetQueries.detail(datasetId, page, ROWS_PER_PAGE),
   );
+
+  const handleRowDelete = () => {
+    if (deletingRowId === null) return;
+    deleteRow.mutate(
+      { datasetId, rowId: deletingRowId },
+      { onSuccess: () => setDeletingRowId(null) },
+    );
+  };
+
+  const handleDatasetDelete = () => {
+    deleteDataset.mutate(datasetId, {
+      onSuccess: () => {
+        setIsDeletingDataset(false);
+        onDelete();
+      },
+    });
+  };
 
   if (isPending) {
     return (
@@ -69,7 +87,18 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">{data.name}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-medium">{data.name}</h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-destructive hover:text-destructive"
+            aria-label="데이터셋 삭제"
+            onClick={() => setIsDeletingDataset(true)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
         <Button onClick={() => openRowForm({ mode: "add" })}>
           <Plus className="mr-2 h-4 w-4" />행 추가
         </Button>
@@ -164,7 +193,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                         size="icon"
                         className="h-7 w-7 text-destructive hover:text-destructive"
                         aria-label="삭제"
-                        onClick={() => confirmDelete.open(row.id)}
+                        onClick={() => setDeletingRowId(row.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -196,9 +225,20 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
       />
 
       <ConfirmDeleteDialog
-        {...confirmDelete.dialogProps}
+        open={deletingRowId !== null}
+        onOpenChange={(open) => !open && setDeletingRowId(null)}
+        isPending={deleteRow.isPending}
+        onConfirm={handleRowDelete}
         title="행을 삭제하시겠습니까?"
         description="이 작업은 되돌릴 수 없습니다. 해당 행이 영구적으로 삭제됩니다."
+      />
+      <ConfirmDeleteDialog
+        open={isDeletingDataset}
+        onOpenChange={(open) => !open && setIsDeletingDataset(false)}
+        isPending={deleteDataset.isPending}
+        onConfirm={handleDatasetDelete}
+        title="데이터셋을 삭제하시겠습니까?"
+        description="이 작업은 되돌릴 수 없습니다. 데이터셋과 모든 행이 영구적으로 삭제됩니다."
       />
     </div>
   );

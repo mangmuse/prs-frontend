@@ -26,7 +26,7 @@ export const DatasetsPage = () => {
         </div>
 
         {selectedDatasetId ? (
-          <DatasetTable datasetId={selectedDatasetId} />
+          <DatasetTable datasetId={selectedDatasetId} onDelete={() => setSelectedDatasetId(null)} />
         ) : (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
             <p className="text-muted-foreground">데이터셋을 선택하거나 새로 생성하세요.</p>
