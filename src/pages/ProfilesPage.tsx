@@ -44,7 +44,11 @@ export const ProfilesPage = () => {
         </div>
       </div>
 
-      <CreateProfileModal state={modalState} onClose={closeModal} />
+      <CreateProfileModal
+        state={modalState}
+        onClose={closeModal}
+        onCreated={setSelectedProfileId}
+      />
     </div>
   );
 };

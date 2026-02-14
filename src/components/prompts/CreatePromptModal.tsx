@@ -26,6 +26,7 @@ import { useCreatePrompt } from "@/hooks/mutations/promptMutations";
 interface CreatePromptModalProps {
   open: boolean;
   onClose: () => void;
+  onCreated?: (id: number) => void;
 }
 
 const createPromptSchema = z.object({
@@ -34,7 +35,7 @@ const createPromptSchema = z.object({
 
 type CreatePromptFormData = z.infer<typeof createPromptSchema>;
 
-export const CreatePromptModal = ({ open, onClose }: CreatePromptModalProps) => {
+export const CreatePromptModal = ({ open, onClose, onCreated }: CreatePromptModalProps) => {
   const form = useForm<CreatePromptFormData>({
     resolver: zodResolver(createPromptSchema),
     defaultValues: { name: "" },
@@ -51,8 +52,9 @@ export const CreatePromptModal = ({ open, onClose }: CreatePromptModalProps) => 
     createPromptMutation.mutate(
       { name: data.name },
       {
-        onSuccess: () => {
+        onSuccess: (created) => {
           toast.success("프롬프트가 생성되었습니다");
+          onCreated?.(created.id);
           handleClose();
         },
         onError: () => {

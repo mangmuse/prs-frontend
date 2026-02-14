@@ -34,7 +34,12 @@ export const DatasetsPage = () => {
         )}
       </div>
 
-      <CreateDatasetModal open={state.open} onOpenChange={onOpenChange} onSuccess={() => {}} />
+      <CreateDatasetModal
+        open={state.open}
+        onOpenChange={onOpenChange}
+        onSuccess={() => {}}
+        onCreated={setSelectedDatasetId}
+      />
     </div>
   );
 };

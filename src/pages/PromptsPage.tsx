@@ -50,7 +50,11 @@ export const PromptsPage = () => {
         </div>
       </div>
 
-      <CreatePromptModal open={promptModal.state.open} onClose={promptModal.close} />
+      <CreatePromptModal
+        open={promptModal.state.open}
+        onClose={promptModal.close}
+        onCreated={setSelectedPromptId}
+      />
 
       {versionModal.state.promptId > 0 && (
         <CreateVersionModal

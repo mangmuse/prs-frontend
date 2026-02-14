@@ -24,9 +24,15 @@ interface CreateDatasetModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  onCreated?: (id: number) => void;
 }
 
-export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateDatasetModalProps) => {
+export const CreateDatasetModal = ({
+  open,
+  onOpenChange,
+  onSuccess,
+  onCreated,
+}: CreateDatasetModalProps) => {
   const createDatasetWithRows = useCreateDatasetWithRows();
 
   const {
@@ -72,8 +78,9 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
         rows: validRows,
       },
       {
-        onSuccess: () => {
+        onSuccess: (created) => {
           toast.success("데이터셋이 생성되었습니다");
+          onCreated?.(created.id);
           reset();
           onOpenChange(false);
           onSuccess();
