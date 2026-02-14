@@ -29,4 +29,8 @@ export const promptsApi = {
   async createVersion(promptId: number, data: CreateVersionRequest): Promise<VersionDetail> {
     return apiClient.post(`prompts/${promptId}/versions`, { json: data }).json<VersionDetail>();
   },
+
+  async delete(promptId: number): Promise<void> {
+    await apiClient.delete(`prompts/${promptId}`);
+  },
 };
