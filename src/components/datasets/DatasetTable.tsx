@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useConfirmDelete } from "@/hooks/modals/useConfirmDelete";
 import { useModal } from "@/hooks/modals/useModal";
 import { useDeleteDatasetRow } from "@/hooks/mutations/useDeleteDatasetRow";
 import { datasetQueries } from "@/queries/datasetQueries";
@@ -42,8 +43,10 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
     onOpenChange: onRowFormOpenChange,
   } = useModal<RowFormState>({ open: false });
   const [page, setPage] = useState<number>(1);
-  const [deletingRowId, setDeletingRowId] = useState<number | null>(null);
-  const deleteRow = useDeleteDatasetRow();
+  const confirmDelete = useConfirmDelete(useDeleteDatasetRow(), (rowId: number) => ({
+    datasetId,
+    rowId,
+  }));
 
   const { data, isPending, error } = useQuery(
     datasetQueries.detail(datasetId, page, ROWS_PER_PAGE),
@@ -161,7 +164,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                         size="icon"
                         className="h-7 w-7 text-destructive hover:text-destructive"
                         aria-label="삭제"
-                        onClick={() => setDeletingRowId(row.id)}
+                        onClick={() => confirmDelete.open(row.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -193,18 +196,9 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
       />
 
       <ConfirmDeleteDialog
-        open={deletingRowId !== null}
-        onOpenChange={(open) => !open && setDeletingRowId(null)}
+        {...confirmDelete.dialogProps}
         title="행을 삭제하시겠습니까?"
         description="이 작업은 되돌릴 수 없습니다. 해당 행이 영구적으로 삭제됩니다."
-        isPending={deleteRow.isPending}
-        onConfirm={() => {
-          if (deletingRowId === null) return;
-          deleteRow.mutate(
-            { datasetId, rowId: deletingRowId },
-            { onSuccess: () => setDeletingRowId(null) },
-          );
-        }}
       />
     </div>
   );

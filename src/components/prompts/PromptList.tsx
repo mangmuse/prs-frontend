@@ -1,10 +1,9 @@
-import { useState } from "react";
-
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Plus, Trash2 } from "lucide-react";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
+import { useConfirmDelete } from "@/hooks/modals/useConfirmDelete";
 import { useDeletePrompt } from "@/hooks/mutations/useDeletePrompt";
 import { cn } from "@/lib/utils";
 import { promptQueries } from "@/queries/promptQueries";
@@ -17,8 +16,7 @@ interface PromptListProps {
 
 export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProps) => {
   const { data: prompts, isPending } = useQuery(promptQueries.list());
-  const [deletingPromptId, setDeletingPromptId] = useState<number | null>(null);
-  const deletePrompt = useDeletePrompt();
+  const confirmDelete = useConfirmDelete(useDeletePrompt());
 
   if (isPending) {
     return (
@@ -69,7 +67,7 @@ export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProp
                     aria-label="삭제"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setDeletingPromptId(prompt.id);
+                      confirmDelete.open(prompt.id);
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -82,17 +80,9 @@ export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProp
         </div>
       )}
       <ConfirmDeleteDialog
-        open={deletingPromptId !== null}
-        onOpenChange={(open) => !open && setDeletingPromptId(null)}
+        {...confirmDelete.dialogProps}
         title="프롬프트를 삭제하시겠습니까?"
         description="이 작업은 되돌릴 수 없습니다. 프롬프트와 모든 버전이 영구적으로 삭제됩니다."
-        isPending={deletePrompt.isPending}
-        onConfirm={() => {
-          if (deletingPromptId === null) return;
-          deletePrompt.mutate(deletingPromptId, {
-            onSuccess: () => setDeletingPromptId(null),
-          });
-        }}
       />
     </div>
   );
