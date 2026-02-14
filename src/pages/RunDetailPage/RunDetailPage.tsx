@@ -11,7 +11,7 @@ import { RunDetailMetricsGrid } from "@/components/runs/RunDetailMetricsGrid";
 import { RunDetailResultsSplit } from "@/components/runs/RunDetailResultsSplit";
 import { RunDetailSummaryCards } from "@/components/runs/RunDetailSummaryCards";
 import { RunDetailVersionAndCompare } from "@/components/runs/RunDetailVersionAndCompare";
-import { useCreateRun } from "@/hooks/mutations/useCreateRun";
+import { useCreateRun } from "@/hooks/mutations/runMutations";
 import { useCompareMode } from "@/hooks/runDetail/useCompareMode";
 import { useLiveSimulation } from "@/hooks/runDetail/useLiveSimulation";
 import { runQueries } from "@/queries/runQueries";

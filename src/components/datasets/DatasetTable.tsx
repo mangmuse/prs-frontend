@@ -15,8 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useModal } from "@/hooks/modals/useModal";
-import { useDeleteDataset } from "@/hooks/mutations/useDeleteDataset";
-import { useDeleteDatasetRow } from "@/hooks/mutations/useDeleteDatasetRow";
+import { useDeleteDataset, useDeleteDatasetRow } from "@/hooks/mutations/datasetMutations";
 import { datasetQueries } from "@/queries/datasetQueries";
 import type { DatasetRow } from "@/types/dataset";
 import { isJsonString } from "@/utils/json";

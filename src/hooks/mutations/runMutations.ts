@@ -14,3 +14,14 @@ export const useCreateRun = () => {
     },
   });
 };
+
+export const useDeleteRun = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (runId: number) => runsApi.delete(runId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: runQueries.all() });
+    },
+  });
+};

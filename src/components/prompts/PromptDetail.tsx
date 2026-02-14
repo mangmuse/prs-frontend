@@ -7,8 +7,7 @@ import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { EditMetaDialog } from "@/components/common/EditMetaDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useDeletePrompt } from "@/hooks/mutations/useDeletePrompt";
-import { useUpdatePrompt } from "@/hooks/mutations/useUpdatePrompt";
+import { useDeletePrompt, useUpdatePrompt } from "@/hooks/mutations/promptMutations";
 import { cn } from "@/lib/utils";
 import { promptQueries } from "@/queries/promptQueries";
 

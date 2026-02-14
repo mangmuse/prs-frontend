@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useDeleteRun } from "@/hooks/mutations/useDeleteRun";
+import { useDeleteRun } from "@/hooks/mutations/runMutations";
 import type { RunSummary } from "@/types/run";
 import { formatRelativeTime } from "@/utils/date";
 import { formatPercent } from "@/utils/format";

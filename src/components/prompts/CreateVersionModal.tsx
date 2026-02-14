@@ -31,7 +31,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { SCHEMA_OPTIONS } from "@/constants/prompt";
-import { useCreateVersion } from "@/hooks/mutations/useCreateVersion";
+import { useCreateVersion } from "@/hooks/mutations/promptMutations";
 import { llmQueries } from "@/queries/llmQueries";
 import type { CreateVersionRequest, OutputSchemaType } from "@/types/prompt";
 

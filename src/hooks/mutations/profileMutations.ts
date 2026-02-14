@@ -15,3 +15,14 @@ export const useUpdateProfile = () => {
     },
   });
 };
+
+export const useDeleteProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (profileId: number) => profilesApi.delete(profileId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
+    },
+  });
+};

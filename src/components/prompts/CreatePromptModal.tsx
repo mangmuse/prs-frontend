@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCreatePrompt } from "@/hooks/mutations/useCreatePrompt";
+import { useCreatePrompt } from "@/hooks/mutations/promptMutations";
 
 interface CreatePromptModalProps {
   open: boolean;

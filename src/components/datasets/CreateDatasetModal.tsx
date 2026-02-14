@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateDatasetWithRows } from "@/hooks/mutations/useCreateDatasetWithRows";
+import { useCreateDatasetWithRows } from "@/hooks/mutations/datasetMutations";
 
 import { DatasetRowsTable } from "./DatasetRowsTable";
 import { TemplateReferenceSection } from "./TemplateReferenceSection";

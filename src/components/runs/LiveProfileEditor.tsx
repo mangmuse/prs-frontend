@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useUpdateProfile } from "@/hooks/mutations/useUpdateProfile";
+import { useUpdateProfile } from "@/hooks/mutations/profileMutations";
 import { cn } from "@/lib/utils";
 import { runQueries } from "@/queries/runQueries";
 import type { LogicConstraint } from "@/types/constraint";

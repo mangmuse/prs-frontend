@@ -5,7 +5,7 @@ import { Edit, Filter, Trash2 } from "lucide-react";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
-import { useDeleteProfile } from "@/hooks/mutations/useDeleteProfile";
+import { useDeleteProfile } from "@/hooks/mutations/profileMutations";
 import { profileQueries } from "@/queries/profileQueries";
 import type { LogicConstraint } from "@/types/constraint";
 import { CONSTRAINT_TYPE_LABELS, getConstraintValueDisplay } from "@/utils/constraintUtils";

@@ -6,7 +6,7 @@ import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useVerifyApiKey } from "@/hooks/mutations/useVerifyApiKey";
+import { useVerifyApiKey } from "@/hooks/mutations/authMutations";
 import { cn } from "@/lib/utils";
 import { type LLMProvider, useApiKey, useApiKeyActions } from "@/stores/apiKeyStore";
 import type { ProviderOption } from "@/utils/provider";

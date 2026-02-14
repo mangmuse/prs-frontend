@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router";
 
 import { useAuthCallback } from "@/hooks/auth/useAuthCallback";
-import { useMigrate } from "@/hooks/mutations/useMigrate";
+import { useMigrate } from "@/hooks/mutations/authMutations";
 
 const CallbackLoading = ({ message }: { message: string }) => (
   <div className="min-h-screen flex items-center justify-center bg-gray-100">

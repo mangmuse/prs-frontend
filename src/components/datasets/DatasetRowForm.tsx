@@ -17,8 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddRows } from "@/hooks/mutations/useAddRows";
-import { useUpdateDatasetRow } from "@/hooks/mutations/useUpdateDatasetRow";
+import { useAddRows, useUpdateDatasetRow } from "@/hooks/mutations/datasetMutations";
 import type { DatasetRow } from "@/types/dataset";
 
 import { TemplateReferenceSection } from "./TemplateReferenceSection";
