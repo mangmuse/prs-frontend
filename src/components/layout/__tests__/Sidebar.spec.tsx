@@ -1,6 +1,7 @@
 import { MemoryRouter, useLocation } from "react-router";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
@@ -8,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authApi } from "@/api/auth";
 import { useAuthStore } from "@/stores/authStore";
+import { createTestQueryClient } from "@/test/utils";
 
 import { Sidebar } from "../Sidebar";
 
@@ -15,14 +17,6 @@ const LocationDisplay = () => {
   const location = useLocation();
   return <div data-testid="location">{location.pathname}</div>;
 };
-
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
 
 const renderSidebar = (queryClient: QueryClient) =>
   render(

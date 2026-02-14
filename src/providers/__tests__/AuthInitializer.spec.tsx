@@ -1,26 +1,13 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, delay, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
 import { useAuthStore } from "@/stores/authStore";
+import { renderWithClient } from "@/test/utils";
 
 import { AuthInitializer } from "../AuthInitializer";
-
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-const renderWithProviders = (ui: React.ReactElement) => {
-  const queryClient = createTestQueryClient();
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
-};
 
 describe("AuthInitializer", () => {
   beforeEach(() => {
@@ -37,7 +24,7 @@ describe("AuthInitializer", () => {
   });
 
   it("초기화 성공 시 children을 렌더링한다", async () => {
-    renderWithProviders(
+    renderWithClient(
       <AuthInitializer>
         <div>App Content</div>
       </AuthInitializer>,
@@ -56,7 +43,7 @@ describe("AuthInitializer", () => {
       }),
     );
 
-    renderWithProviders(
+    renderWithClient(
       <AuthInitializer>
         <div>App Content</div>
       </AuthInitializer>,
@@ -76,7 +63,7 @@ describe("AuthInitializer", () => {
       }),
     );
 
-    renderWithProviders(
+    renderWithClient(
       <AuthInitializer fallback={<div>Custom Loading</div>}>
         <div>App Content</div>
       </AuthInitializer>,
@@ -106,7 +93,7 @@ describe("AuthInitializer", () => {
       );
     };
 
-    renderWithProviders(
+    renderWithClient(
       <AuthInitializer>
         <TestContent />
       </AuthInitializer>,
@@ -135,7 +122,7 @@ describe("AuthInitializer", () => {
       ),
     );
 
-    renderWithProviders(
+    renderWithClient(
       <AuthInitializer>
         <div>App Content</div>
       </AuthInitializer>,

@@ -1,19 +1,12 @@
 import { RouterProvider, createMemoryRouter } from "react-router";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { authApi } from "@/api/auth";
 import { useAuthStore } from "@/stores/authStore";
-
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
+import { createTestQueryClient } from "@/test/utils";
 
 const LazyAuthCallbackPage = async () => {
   const { AuthCallbackPage } = await import("@/pages/AuthCallbackPage");
