@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
+import { toast } from "sonner";
 import { describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
@@ -154,6 +155,60 @@ describe("DatasetTable - 데이터셋 수정", () => {
     await waitFor(() => {
       expect(screen.queryByLabelText("이름")).not.toBeInTheDocument();
     });
+  });
+});
+
+describe("DatasetTable - 토스트 알림", () => {
+  it("mutation 성공 시 성공 토스트를 표시해야 한다", async () => {
+    const toastSpy = vi.spyOn(toast, "success").mockImplementation(() => "");
+    server.use(
+      http.get(`${API}/datasets/1`, () => HttpResponse.json(mockDetailResponse)),
+      http.delete(`${API}/datasets/1`, () => new HttpResponse(null, { status: 204 })),
+    );
+    const user = userEvent.setup();
+    renderWithClient(<DatasetTable datasetId={1} onDelete={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("테스트 데이터셋")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "데이터셋 삭제" }));
+    await waitFor(() => {
+      expect(screen.getByText("데이터셋을 삭제하시겠습니까?")).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "삭제하기" }));
+
+    await waitFor(() => {
+      expect(toastSpy).toHaveBeenCalledTimes(1);
+    });
+
+    toastSpy.mockRestore();
+  });
+
+  it("mutation 실패 시 에러 토스트를 표시해야 한다", async () => {
+    const toastSpy = vi.spyOn(toast, "error").mockImplementation(() => "");
+    server.use(
+      http.get(`${API}/datasets/1`, () => HttpResponse.json(mockDetailResponse)),
+      http.delete(`${API}/datasets/1`, () => new HttpResponse(null, { status: 500 })),
+    );
+    const user = userEvent.setup();
+    renderWithClient(<DatasetTable datasetId={1} onDelete={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("테스트 데이터셋")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "데이터셋 삭제" }));
+    await waitFor(() => {
+      expect(screen.getByText("데이터셋을 삭제하시겠습니까?")).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "삭제하기" }));
+
+    await waitFor(() => {
+      expect(toastSpy).toHaveBeenCalledTimes(1);
+    });
+
+    toastSpy.mockRestore();
   });
 });
 

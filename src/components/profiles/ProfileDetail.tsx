@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { Edit, Filter, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,12 @@ export const ProfileDetail = ({ profileId, onEdit, onDelete }: ProfileDetailProp
   const handleDelete = () => {
     deleteProfile.mutate(profileId, {
       onSuccess: () => {
+        toast.success("프로필이 삭제되었습니다");
         setIsDeleting(false);
         onDelete();
+      },
+      onError: () => {
+        toast.error("프로필 삭제에 실패했습니다");
       },
     });
   };

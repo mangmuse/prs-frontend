@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { Maximize2, Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { EditMetaDialog } from "@/components/common/EditMetaDialog";
@@ -63,22 +64,42 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
     if (deletingRowId === null) return;
     deleteRow.mutate(
       { datasetId, rowId: deletingRowId },
-      { onSuccess: () => setDeletingRowId(null) },
+      {
+        onSuccess: () => {
+          toast.success("행이 삭제되었습니다");
+          setDeletingRowId(null);
+        },
+        onError: () => {
+          toast.error("행 삭제에 실패했습니다");
+        },
+      },
     );
   };
 
   const handleDatasetUpdate = (formData: { name: string; description: string }) => {
     updateDataset.mutate(
       { datasetId, data: formData },
-      { onSuccess: () => setIsEditingDataset(false) },
+      {
+        onSuccess: () => {
+          toast.success("데이터셋이 수정되었습니다");
+          setIsEditingDataset(false);
+        },
+        onError: () => {
+          toast.error("데이터셋 수정에 실패했습니다");
+        },
+      },
     );
   };
 
   const handleDatasetDelete = () => {
     deleteDataset.mutate(datasetId, {
       onSuccess: () => {
+        toast.success("데이터셋이 삭제되었습니다");
         setIsDeletingDataset(false);
         onDelete();
+      },
+      onError: () => {
+        toast.error("데이터셋 삭제에 실패했습니다");
       },
     });
   };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,13 @@ export const RunsTable = ({ runs }: RunsTableProps) => {
   const handleRunDelete = () => {
     if (deletingRunId === null) return;
     deleteRun.mutate(deletingRunId, {
-      onSuccess: () => setDeletingRunId(null),
+      onSuccess: () => {
+        toast.success("실행 기록이 삭제되었습니다");
+        setDeletingRunId(null);
+      },
+      onError: () => {
+        toast.error("실행 기록 삭제에 실패했습니다");
+      },
     });
   };
 

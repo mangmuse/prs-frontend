@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Plus, Settings, Trash2, User } from "lucide-react";
+import { toast } from "sonner";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { EditMetaDialog } from "@/components/common/EditMetaDialog";
@@ -37,14 +38,29 @@ export const PromptDetail = ({
   const handlePromptDelete = () => {
     deletePrompt.mutate(promptId, {
       onSuccess: () => {
+        toast.success("프롬프트가 삭제되었습니다");
         setIsDeletingPrompt(false);
         onDelete();
+      },
+      onError: () => {
+        toast.error("프롬프트 삭제에 실패했습니다");
       },
     });
   };
 
   const handlePromptUpdate = (data: { name: string; description: string }) => {
-    updatePrompt.mutate({ promptId, data }, { onSuccess: () => setIsEditingPrompt(false) });
+    updatePrompt.mutate(
+      { promptId, data },
+      {
+        onSuccess: () => {
+          toast.success("프롬프트가 수정되었습니다");
+          setIsEditingPrompt(false);
+        },
+        onError: () => {
+          toast.error("프롬프트 수정에 실패했습니다");
+        },
+      },
+    );
   };
 
   const { data: versions, isPending: versionsLoading } = useQuery(promptQueries.versions(promptId));

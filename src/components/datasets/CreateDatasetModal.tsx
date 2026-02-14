@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -72,12 +73,13 @@ export const CreateDatasetModal = ({ open, onOpenChange, onSuccess }: CreateData
       },
       {
         onSuccess: () => {
+          toast.success("데이터셋이 생성되었습니다");
           reset();
           onOpenChange(false);
           onSuccess();
         },
-        onError: (error) => {
-          console.error("Failed to create dataset:", error);
+        onError: () => {
+          toast.error("데이터셋 생성에 실패했습니다");
         },
       },
     );

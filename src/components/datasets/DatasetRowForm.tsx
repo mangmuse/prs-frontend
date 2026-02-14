@@ -3,6 +3,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -104,8 +105,12 @@ export const DatasetRowForm = ({
         },
         {
           onSuccess: () => {
+            toast.success("행이 수정되었습니다");
             reset();
             onOpenChange(false);
+          },
+          onError: () => {
+            toast.error("행 수정에 실패했습니다");
           },
         },
       );
@@ -119,11 +124,12 @@ export const DatasetRowForm = ({
       },
       {
         onSuccess: () => {
+          toast.success("행이 추가되었습니다");
           reset();
           onOpenChange(false);
         },
-        onError: (error) => {
-          console.error("Failed to add row:", error);
+        onError: () => {
+          toast.error("행 추가에 실패했습니다");
         },
       },
     );

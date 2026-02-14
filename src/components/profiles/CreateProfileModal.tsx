@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { profilesApi } from "@/api/profiles";
 import { Button } from "@/components/ui/button";
@@ -73,18 +74,26 @@ export const CreateProfileModal = ({ state, onClose, onSuccess }: CreateProfileM
   const createMutation = useMutation({
     mutationFn: (data: CreateProfileRequest) => profilesApi.create(data),
     onSuccess: () => {
+      toast.success("프로필이 생성되었습니다");
       void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
       handleClose();
       onSuccess?.();
+    },
+    onError: () => {
+      toast.error("프로필 생성에 실패했습니다");
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: (data: UpdateProfileRequest) => profilesApi.update(profileId!, data),
     onSuccess: () => {
+      toast.success("프로필이 수정되었습니다");
       void queryClient.invalidateQueries({ queryKey: profileQueries.all() });
       handleClose();
       onSuccess?.();
+    },
+    onError: () => {
+      toast.error("프로필 수정에 실패했습니다");
     },
   });
 

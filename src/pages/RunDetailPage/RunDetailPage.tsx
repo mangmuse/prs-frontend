@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { LiveProfileEditor } from "@/components/runs/LiveProfileEditor";
 import { RunDetailBanners } from "@/components/runs/RunDetailBanners";
@@ -73,7 +74,11 @@ export const RunDetailPage = () => {
       },
       {
         onSuccess: (newRun) => {
+          toast.success("실행이 시작되었습니다");
           void navigate(`/runs/${newRun.id}`);
+        },
+        onError: () => {
+          toast.error("실행에 실패했습니다");
         },
       },
     );

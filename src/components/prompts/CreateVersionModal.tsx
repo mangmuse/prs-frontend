@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,18 @@ export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionMod
       memo: data.memo || undefined,
     };
 
-    createVersionMutation.mutate({ promptId, data: requestData }, { onSuccess: handleClose });
+    createVersionMutation.mutate(
+      { promptId, data: requestData },
+      {
+        onSuccess: () => {
+          toast.success("새 버전이 생성되었습니다");
+          handleClose();
+        },
+        onError: () => {
+          toast.error("버전 생성에 실패했습니다");
+        },
+      },
+    );
   };
 
   return (

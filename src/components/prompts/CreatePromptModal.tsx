@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,18 @@ export const CreatePromptModal = ({ open, onClose }: CreatePromptModalProps) => 
   };
 
   const onSubmit = (data: CreatePromptFormData) => {
-    createPromptMutation.mutate({ name: data.name }, { onSuccess: handleClose });
+    createPromptMutation.mutate(
+      { name: data.name },
+      {
+        onSuccess: () => {
+          toast.success("프롬프트가 생성되었습니다");
+          handleClose();
+        },
+        onError: () => {
+          toast.error("프롬프트 생성에 실패했습니다");
+        },
+      },
+    );
   };
 
   return (
