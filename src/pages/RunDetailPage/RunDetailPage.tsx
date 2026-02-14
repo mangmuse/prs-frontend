@@ -43,11 +43,13 @@ export const RunDetailPage = () => {
       if (statusFilter === "all") return true;
       if (statusFilter === "pass") return r.status === "pass";
       if (statusFilter === "fail") return r.status !== "pass";
-      if (statusFilter === "regressed") {
-        return compareMode.rowChanges?.get(r.rowIndex)?.category === "regressed";
-      }
-      if (statusFilter === "improved") {
-        return compareMode.rowChanges?.get(r.rowIndex)?.category === "improved";
+      if (
+        statusFilter === "regressed" ||
+        statusFilter === "improved" ||
+        statusFilter === "changed" ||
+        statusFilter === "unchanged"
+      ) {
+        return compareMode.rowChanges?.get(r.rowIndex)?.category === statusFilter;
       }
       return true;
     });

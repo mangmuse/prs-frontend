@@ -49,11 +49,7 @@ export const RunDetailSummaryCards = ({
               className={`cursor-pointer border p-4 transition-all hover:shadow-sm ${config.color} ${
                 statusFilter === category ? "ring-2 ring-offset-1 ring-current" : ""
               }`}
-              onClick={() =>
-                onStatusFilterChange(
-                  category === "regressed" || category === "improved" ? category : "all",
-                )
-              }
+              onClick={() => onStatusFilterChange(statusFilter === category ? "all" : category)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

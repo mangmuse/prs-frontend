@@ -76,7 +76,14 @@ export interface ReEvaluateResponse {
   passRate: number;
 }
 
-export type StatusFilter = "all" | "pass" | "fail" | "regressed" | "improved";
+export type StatusFilter =
+  | "all"
+  | "pass"
+  | "fail"
+  | "regressed"
+  | "improved"
+  | "changed"
+  | "unchanged";
 
 export type MetricsAsPercent = {
   passRate: number;
