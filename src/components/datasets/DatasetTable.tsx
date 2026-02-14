@@ -1,22 +1,10 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { Maximize2, Plus } from "lucide-react";
+import { Maximize2, Pencil, Plus, Trash2 } from "lucide-react";
 
-import { ExpandableViewer } from "@/components/common/ExpandableViewer";
-import { JsonViewer } from "@/components/runs/JsonViewer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationFirst,
-  PaginationItem,
-  PaginationLast,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -25,54 +13,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { useModal } from "@/hooks/modals/useModal";
 import { datasetQueries } from "@/queries/datasetQueries";
 import type { DatasetRow } from "@/types/dataset";
 import { isJsonString } from "@/utils/json";
-import { buildPaginationState } from "@/utils/pagination";
 
+import { DatasetPagination } from "./DatasetPagination";
+import { DatasetRowDetailViewer } from "./DatasetRowDetailViewer";
 import { DatasetRowForm } from "./DatasetRowForm";
+
+type RowFormState =
+  | { open: false }
+  | { open: true; mode: "add" }
+  | { open: true; mode: "edit"; row: DatasetRow };
 
 interface DatasetTableProps {
   datasetId: number;
 }
 
 const ROWS_PER_PAGE = 10;
-const PAGE_GROUP_SIZE = 5;
-
-interface DatasetRowDetailViewerProps {
-  row: DatasetRow;
-  defaultTab: "input" | "expected";
-  trigger: React.ReactNode;
-}
-
-const DatasetRowDetailViewer = ({ row, defaultTab, trigger }: DatasetRowDetailViewerProps) => (
-  <ExpandableViewer.Root title="데이터셋 상세" maxWidth="max-w-3xl" trigger={trigger}>
-    <ExpandableViewer.Tabs defaultTab={defaultTab}>
-      <ExpandableViewer.Tab id="input" label="입력 데이터">
-        <ExpandableViewer.ScrollContent>
-          <div className="space-y-4">
-            {Object.entries(row.inputData).map(([key, value]) => (
-              <div key={key} className="space-y-1.5">
-                <h4 className="text-sm font-medium text-muted-foreground">{key}</h4>
-                <JsonViewer
-                  data={typeof value === "string" ? value : JSON.stringify(value, null, 2)}
-                  maxHeight="auto"
-                />
-              </div>
-            ))}
-          </div>
-        </ExpandableViewer.ScrollContent>
-      </ExpandableViewer.Tab>
-      <ExpandableViewer.Tab id="expected" label="기대 출력">
-        <ExpandableViewer.JsonContent data={row.expectedOutput} />
-      </ExpandableViewer.Tab>
-    </ExpandableViewer.Tabs>
-  </ExpandableViewer.Root>
-);
 
 export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
-  const [isAddRowOpen, setIsAddRowOpen] = useState<boolean>(false);
+  const {
+    state: rowFormState,
+    open: openRowForm,
+    onOpenChange: onRowFormOpenChange,
+  } = useModal<RowFormState>({ open: false });
   const [page, setPage] = useState<number>(1);
 
   const { data, isPending, error } = useQuery(
@@ -97,7 +63,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">{data.name}</h3>
-        <Button onClick={() => setIsAddRowOpen(true)}>
+        <Button onClick={() => openRowForm({ mode: "add" })}>
           <Plus className="mr-2 h-4 w-4" />행 추가
         </Button>
       </div>
@@ -105,7 +71,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
       {data.rows.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
           <p className="text-muted-foreground">아직 행이 없습니다.</p>
-          <Button variant="link" className="mt-2" onClick={() => setIsAddRowOpen(true)}>
+          <Button variant="link" className="mt-2" onClick={() => openRowForm({ mode: "add" })}>
             첫 번째 행 추가하기
           </Button>
         </div>
@@ -118,6 +84,7 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                 <TableHead>입력값</TableHead>
                 <TableHead className="w-28">기대값</TableHead>
                 <TableHead className="w-40">태그</TableHead>
+                <TableHead className="w-20">작업</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -174,6 +141,27 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
                       ))}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openRowForm({ mode: "edit", row })}
+                        aria-label="수정"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        aria-label="삭제"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -190,96 +178,14 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
         />
       )}
 
-      <DatasetRowForm datasetId={datasetId} open={isAddRowOpen} onOpenChange={setIsAddRowOpen} />
-    </div>
-  );
-};
-
-interface DatasetPaginationProps {
-  page: number;
-  totalPages: number;
-  totalCount: number;
-  onPageChange: (page: number) => void;
-}
-
-const DatasetPagination = ({
-  page,
-  totalPages,
-  totalCount,
-  onPageChange,
-}: DatasetPaginationProps) => {
-  const {
-    pageNumbers,
-    isFirstPage,
-    isLastPage,
-    isFirstGroup,
-    isLastGroup,
-    prevGroupFirstPage,
-    nextGroupFirstPage,
-  } = buildPaginationState(page, totalPages, PAGE_GROUP_SIZE);
-
-  const disabledClass = "pointer-events-none opacity-50";
-  const navClass = (disabled: boolean) => cn("cursor-pointer", disabled && disabledClass);
-
-  const handleNavClick = (targetPage: number, disabled: boolean) => () => {
-    if (disabled) return;
-    onPageChange(targetPage);
-  };
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationFirst
-              onClick={handleNavClick(1, isFirstPage)}
-              className={navClass(isFirstPage)}
-              aria-disabled={isFirstPage}
-            />
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={handleNavClick(prevGroupFirstPage, isFirstGroup)}
-              className={navClass(isFirstGroup)}
-              aria-disabled={isFirstGroup}
-            />
-          </PaginationItem>
-
-          {pageNumbers.map((pageNum) => (
-            <PaginationItem key={pageNum}>
-              <PaginationLink
-                isActive={page === pageNum}
-                onClick={() => onPageChange(pageNum)}
-                className={cn(
-                  "cursor-pointer",
-                  page === pageNum &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
-                )}
-              >
-                {pageNum}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-
-          <PaginationItem>
-            <PaginationNext
-              onClick={handleNavClick(nextGroupFirstPage, isLastGroup)}
-              className={navClass(isLastGroup)}
-              aria-disabled={isLastGroup}
-            />
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationLast
-              onClick={handleNavClick(totalPages, isLastPage)}
-              className={navClass(isLastPage)}
-              aria-disabled={isLastPage}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-      <span className="text-sm text-muted-foreground">총 {totalCount}개</span>
+      <DatasetRowForm
+        datasetId={datasetId}
+        open={rowFormState.open}
+        onOpenChange={onRowFormOpenChange}
+        editingRow={
+          rowFormState.open && rowFormState.mode === "edit" ? rowFormState.row : undefined
+        }
+      />
     </div>
   );
 };
