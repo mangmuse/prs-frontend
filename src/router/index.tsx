@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthCallbackPage } from "@/pages/AuthCallbackPage";
 import { DatasetsPage } from "@/pages/DatasetsPage";
 import { HomePage } from "@/pages/HomePage";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProfilesPage } from "@/pages/ProfilesPage";
 import { PromptsPage } from "@/pages/PromptsPage";
 import { RunDetailPage } from "@/pages/RunDetailPage/RunDetailPage";
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: "runs", element: <RunsPage /> },
       { path: "runs/:id", element: <RunDetailPage /> },
       { path: "settings", element: <SettingsPage /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);
