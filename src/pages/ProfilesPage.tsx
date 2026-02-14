@@ -34,6 +34,7 @@ export const ProfilesPage = () => {
                   openModal({ mode: "edit", profileId: selectedProfileId });
                 }
               }}
+              onDelete={() => setSelectedProfileId(null)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">

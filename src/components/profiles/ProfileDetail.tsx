@@ -1,7 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { Edit, Filter } from "lucide-react";
+import { useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+import { Edit, Filter, Trash2 } from "lucide-react";
+
+import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
+import { useDeleteProfile } from "@/hooks/mutations/useDeleteProfile";
 import { profileQueries } from "@/queries/profileQueries";
 import type { LogicConstraint } from "@/types/constraint";
 import { CONSTRAINT_TYPE_LABELS, getConstraintValueDisplay } from "@/utils/constraintUtils";
@@ -9,10 +13,22 @@ import { CONSTRAINT_TYPE_LABELS, getConstraintValueDisplay } from "@/utils/const
 interface ProfileDetailProps {
   profileId: number;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
-export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
+export const ProfileDetail = ({ profileId, onEdit, onDelete }: ProfileDetailProps) => {
   const { data: profile, isPending } = useQuery(profileQueries.detail(profileId));
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteProfile = useDeleteProfile();
+
+  const handleDelete = () => {
+    deleteProfile.mutate(profileId, {
+      onSuccess: () => {
+        setIsDeleting(false);
+        onDelete();
+      },
+    });
+  };
 
   if (isPending) {
     return <div className="text-muted-foreground">로딩 중...</div>;
@@ -23,73 +39,89 @@ export const ProfileDetail = ({ profileId, onEdit }: ProfileDetailProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-xl font-semibold">{profile.name}</h2>
-          {profile.description && (
-            <p className="mt-1 text-sm text-muted-foreground">{profile.description}</p>
+    <>
+      <div className="space-y-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">{profile.name}</h2>
+            {profile.description && (
+              <p className="mt-1 text-sm text-muted-foreground">{profile.description}</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={onEdit}>
+              <Edit className="mr-1 h-4 w-4" />
+              수정
+            </Button>
+            <Button size="sm" variant="ghost" aria-label="삭제" onClick={() => setIsDeleting(true)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-lg border bg-card p-4">
+            <div className="text-sm text-muted-foreground">유사도 임계값</div>
+            <div className="mt-1 text-3xl font-bold text-primary">
+              {Math.round(profile.semanticThreshold * 100)}%
+            </div>
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full bg-primary transition-all"
+                style={{ width: `${profile.semanticThreshold * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg border bg-card p-4">
+            <div className="text-sm text-muted-foreground">제약조건</div>
+            <div className="mt-1 text-3xl font-bold text-primary">
+              {profile.globalConstraints.length}개
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Filter className="h-4 w-4" />
+            제약조건
+          </div>
+
+          {profile.globalConstraints.length === 0 ? (
+            <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+              제약조건이 없습니다.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {profile.globalConstraints.map((constraint: LogicConstraint, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3"
+                >
+                  <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                    {CONSTRAINT_TYPE_LABELS[constraint.type]}
+                  </span>
+                  <span className="text-sm font-medium">{constraint.target}</span>
+                  {getConstraintValueDisplay(constraint) && (
+                    <span className="text-sm text-muted-foreground">
+                      : {getConstraintValueDisplay(constraint)}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
-        <Button size="sm" variant="outline" onClick={onEdit}>
-          <Edit className="mr-1 h-4 w-4" />
-          수정
-        </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">유사도 임계값</div>
-          <div className="mt-1 text-3xl font-bold text-primary">
-            {Math.round(profile.semanticThreshold * 100)}%
-          </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full bg-primary transition-all"
-              style={{ width: `${profile.semanticThreshold * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">제약조건</div>
-          <div className="mt-1 text-3xl font-bold text-primary">
-            {profile.globalConstraints.length}개
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <Filter className="h-4 w-4" />
-          제약조건
-        </div>
-
-        {profile.globalConstraints.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-            제약조건이 없습니다.
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {profile.globalConstraints.map((constraint: LogicConstraint, index: number) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3"
-              >
-                <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                  {CONSTRAINT_TYPE_LABELS[constraint.type]}
-                </span>
-                <span className="text-sm font-medium">{constraint.target}</span>
-                {getConstraintValueDisplay(constraint) && (
-                  <span className="text-sm text-muted-foreground">
-                    : {getConstraintValueDisplay(constraint)}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+      <ConfirmDeleteDialog
+        open={isDeleting}
+        onOpenChange={(open) => !open && setIsDeleting(false)}
+        isPending={deleteProfile.isPending}
+        onConfirm={handleDelete}
+        title="프로필을 삭제하시겠습니까?"
+        description="이 작업은 되돌릴 수 없습니다. 프로필이 영구적으로 삭제됩니다."
+      />
+    </>
   );
 };

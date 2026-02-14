@@ -23,4 +23,8 @@ export const profilesApi = {
   async update(id: number, data: UpdateProfileRequest): Promise<ProfileDetail> {
     return apiClient.patch(`evaluator-profiles/${id}`, { json: data }).json<ProfileDetail>();
   },
+
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`evaluator-profiles/${id}`);
+  },
 };
