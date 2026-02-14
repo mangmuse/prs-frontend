@@ -6,6 +6,7 @@ import type {
   Dataset,
   DatasetDetailResponse,
   DatasetRow,
+  UpdateDatasetRequest,
   UpdateRowRequest,
 } from "@/types/dataset";
 
@@ -36,6 +37,10 @@ export const datasetsApi = {
 
   async deleteRow(datasetId: number, rowId: number): Promise<void> {
     await apiClient.delete(`datasets/${datasetId}/rows/${rowId}`);
+  },
+
+  async update(datasetId: number, data: UpdateDatasetRequest): Promise<Dataset> {
+    return apiClient.patch(`datasets/${datasetId}`, { json: data }).json<Dataset>();
   },
 
   async delete(datasetId: number): Promise<void> {

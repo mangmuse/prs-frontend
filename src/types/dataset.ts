@@ -28,6 +28,7 @@ export interface CreateDatasetResponse {
 export interface DatasetDetailResponse {
   id: number;
   name: string;
+  description?: string;
   rows: DatasetRow[];
   pagination: {
     page: number;
@@ -45,6 +46,11 @@ export interface CreateRowsRequest {
 
 export interface CreateRowsResponse {
   createdCount: number;
+}
+
+export interface UpdateDatasetRequest {
+  name: string;
+  description: string;
 }
 
 export interface UpdateRowRequest {

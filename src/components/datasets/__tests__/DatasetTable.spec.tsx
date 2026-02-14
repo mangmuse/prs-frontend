@@ -112,6 +112,51 @@ describe("DatasetTable - 행 삭제", () => {
   });
 });
 
+describe("DatasetTable - 데이터셋 수정", () => {
+  it("Dataset 이름을 수정하고 저장하면 업데이트되어야 한다", async () => {
+    let patchBody: Record<string, unknown> | null = null;
+    server.use(
+      http.get(`${API}/datasets/1`, () => HttpResponse.json(mockDetailResponse)),
+      http.patch(`${API}/datasets/1`, async ({ request }) => {
+        patchBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({
+          id: 1,
+          name: patchBody.name,
+          description: patchBody.description ?? null,
+          rowCount: 1,
+          createdAt: "2026-01-01T00:00:00Z",
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithClient(<DatasetTable datasetId={1} onDelete={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("테스트 데이터셋")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "데이터셋 수정" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("이름")).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByLabelText("이름");
+    await user.clear(nameInput);
+    await user.type(nameInput, "수정된 데이터셋");
+
+    await user.click(screen.getByRole("button", { name: "저장" }));
+
+    await waitFor(() => {
+      expect(patchBody).toEqual(expect.objectContaining({ name: "수정된 데이터셋" }));
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("이름")).not.toBeInTheDocument();
+    });
+  });
+});
+
 describe("DatasetTable - 행 수정", () => {
   it("행 수정 버튼 클릭 후 내용을 변경하고 저장하면 업데이트되어야 한다", async () => {
     setupHandlers();

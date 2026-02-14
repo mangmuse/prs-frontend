@@ -2,7 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { datasetsApi } from "@/api/datasets";
 import { datasetQueries } from "@/queries/datasetQueries";
-import type { CreateDatasetRequest, CreateRowsRequest, UpdateRowRequest } from "@/types/dataset";
+import type {
+  CreateDatasetRequest,
+  CreateRowsRequest,
+  UpdateDatasetRequest,
+  UpdateRowRequest,
+} from "@/types/dataset";
 
 export const useCreateDataset = () => {
   const queryClient = useQueryClient();
@@ -80,6 +85,18 @@ export const useDeleteDatasetRow = () => {
   return useMutation({
     mutationFn: ({ datasetId, rowId }: { datasetId: number; rowId: number }) =>
       datasetsApi.deleteRow(datasetId, rowId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: datasetQueries.all() });
+    },
+  });
+};
+
+export const useUpdateDataset = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ datasetId, data }: { datasetId: number; data: UpdateDatasetRequest }) =>
+      datasetsApi.update(datasetId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: datasetQueries.all() });
     },

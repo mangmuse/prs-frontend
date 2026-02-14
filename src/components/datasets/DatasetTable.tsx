@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Maximize2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
+import { EditMetaDialog } from "@/components/common/EditMetaDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useModal } from "@/hooks/modals/useModal";
-import { useDeleteDataset, useDeleteDatasetRow } from "@/hooks/mutations/datasetMutations";
+import {
+  useDeleteDataset,
+  useDeleteDatasetRow,
+  useUpdateDataset,
+} from "@/hooks/mutations/datasetMutations";
 import { datasetQueries } from "@/queries/datasetQueries";
 import type { DatasetRow } from "@/types/dataset";
 import { isJsonString } from "@/utils/json";
@@ -46,7 +51,9 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
   const [deletingRowId, setDeletingRowId] = useState<number | null>(null);
   const deleteRow = useDeleteDatasetRow();
   const [isDeletingDataset, setIsDeletingDataset] = useState(false);
+  const [isEditingDataset, setIsEditingDataset] = useState(false);
   const deleteDataset = useDeleteDataset();
+  const updateDataset = useUpdateDataset();
 
   const { data, isPending, error } = useQuery(
     datasetQueries.detail(datasetId, page, ROWS_PER_PAGE),
@@ -57,6 +64,13 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
     deleteRow.mutate(
       { datasetId, rowId: deletingRowId },
       { onSuccess: () => setDeletingRowId(null) },
+    );
+  };
+
+  const handleDatasetUpdate = (formData: { name: string; description: string }) => {
+    updateDataset.mutate(
+      { datasetId, data: formData },
+      { onSuccess: () => setIsEditingDataset(false) },
     );
   };
 
@@ -88,6 +102,15 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h3 className="text-lg font-medium">{data.name}</h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            aria-label="데이터셋 수정"
+            onClick={() => setIsEditingDataset(true)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -230,6 +253,15 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
         onConfirm={handleRowDelete}
         title="행을 삭제하시겠습니까?"
         description="이 작업은 되돌릴 수 없습니다. 해당 행이 영구적으로 삭제됩니다."
+      />
+      <EditMetaDialog
+        open={isEditingDataset}
+        onOpenChange={(open) => !open && setIsEditingDataset(false)}
+        onSubmit={handleDatasetUpdate}
+        isPending={updateDataset.isPending}
+        title="데이터셋 수정"
+        initialName={data.name}
+        initialDescription={data.description ?? ""}
       />
       <ConfirmDeleteDialog
         open={isDeletingDataset}
