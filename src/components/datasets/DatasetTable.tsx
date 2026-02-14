@@ -3,16 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Maximize2, Pencil, Plus, Trash2 } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -201,34 +192,20 @@ export const DatasetTable = ({ datasetId }: DatasetTableProps) => {
         }
       />
 
-      <AlertDialog
+      <ConfirmDeleteDialog
         open={deletingRowId !== null}
         onOpenChange={(open) => !open && setDeletingRowId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>행을 삭제하시겠습니까?</AlertDialogTitle>
-            <AlertDialogDescription>
-              이 작업은 되돌릴 수 없습니다. 해당 행이 영구적으로 삭제됩니다.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                if (deletingRowId === null) return;
-                deleteRow.mutate(
-                  { datasetId, rowId: deletingRowId },
-                  { onSuccess: () => setDeletingRowId(null) },
-                );
-              }}
-            >
-              삭제하기
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="행을 삭제하시겠습니까?"
+        description="이 작업은 되돌릴 수 없습니다. 해당 행이 영구적으로 삭제됩니다."
+        isPending={deleteRow.isPending}
+        onConfirm={() => {
+          if (deletingRowId === null) return;
+          deleteRow.mutate(
+            { datasetId, rowId: deletingRowId },
+            { onSuccess: () => setDeletingRowId(null) },
+          );
+        }}
+      />
     </div>
   );
 };
