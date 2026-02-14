@@ -5,6 +5,8 @@ import type {
   CreateRowsResponse,
   Dataset,
   DatasetDetailResponse,
+  DatasetRow,
+  UpdateRowRequest,
 } from "@/types/dataset";
 
 import { apiClient } from "./client";
@@ -26,5 +28,13 @@ export const datasetsApi = {
 
   async addRows(datasetId: number, rows: CreateRowsRequest[]): Promise<CreateRowsResponse> {
     return apiClient.post(`datasets/${datasetId}/rows`, { json: rows }).json<CreateRowsResponse>();
+  },
+
+  async updateRow(datasetId: number, rowId: number, data: UpdateRowRequest): Promise<DatasetRow> {
+    return apiClient.put(`datasets/${datasetId}/rows/${rowId}`, { json: data }).json<DatasetRow>();
+  },
+
+  async deleteRow(datasetId: number, rowId: number): Promise<void> {
+    await apiClient.delete(`datasets/${datasetId}/rows/${rowId}`);
   },
 };

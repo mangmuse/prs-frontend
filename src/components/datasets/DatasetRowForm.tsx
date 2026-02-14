@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddRows } from "@/hooks/mutations/useAddRows";
+import { useUpdateDatasetRow } from "@/hooks/mutations/useUpdateDatasetRow";
+import type { DatasetRow } from "@/types/dataset";
 
 import { TemplateReferenceSection } from "./TemplateReferenceSection";
 
@@ -37,10 +40,26 @@ interface DatasetRowFormProps {
   datasetId: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editingRow?: DatasetRow;
 }
 
-export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowFormProps) => {
+const toFormValues = (row: DatasetRow): DatasetRowFormData => ({
+  inputFields: Object.entries(row.inputData).map(([key, value]) => ({
+    key,
+    value: typeof value === "string" ? value : JSON.stringify(value),
+  })),
+  expectedOutput: row.expectedOutput,
+  tags: row.tags.join(", "),
+});
+
+export const DatasetRowForm = ({
+  datasetId,
+  open,
+  onOpenChange,
+  editingRow,
+}: DatasetRowFormProps) => {
   const addRows = useAddRows();
+  const updateRow = useUpdateDatasetRow();
 
   const {
     register,
@@ -63,6 +82,12 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
     name: "inputFields",
   });
 
+  useEffect(() => {
+    if (open && editingRow) {
+      reset(toFormValues(editingRow));
+    }
+  }, [open, editingRow, reset]);
+
   const onSubmit = (data: DatasetRowFormData) => {
     const inputData = Object.fromEntries(data.inputFields.map((field) => [field.key, field.value]));
 
@@ -71,16 +96,27 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
       .map((tag) => tag.trim())
       .filter(Boolean);
 
+    if (editingRow) {
+      updateRow.mutate(
+        {
+          datasetId,
+          rowId: editingRow.id,
+          data: { inputData, expectedOutput: data.expectedOutput, tags },
+        },
+        {
+          onSuccess: () => {
+            reset();
+            onOpenChange(false);
+          },
+        },
+      );
+      return;
+    }
+
     addRows.mutate(
       {
         datasetId,
-        rows: [
-          {
-            inputData: inputData,
-            expectedOutput: data.expectedOutput,
-            tags,
-          },
-        ],
+        rows: [{ inputData, expectedOutput: data.expectedOutput, tags }],
       },
       {
         onSuccess: () => {
@@ -115,8 +151,12 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <form onSubmit={(event) => void handleSubmit(onSubmit)(event)}>
           <DialogHeader>
-            <DialogTitle>새 행 추가</DialogTitle>
-            <DialogDescription>데이터셋에 새 테스트 케이스를 추가합니다.</DialogDescription>
+            <DialogTitle>{editingRow ? "행 수정" : "새 행 추가"}</DialogTitle>
+            <DialogDescription>
+              {editingRow
+                ? "테스트 케이스를 수정합니다."
+                : "데이터셋에 새 테스트 케이스를 추가합니다."}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
@@ -202,8 +242,14 @@ export const DatasetRowForm = ({ datasetId, open, onOpenChange }: DatasetRowForm
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               취소
             </Button>
-            <Button type="submit" disabled={addRows.isPending}>
-              {addRows.isPending ? "추가 중..." : "추가"}
+            <Button type="submit" disabled={addRows.isPending || updateRow.isPending}>
+              {editingRow
+                ? updateRow.isPending
+                  ? "저장 중..."
+                  : "저장"
+                : addRows.isPending
+                  ? "추가 중..."
+                  : "추가"}
             </Button>
           </DialogFooter>
         </form>

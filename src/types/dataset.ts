@@ -46,3 +46,9 @@ export interface CreateRowsRequest {
 export interface CreateRowsResponse {
   createdCount: number;
 }
+
+export interface UpdateRowRequest {
+  inputData: Record<string, unknown>;
+  expectedOutput: string;
+  tags?: string[];
+}
