@@ -76,11 +76,15 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
     setFormState((prev) => ({ ...prev, profileId: parseInt(value, 10) }));
   };
 
+  const selectedDataset = datasets?.find((d) => d.id === formState.datasetId);
+  const isEmptyDataset = selectedDataset !== undefined && selectedDataset.rowCount === 0;
+
   const isFormValid =
     formState.promptId !== null &&
     effectiveVersionId !== null &&
     formState.datasetId !== null &&
-    formState.profileId !== null;
+    formState.profileId !== null &&
+    !isEmptyDataset;
 
   const handleSubmit = () => {
     if (!isFormValid) return;
@@ -192,6 +196,12 @@ export const CreateRunModal = ({ open, onOpenChange }: CreateRunModalProps) => {
             </Select>
           </div>
         </div>
+
+        {isEmptyDataset && (
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            선택한 데이터셋이 비어 있습니다. 행을 추가한 후 실행해주세요.
+          </div>
+        )}
 
         {requiredProvider && !apiKey && (
           <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
