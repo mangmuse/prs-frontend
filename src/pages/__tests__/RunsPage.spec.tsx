@@ -1,6 +1,6 @@
 import { MemoryRouter } from "react-router";
 
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
@@ -10,6 +10,28 @@ import { RunsPage } from "@/pages/RunsPage";
 import { renderWithClient } from "@/test/utils";
 
 const API = "http://localhost:8000";
+
+const mockRuns = [
+  {
+    id: 1,
+    promptId: 1,
+    promptVersionId: 1,
+    promptName: "팩트체크",
+    versionNumber: 1,
+    datasetId: 1,
+    datasetName: "테스트셋",
+    profileId: 1,
+    profileName: "기본 프로필",
+    status: "completed",
+    passRate: 0.85,
+    avgSemantic: 0.9,
+    formatPassRate: 1.0,
+    semanticPassRate: 0.9,
+    constraintPassRate: 0.85,
+    totalRows: 10,
+    createdAt: "2026-01-01",
+  },
+];
 
 const renderRunsPage = () =>
   renderWithClient(
@@ -38,5 +60,16 @@ describe("RunsPage", () => {
     await user.click(ctaButton);
 
     expect(await screen.findByRole("heading", { name: "새 실행" })).toBeInTheDocument();
+  });
+
+  it("실행 기록이 있으면 테이블이 표시되어야 한다", async () => {
+    server.use(http.get(`${API}/runs`, () => HttpResponse.json(mockRuns)));
+
+    renderRunsPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+    expect(screen.getByText(/팩트체크/)).toBeInTheDocument();
   });
 });
