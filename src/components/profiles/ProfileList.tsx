@@ -38,6 +38,10 @@ export const ProfileList = ({ selectedId, onSelect, onCreateNew }: ProfileListPr
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
           <Shield className="mb-2 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">프로필을 생성하세요</p>
+          <Button size="sm" className="mt-4" onClick={onCreateNew}>
+            <Plus className="mr-1 h-4 w-4" />
+            프로필 만들기
+          </Button>
         </div>
       ) : (
         <div className="space-y-2">

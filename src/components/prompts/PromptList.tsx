@@ -38,6 +38,10 @@ export const PromptList = ({ selectedId, onSelect, onCreateNew }: PromptListProp
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
           <FileText className="mb-2 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">프롬프트를 생성하세요</p>
+          <Button size="sm" className="mt-4" onClick={onCreateNew}>
+            <Plus className="mr-1 h-4 w-4" />
+            프롬프트 만들기
+          </Button>
         </div>
       ) : (
         <div className="space-y-2">

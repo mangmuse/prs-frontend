@@ -39,6 +39,7 @@ const retryWithNewToken = async (request: KyRequest, newToken: string): Promise<
 export const apiClient = ky.create({
   prefixUrl: API_BASE_URL,
   timeout: 10000,
+  retry: import.meta.env.MODE === "test" ? { limit: 0 } : undefined,
   credentials: "include",
   headers: {
     "Content-Type": "application/json",

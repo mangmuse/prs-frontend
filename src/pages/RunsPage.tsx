@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Play, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { CreateRunModal } from "@/components/runs/CreateRunModal";
@@ -51,7 +51,17 @@ export const RunsPage = () => {
         </Button>
       </header>
       <div className="flex-1 p-6">
-        <RunsTable runs={runs} />
+        {runs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
+            <Play className="mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-muted-foreground">실행 기록이 없습니다</p>
+            <Button className="mt-4" onClick={() => open()}>
+              <Plus className="mr-2 h-4 w-4" />첫 실행 시작하기
+            </Button>
+          </div>
+        ) : (
+          <RunsTable runs={runs} />
+        )}
       </div>
 
       <CreateRunModal open={state.open} onOpenChange={onOpenChange} />
