@@ -22,12 +22,7 @@ describe("CreateDatasetModal", () => {
 
     const user = userEvent.setup();
     renderWithClient(
-      <CreateDatasetModal
-        open={true}
-        onOpenChange={() => {}}
-        onSuccess={() => {}}
-        onCreated={onCreated}
-      />,
+      <CreateDatasetModal open={true} onOpenChange={() => {}} onCreated={onCreated} />,
     );
 
     await user.type(screen.getByPlaceholderText("데이터셋 이름"), "새 데이터셋");

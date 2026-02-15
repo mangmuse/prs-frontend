@@ -13,8 +13,13 @@ const API = "http://localhost:8000";
 describe("CreateProfileModal", () => {
   it("제약조건 타입을 변경하면 이전 타입의 필드 값이 초기화되어야 한다", async () => {
     const user = userEvent.setup();
+    const onCreated = vi.fn();
     renderWithClient(
-      <CreateProfileModal state={{ open: true, mode: "create" }} onClose={() => {}} />,
+      <CreateProfileModal
+        state={{ open: true, mode: "create" }}
+        onClose={() => {}}
+        onCreated={onCreated}
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "제약조건 추가" }));
@@ -37,12 +42,18 @@ describe("CreateProfileModal", () => {
 
     const resetValueInput = await screen.findByPlaceholderText("값");
     expect(resetValueInput).toHaveValue("");
+    expect(onCreated).not.toHaveBeenCalled();
   });
 
   it("제약조건 타입 변경 후 새 타입의 기본값이 설정되어야 한다", async () => {
     const user = userEvent.setup();
+    const onCreated = vi.fn();
     renderWithClient(
-      <CreateProfileModal state={{ open: true, mode: "create" }} onClose={() => {}} />,
+      <CreateProfileModal
+        state={{ open: true, mode: "create" }}
+        onClose={() => {}}
+        onCreated={onCreated}
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "제약조건 추가" }));
@@ -52,6 +63,7 @@ describe("CreateProfileModal", () => {
 
     const maxInput = await screen.findByPlaceholderText("최대 길이");
     expect(maxInput).toHaveValue(100);
+    expect(onCreated).not.toHaveBeenCalled();
   });
 
   it("Profile 생성 후 해당 프로필이 자동 선택되어야 한다", async () => {

@@ -30,16 +30,10 @@ type ModalState =
 interface CreateProfileModalProps {
   state: ModalState;
   onClose: () => void;
-  onSuccess?: () => void;
-  onCreated?: (id: number) => void;
+  onCreated: (id: number) => void;
 }
 
-export const CreateProfileModal = ({
-  state,
-  onClose,
-  onSuccess,
-  onCreated,
-}: CreateProfileModalProps) => {
+export const CreateProfileModal = ({ state, onClose, onCreated }: CreateProfileModalProps) => {
   const isEditMode = state.open && state.mode === "edit";
   const profileId = isEditMode ? state.profileId : null;
 
@@ -84,7 +78,7 @@ export const CreateProfileModal = ({
     onClose();
   };
 
-  const onSubmit = async (data: ProfileFormData) => {
+  const onSubmit = (data: ProfileFormData) => {
     const requestData = {
       name: data.name,
       description: data.description || undefined,
@@ -121,20 +115,32 @@ export const CreateProfileModal = ({
       }),
     };
 
-    try {
-      if (isEditMode) {
-        await updateMutation.mutateAsync({ id: profileId!, data: requestData });
-        toast.success("프로필이 수정되었습니다");
-      } else {
-        const created = await createMutation.mutateAsync(requestData as CreateProfileRequest);
-        toast.success("프로필이 생성되었습니다");
-        onCreated?.(created.id);
-      }
-      handleClose();
-      onSuccess?.();
-    } catch {
-      toast.error(isEditMode ? "프로필 수정에 실패했습니다" : "프로필 생성에 실패했습니다");
+    if (isEditMode) {
+      updateMutation.mutate(
+        { id: profileId!, data: requestData },
+        {
+          onSuccess: () => {
+            toast.success("프로필이 수정되었습니다");
+            handleClose();
+          },
+          onError: () => {
+            toast.error("프로필 수정에 실패했습니다");
+          },
+        },
+      );
+      return;
     }
+
+    createMutation.mutate(requestData as CreateProfileRequest, {
+      onSuccess: (created) => {
+        toast.success("프로필이 생성되었습니다");
+        onCreated(created.id);
+        handleClose();
+      },
+      onError: () => {
+        toast.error("프로필 생성에 실패했습니다");
+      },
+    });
   };
 
   const isLoading = createMutation.isPending || updateMutation.isPending;

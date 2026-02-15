@@ -26,7 +26,7 @@ import { useCreatePrompt } from "@/hooks/mutations/promptMutations";
 interface CreatePromptModalProps {
   open: boolean;
   onClose: () => void;
-  onCreated?: (id: number) => void;
+  onCreated: (id: number) => void;
 }
 
 const createPromptSchema = z.object({
@@ -54,7 +54,7 @@ export const CreatePromptModal = ({ open, onClose, onCreated }: CreatePromptModa
       {
         onSuccess: (created) => {
           toast.success("프롬프트가 생성되었습니다");
-          onCreated?.(created.id);
+          onCreated(created.id);
           handleClose();
         },
         onError: () => {

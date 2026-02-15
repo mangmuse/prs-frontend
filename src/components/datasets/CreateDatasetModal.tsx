@@ -23,16 +23,10 @@ import type { CreateDatasetFormData } from "./types";
 interface CreateDatasetModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
-  onCreated?: (id: number) => void;
+  onCreated: (id: number) => void;
 }
 
-export const CreateDatasetModal = ({
-  open,
-  onOpenChange,
-  onSuccess,
-  onCreated,
-}: CreateDatasetModalProps) => {
+export const CreateDatasetModal = ({ open, onOpenChange, onCreated }: CreateDatasetModalProps) => {
   const createDatasetWithRows = useCreateDatasetWithRows();
 
   const {
@@ -80,10 +74,9 @@ export const CreateDatasetModal = ({
       {
         onSuccess: (created) => {
           toast.success("데이터셋이 생성되었습니다");
-          onCreated?.(created.id);
+          onCreated(created.id);
           reset();
           onOpenChange(false);
-          onSuccess();
         },
         onError: () => {
           toast.error("데이터셋 생성에 실패했습니다");
