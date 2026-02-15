@@ -4,6 +4,9 @@ import { HttpResponse, http } from "msw";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockDataset } from "@/test/factories/dataset";
+import { createMockProfileSummary } from "@/test/factories/profile";
+import { createMockPrompt, createMockVersion } from "@/test/factories/prompt";
 import { renderWithClient } from "@/test/utils";
 
 import { CreateRunModal } from "../CreateRunModal";
@@ -12,46 +15,15 @@ const API = "http://localhost:8000";
 
 const renderModal = () => renderWithClient(<CreateRunModal open={true} onOpenChange={() => {}} />);
 
-const mockPrompts = [
-  {
-    id: 1,
-    name: "테스트 프롬프트",
-    description: null,
-    latestVersion: 1,
-    versionCount: 1,
-    createdAt: "2026-01-01",
-  },
-];
-const mockVersions = [
-  {
-    id: 10,
-    versionNumber: 1,
-    model: "openai/gpt-4o",
-    memo: null,
-    userTemplate: "{{input}}",
-    createdAt: "2026-01-01",
-  },
-];
-const mockProfiles = [
-  {
-    id: 1,
-    name: "기본 프로필",
-    description: null,
-    semanticThreshold: 0.85,
-    constraintCount: 0,
-    createdAt: "2026-01-01",
-  },
-];
+const mockPrompts = [createMockPrompt({ name: "테스트 프롬프트" })];
+const mockVersions = [createMockVersion({ id: 10, model: "openai/gpt-4o" })];
+const mockProfiles = [createMockProfileSummary()];
 
 const setupHandlers = (datasets: { id: number; name: string; rowCount: number }[]) => {
   server.use(
     http.get(`${API}/prompts`, () => HttpResponse.json(mockPrompts)),
     http.get(`${API}/prompts/:promptId/versions`, () => HttpResponse.json(mockVersions)),
-    http.get(`${API}/datasets`, () =>
-      HttpResponse.json(
-        datasets.map((d) => ({ ...d, description: null, createdAt: "2026-01-01" })),
-      ),
-    ),
+    http.get(`${API}/datasets`, () => HttpResponse.json(datasets.map((d) => createMockDataset(d)))),
     http.get(`${API}/evaluator-profiles`, () => HttpResponse.json(mockProfiles)),
   );
 };

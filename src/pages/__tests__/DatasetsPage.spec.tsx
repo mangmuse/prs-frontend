@@ -7,29 +7,19 @@ import { describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
 import { DatasetsPage } from "@/pages/DatasetsPage";
+import { createMockDataset, createMockDatasetDetail } from "@/test/factories/dataset";
 import { renderWithClient } from "@/test/utils";
 
 const API = "http://localhost:8000";
 
 const mockDatasets = [
-  { id: 1, name: "테스트 데이터셋", description: "설명", rowCount: 2, createdAt: "2026-01-01" },
+  createMockDataset({ name: "테스트 데이터셋", description: "설명", rowCount: 2 }),
 ];
 
-const mockDatasetDetail = {
-  id: 1,
+const mockDatasetDetail = createMockDatasetDetail({
   name: "테스트 데이터셋",
   description: "설명",
-  rows: [
-    {
-      id: 1,
-      datasetId: 1,
-      inputData: { question: "질문1" },
-      expectedOutput: "답변1",
-      tags: [],
-    },
-  ],
-  pagination: { page: 1, limit: 10, totalCount: 1, totalPages: 1 },
-};
+});
 
 const renderDatasetsPage = () =>
   renderWithClient(

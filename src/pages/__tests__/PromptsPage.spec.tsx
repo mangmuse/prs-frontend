@@ -7,31 +7,18 @@ import { describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
 import { PromptsPage } from "@/pages/PromptsPage";
+import {
+  createMockPrompt,
+  createMockVersion,
+  createMockVersionDetail,
+} from "@/test/factories/prompt";
 import { renderWithClient } from "@/test/utils";
 
 const API = "http://localhost:8000";
 
-const mockPrompts = [
-  {
-    id: 1,
-    name: "팩트체크 프롬프트",
-    description: "사실 검증용",
-    latestVersion: 1,
-    versionCount: 1,
-    createdAt: "2026-01-01",
-  },
-];
+const mockPrompts = [createMockPrompt({ name: "팩트체크 프롬프트", description: "사실 검증용" })];
 
-const mockVersions = [
-  {
-    id: 1,
-    versionNumber: 1,
-    model: "gpt-4o",
-    memo: null,
-    userTemplate: "{{input}}",
-    createdAt: "2026-01-01",
-  },
-];
+const mockVersions = [createMockVersion()];
 
 const renderPromptsPage = () =>
   renderWithClient(
@@ -57,20 +44,7 @@ describe("PromptsPage", () => {
     server.use(
       http.get(`${API}/prompts`, () => HttpResponse.json(mockPrompts)),
       http.get(`${API}/prompts/1/versions`, () => HttpResponse.json(mockVersions)),
-      http.get(`${API}/prompts/1/versions/1`, () =>
-        HttpResponse.json({
-          id: 1,
-          promptId: 1,
-          versionNumber: 1,
-          systemInstruction: "시스템 지시",
-          userTemplate: "{{input}}",
-          model: "gpt-4o",
-          temperature: 0.7,
-          outputSchema: "Freeform",
-          memo: null,
-          createdAt: "2026-01-01",
-        }),
-      ),
+      http.get(`${API}/prompts/1/versions/1`, () => HttpResponse.json(createMockVersionDetail())),
     );
     const user = userEvent.setup();
 

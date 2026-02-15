@@ -5,20 +5,15 @@ import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockProfileDetail } from "@/test/factories/profile";
 
 import { ProfileDetail } from "../ProfileDetail";
 
 const API = "http://localhost:8000";
 
-const mockProfile = {
-  id: 1,
-  name: "기본 프로필",
+const mockProfile = createMockProfileDetail({
   description: "테스트용 프로필",
-  semanticThreshold: 0.85,
-  globalConstraints: [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
+});
 
 const renderProfileDetail = (props?: { onDelete?: () => void }) => {
   const queryClient = new QueryClient({

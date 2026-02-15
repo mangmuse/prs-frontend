@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockDatasetRow } from "@/test/factories/dataset";
 import { renderWithClient } from "@/test/utils";
 
 import { DatasetRowForm } from "../DatasetRowForm";
@@ -17,13 +18,12 @@ const defaultProps = {
   onOpenChange: vi.fn(),
 };
 
-const editingRow = {
+const editingRow = createMockDatasetRow({
   id: 10,
-  datasetId: 1,
   inputData: { claim: "지구는 둥글다", source: "NASA" },
   expectedOutput: "TRUE",
   tags: ["science", "fact"],
-};
+});
 
 describe("DatasetRowForm", () => {
   beforeEach(() => {

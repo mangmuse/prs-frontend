@@ -7,31 +7,12 @@ import { describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
 import { RunsPage } from "@/pages/RunsPage";
+import { createMockRunSummary } from "@/test/factories/run";
 import { renderWithClient } from "@/test/utils";
 
 const API = "http://localhost:8000";
 
-const mockRuns = [
-  {
-    id: 1,
-    promptId: 1,
-    promptVersionId: 1,
-    promptName: "팩트체크",
-    versionNumber: 1,
-    datasetId: 1,
-    datasetName: "테스트셋",
-    profileId: 1,
-    profileName: "기본 프로필",
-    status: "completed",
-    passRate: 0.85,
-    avgSemantic: 0.9,
-    formatPassRate: 1.0,
-    semanticPassRate: 0.9,
-    constraintPassRate: 0.85,
-    totalRows: 10,
-    createdAt: "2026-01-01",
-  },
-];
+const mockRuns = [createMockRunSummary({ promptName: "팩트체크" })];
 
 const renderRunsPage = () =>
   renderWithClient(

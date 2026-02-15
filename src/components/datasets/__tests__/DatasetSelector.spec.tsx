@@ -4,6 +4,7 @@ import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockDataset } from "@/test/factories/dataset";
 import { renderWithClient } from "@/test/utils";
 
 import { DatasetSelector } from "../DatasetSelector";
@@ -11,8 +12,8 @@ import { DatasetSelector } from "../DatasetSelector";
 const API = "http://localhost:8000";
 
 const mockDatasets = [
-  { id: 1, name: "감성 분석", description: "", rowCount: 120, createdAt: "2026-01-01" },
-  { id: 2, name: "팩트체크", description: "", rowCount: 45, createdAt: "2026-01-02" },
+  createMockDataset({ name: "감성 분석", rowCount: 120 }),
+  createMockDataset({ id: 2, name: "팩트체크", rowCount: 45, createdAt: "2026-01-02" }),
 ];
 
 describe("DatasetSelector", () => {

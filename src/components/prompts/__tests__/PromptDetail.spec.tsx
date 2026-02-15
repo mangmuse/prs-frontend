@@ -4,35 +4,21 @@ import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockVersion, createMockVersionDetail } from "@/test/factories/prompt";
 import { renderWithClient } from "@/test/utils";
 
 import { PromptDetail } from "../PromptDetail";
 
 const API = "http://localhost:8000";
 
-const mockVersions = [
-  {
-    id: 10,
-    versionNumber: 1,
-    model: "gpt-4",
-    memo: null,
-    userTemplate: "{{input}}",
-    createdAt: "2026-01-01T00:00:00Z",
-  },
-];
+const mockVersions = [createMockVersion({ id: 10, model: "gpt-4" })];
 
-const mockVersionDetail = {
+const mockVersionDetail = createMockVersionDetail({
   id: 10,
-  promptId: 1,
-  versionNumber: 1,
-  systemInstruction: "테스트 시스템 지시문",
-  userTemplate: "{{input}}",
   model: "gpt-4",
   temperature: 0.5,
-  outputSchema: "Freeform",
-  memo: null,
-  createdAt: "2026-01-01T00:00:00Z",
-};
+  systemInstruction: "테스트 시스템 지시문",
+});
 
 const defaultProps = {
   promptId: 1,

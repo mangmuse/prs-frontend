@@ -5,26 +5,23 @@ import { toast } from "sonner";
 import { describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockDatasetDetail, createMockDatasetRow } from "@/test/factories/dataset";
 import { renderWithClient } from "@/test/utils";
 
 import { DatasetTable } from "../DatasetTable";
 
 const API = "http://localhost:8000";
 
-const mockDetailResponse = {
-  id: 1,
-  name: "테스트 데이터셋",
+const mockDetailResponse = createMockDatasetDetail({
   rows: [
-    {
+    createMockDatasetRow({
       id: 10,
-      datasetId: 1,
       inputData: { claim: "서울은 수도다" },
       expectedOutput: "TRUE",
       tags: ["상식"],
-    },
+    }),
   ],
-  pagination: { page: 1, limit: 10, totalCount: 1, totalPages: 1 },
-};
+});
 
 const setupHandlers = () => {
   server.use(

@@ -7,40 +7,40 @@ import { describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
 import { ProfilesPage } from "@/pages/ProfilesPage";
+import { createMockProfileDetail, createMockProfileSummary } from "@/test/factories/profile";
 import { renderWithClient } from "@/test/utils";
 
 const API = "http://localhost:8000";
 
 const mockProfiles = [
   {
-    id: 1,
-    name: "엄격한 평가",
-    description: "높은 임계값",
-    semanticThreshold: 0.9,
-    constraintCount: 3,
-    createdAt: "2026-01-01",
+    ...createMockProfileSummary({
+      name: "엄격한 평가",
+      description: "높은 임계값",
+      semanticThreshold: 0.9,
+      constraintCount: 3,
+    }),
     updatedAt: "2026-01-01",
   },
   {
-    id: 2,
-    name: "관대한 평가",
-    description: "",
-    semanticThreshold: 0.5,
-    constraintCount: 0,
-    createdAt: "2026-01-02",
+    ...createMockProfileSummary({
+      id: 2,
+      name: "관대한 평가",
+      description: "",
+      semanticThreshold: 0.5,
+      constraintCount: 0,
+      createdAt: "2026-01-02",
+    }),
     updatedAt: "2026-01-02",
   },
 ];
 
-const mockProfileDetail = {
-  id: 1,
+const mockProfileDetail = createMockProfileDetail({
   name: "엄격한 평가",
   description: "높은 임계값",
   semanticThreshold: 0.9,
-  globalConstraints: [],
-  createdAt: "2026-01-01",
   updatedAt: "2026-01-01",
-};
+});
 
 const renderProfilesPage = () =>
   renderWithClient(

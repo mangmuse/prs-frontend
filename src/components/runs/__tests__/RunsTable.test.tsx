@@ -7,32 +7,13 @@ import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
 import { server } from "@/mocks/server";
+import { createMockRunSummary } from "@/test/factories/run";
 
 import { RunsTable } from "../RunsTable";
 
 const API = "http://localhost:8000";
 
-const mockRuns = [
-  {
-    id: 1,
-    promptId: 1,
-    promptVersionId: 1,
-    promptName: "팩트체크",
-    versionNumber: 1,
-    datasetId: 1,
-    datasetName: "상식 데이터",
-    profileId: 1,
-    profileName: "기본 프로필",
-    status: "completed",
-    passRate: 0.8,
-    avgSemantic: 0.85,
-    formatPassRate: 1.0,
-    semanticPassRate: 0.85,
-    constraintPassRate: 0.9,
-    totalRows: 10,
-    createdAt: new Date().toISOString(),
-  },
-];
+const mockRuns = [createMockRunSummary({ promptName: "팩트체크", datasetName: "상식 데이터" })];
 
 describe("RunsTable - Run 삭제", () => {
   it("Run 삭제 버튼 클릭 시 확인 모달이 표시되고 확인하면 삭제되어야 한다", async () => {
