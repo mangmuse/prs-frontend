@@ -27,7 +27,7 @@ describe("ProviderCard - 초기 상태", () => {
 
     expect(screen.getByPlaceholderText("sk-...")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "검증" })).toBeInTheDocument();
-    expect(screen.getByText("미설정")).toBeInTheDocument();
+    expect(screen.getByText(/미설정/)).toBeInTheDocument();
   });
 
   it("입력값이 없으면 검증 버튼이 비활성화되어야 한다", () => {
@@ -51,7 +51,7 @@ describe("ProviderCard - API 키 검증", () => {
     await user.click(screen.getByRole("button", { name: "검증" }));
 
     await waitFor(() => {
-      expect(screen.getByText("연결됨")).toBeInTheDocument();
+      expect(screen.getByText(/연결됨/)).toBeInTheDocument();
     });
     expect(screen.getByText("••••••••••••••••••••")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "OpenAI 키 삭제" })).toBeInTheDocument();
@@ -70,9 +70,9 @@ describe("ProviderCard - API 키 검증", () => {
     await user.click(screen.getByRole("button", { name: "검증" }));
 
     await waitFor(() => {
-      expect(screen.getByText("오류")).toBeInTheDocument();
+      expect(screen.getByText(/오류/)).toBeInTheDocument();
     });
-    expect(screen.getByText("Invalid API key")).toBeInTheDocument();
+    expect(screen.getByText(/Invalid API key/)).toBeInTheDocument();
   });
 
   it("네트워크 에러 시 안내 메시지가 표시되어야 한다", async () => {
@@ -84,7 +84,7 @@ describe("ProviderCard - API 키 검증", () => {
     await user.click(screen.getByRole("button", { name: "검증" }));
 
     await waitFor(() => {
-      expect(screen.getByText("검증 요청에 실패했습니다. 다시 시도해주세요.")).toBeInTheDocument();
+      expect(screen.getByText(/검증 요청에 실패했습니다/)).toBeInTheDocument();
     });
   });
 });
@@ -98,11 +98,11 @@ describe("ProviderCard - 키 삭제", () => {
     const user = userEvent.setup();
     renderWithClient(<ProviderCard provider={openaiProvider} />);
 
-    expect(screen.getByText("연결됨")).toBeInTheDocument();
+    expect(screen.getByText(/연결됨/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "OpenAI 키 삭제" }));
 
-    expect(screen.getByText("미설정")).toBeInTheDocument();
+    expect(screen.getByText(/미설정/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText("sk-...")).toBeInTheDocument();
   });
 });

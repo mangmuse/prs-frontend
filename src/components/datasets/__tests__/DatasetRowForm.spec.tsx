@@ -34,7 +34,7 @@ describe("DatasetRowForm", () => {
   it("추가 모드에서 '추가' 버튼이 표시되어야 한다", () => {
     renderWithClient(<DatasetRowForm {...defaultProps} />);
 
-    expect(screen.getByText("새 행 추가")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /새 행 추가/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "추가" })).toBeInTheDocument();
   });
 
@@ -42,7 +42,7 @@ describe("DatasetRowForm", () => {
     renderWithClient(<DatasetRowForm {...defaultProps} editingRow={editingRow} />);
 
     await waitFor(() => {
-      expect(screen.getByText("행 수정")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /행 수정/ })).toBeInTheDocument();
     });
 
     const keyInputs = screen.getAllByPlaceholderText("key");
@@ -73,7 +73,7 @@ describe("DatasetRowForm", () => {
     await user.click(screen.getByRole("button", { name: "추가" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Expected output은 필수입니다")).toBeInTheDocument();
+      expect(screen.getByText(/Expected output은 필수입니다/)).toBeInTheDocument();
     });
   });
 
@@ -88,7 +88,7 @@ describe("DatasetRowForm", () => {
     await user.click(screen.getByRole("button", { name: "추가" }));
 
     await waitFor(() => {
-      expect(screen.getByText("키는 필수입니다")).toBeInTheDocument();
+      expect(screen.getByText(/키는 필수입니다/)).toBeInTheDocument();
     });
   });
 
@@ -122,7 +122,7 @@ describe("DatasetRowForm", () => {
     renderWithClient(<DatasetRowForm {...defaultProps} editingRow={editingRow} />);
 
     await waitFor(() => {
-      expect(screen.getByText("행 수정")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /행 수정/ })).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "저장" }));

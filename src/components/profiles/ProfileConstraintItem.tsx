@@ -193,8 +193,14 @@ export const ProfileConstraintItem = ({
         />
       )}
 
-      <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
-        <Trash2 className="h-4 w-4 text-destructive" />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={onRemove}
+        aria-label="제약조건 삭제"
+      >
+        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
       </Button>
     </div>
   );

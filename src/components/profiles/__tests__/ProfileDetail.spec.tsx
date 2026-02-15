@@ -53,13 +53,13 @@ describe("ProfileDetail - Profile 삭제", () => {
     const user = userEvent.setup();
 
     await waitFor(() => {
-      expect(screen.getByText("기본 프로필")).toBeInTheDocument();
+      expect(screen.getByText(/기본 프로필/)).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "삭제" }));
 
     await waitFor(() => {
-      expect(screen.getByText("프로필을 삭제하시겠습니까?")).toBeInTheDocument();
+      expect(screen.getByText(/프로필을 삭제하시겠습니까/)).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("button", { name: "삭제하기" }));

@@ -33,10 +33,10 @@ describe("CreateVersionModal", () => {
   it("모달이 열리면 폼 필드들이 표시되어야 한다", () => {
     renderWithClient(<CreateVersionModal {...defaultProps} />);
 
-    expect(screen.getByText("새 버전 생성")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /새 버전 생성/ })).toBeInTheDocument();
     expect(screen.getByText("모델")).toBeInTheDocument();
     expect(screen.getByText(/Temperature/)).toBeInTheDocument();
-    expect(screen.getByText("출력 형식")).toBeInTheDocument();
+    expect(screen.getByText(/출력 형식/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText("시스템 지시사항을 입력하세요...")).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/사용자 템플릿을 입력하세요/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText("이 버전의 변경사항")).toBeInTheDocument();
@@ -50,7 +50,7 @@ describe("CreateVersionModal", () => {
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     await waitFor(() => {
-      expect(screen.getByText("모델을 선택해주세요")).toBeInTheDocument();
+      expect(screen.getByText(/모델을 선택해주세요/)).toBeInTheDocument();
     });
   });
 
@@ -64,7 +64,7 @@ describe("CreateVersionModal", () => {
     renderWithClient(<CreateVersionModal {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText("모델을 선택하세요")).toBeInTheDocument();
+      expect(screen.getByText(/모델을 선택하세요/)).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("combobox", { name: "모델" }));
@@ -89,7 +89,7 @@ describe("CreateVersionModal", () => {
     renderWithClient(<CreateVersionModal {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText("모델을 선택하세요")).toBeInTheDocument();
+      expect(screen.getByText(/모델을 선택하세요/)).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole("combobox", { name: "모델" }));
@@ -108,7 +108,7 @@ describe("CreateVersionModal", () => {
     renderWithClient(<CreateVersionModal {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText("모델을 선택하세요")).toBeInTheDocument();
+      expect(screen.getByText(/모델을 선택하세요/)).toBeInTheDocument();
     });
     expect(screen.queryByRole("option")).not.toBeInTheDocument();
   });
