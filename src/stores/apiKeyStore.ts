@@ -12,7 +12,7 @@ interface ApiKeyState {
   };
 }
 
-const useApiKeyStore = create<ApiKeyState>()(
+export const useApiKeyStore = create<ApiKeyState>()(
   devtools(
     persist(
       (set) => ({
