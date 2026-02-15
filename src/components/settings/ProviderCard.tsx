@@ -116,23 +116,19 @@ export const ProviderCard = ({ provider }: ProviderCardProps) => {
 
   const isConnected = cardState.status === "success";
 
-  const statusBadge = () => {
-    const statusConfig = CARD_STATUS_BADGE_CONFIG[cardState.status];
-    const StatusIcon = statusConfig.icon;
-
-    return (
-      <Badge variant={statusConfig.variant} className={statusConfig.className}>
-        {StatusIcon && <StatusIcon className={cn("mr-1 h-3 w-3", statusConfig.iconClassName)} />}
-        {statusConfig.label}
-      </Badge>
-    );
-  };
+  const statusConfig = CARD_STATUS_BADGE_CONFIG[cardState.status];
+  const StatusIcon = statusConfig.icon;
 
   return (
     <Card className={cn("transition-all", isConnected && "border-green-200 bg-green-50/30")}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-base font-medium">{provider.name}</CardTitle>
-        {statusBadge()}
+        <Badge variant={statusConfig.variant} className={statusConfig.className}>
+          {StatusIcon ? (
+            <StatusIcon className={cn("mr-1 h-3 w-3", statusConfig.iconClassName)} />
+          ) : null}
+          <span>{statusConfig.label}</span>
+        </Badge>
       </CardHeader>
       <CardContent className="space-y-3">
         {savedKey ? (
@@ -186,10 +182,10 @@ export const ProviderCard = ({ provider }: ProviderCardProps) => {
               {cardState.status === "verifying" ? (
                 <>
                   <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                  검증 중
+                  <span>검증 중</span>
                 </>
               ) : (
-                "검증"
+                <span>검증</span>
               )}
             </Button>
           </div>
