@@ -77,7 +77,7 @@ describe("Sidebar", () => {
     });
 
     expect(screen.getByText("Google로 로그인")).toBeInTheDocument();
-    expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+    expect(screen.queryByText("로딩 중...")).not.toBeInTheDocument();
     expect(queryClient.getQueryData(["auth", "me"])).toBeUndefined();
     expect(queryClient.getQueryData(["datasets", "list"])).toBeUndefined();
     expect(queryClient.getQueryData(["prompts", "list"])).toBeUndefined();

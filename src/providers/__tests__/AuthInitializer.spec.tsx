@@ -50,7 +50,7 @@ describe("AuthInitializer", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Loading...")).toBeInTheDocument();
+      expect(screen.getByText("로딩 중...")).toBeInTheDocument();
     });
     expect(screen.queryByText("App Content")).not.toBeInTheDocument();
   });
@@ -103,7 +103,7 @@ describe("AuthInitializer", () => {
     expect(screen.getByText("App Content")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "로그아웃 실행" }));
     expect(screen.getByText("App Content")).toBeInTheDocument();
-    expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+    expect(screen.queryByText("로딩 중...")).not.toBeInTheDocument();
   });
 
   it("refresh 성공 후 me 실패 시 guest 세션으로 폴백한다", async () => {

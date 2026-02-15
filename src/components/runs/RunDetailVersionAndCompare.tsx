@@ -3,6 +3,13 @@ import { X } from "lucide-react";
 import { RunVersionTabs } from "@/components/runs/RunVersionTabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { RelatedVersionsResponse } from "@/types/run";
 
 export const RunDetailVersionAndCompare = ({
@@ -49,22 +56,20 @@ export const RunDetailVersionAndCompare = ({
             </Button>
           </div>
         ) : (
-          <select
-            className="rounded-md border px-3 py-1.5 text-sm"
-            onChange={(e) => onCompareSelect(e.target.value)}
-            value=""
-          >
-            <option value="" disabled>
-              버전 선택
-            </option>
-            {relatedVersions.executedRuns
-              .filter((r) => r.id !== runId)
-              .map((r) => (
-                <option key={r.id} value={r.id}>
-                  v{r.versionNumber}와 비교
-                </option>
-              ))}
-          </select>
+          <Select onValueChange={onCompareSelect}>
+            <SelectTrigger className="h-8 w-[160px] text-sm">
+              <SelectValue placeholder="버전 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {relatedVersions.executedRuns
+                .filter((r) => r.id !== runId)
+                .map((r) => (
+                  <SelectItem key={r.id} value={String(r.id)}>
+                    v{r.versionNumber}와 비교
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
         )}
       </div>
     )}

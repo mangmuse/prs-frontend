@@ -18,7 +18,7 @@ export const ProfileList = ({ selectedId, onSelect, onCreateNew }: ProfileListPr
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Profiles</h2>
+          <h2 className="text-lg font-semibold">프로필</h2>
         </div>
         <div className="text-sm text-muted-foreground">로딩 중...</div>
       </div>
@@ -28,7 +28,7 @@ export const ProfileList = ({ selectedId, onSelect, onCreateNew }: ProfileListPr
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Profiles</h2>
+        <h2 className="text-lg font-semibold">프로필</h2>
         <Button size="sm" onClick={onCreateNew}>
           <Plus className="mr-1 h-4 w-4" />새 프로필
         </Button>
