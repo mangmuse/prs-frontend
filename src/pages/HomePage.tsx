@@ -1,10 +1,21 @@
 import { Link } from "react-router";
 
-import { ArrowRight, ChevronDown, Database, FileText, Play, UserCircle } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  CircleAlert,
+  CircleCheck,
+  Database,
+  FileText,
+  Key,
+  Play,
+  UserCircle,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useHasAnyKey } from "@/stores/apiKeyStore";
 
 const steps = [
   {
@@ -49,6 +60,8 @@ const steps = [
 ] as const;
 
 export const HomePage = () => {
+  const hasAnyKey = useHasAnyKey();
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex h-16 items-center gap-4 border-b bg-white px-6">
@@ -129,6 +142,47 @@ export const HomePage = () => {
               </Card>
             ))}
           </section>
+
+          {/* API 키 안내 */}
+          <Card
+            className={
+              hasAnyKey ? "border-green-200 bg-green-50/50" : "border-amber-300 bg-amber-50"
+            }
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                {hasAnyKey ? (
+                  <CircleCheck className="h-5 w-5 text-green-600" />
+                ) : (
+                  <CircleAlert className="h-5 w-5 text-amber-600" />
+                )}
+                <Key className={`h-4 w-4 ${hasAnyKey ? "text-green-600" : "text-amber-600"}`} />
+                {hasAnyKey ? "API 키가 설정되었습니다" : "API 키를 먼저 설정하세요"}
+              </CardTitle>
+              <CardDescription>
+                {hasAnyKey
+                  ? "설정 페이지에서 API 키를 변경하거나 추가할 수 있습니다."
+                  : "실행하려면 LLM 제공자(OpenAI, Anthropic 등)의 API 키가 필요합니다. 설정 페이지에서 등록하세요."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                size="sm"
+                className={
+                  hasAnyKey
+                    ? "border-green-300 hover:bg-green-100"
+                    : "border-amber-400 bg-white hover:bg-amber-100"
+                }
+                asChild
+              >
+                <Link to="/settings">
+                  설정 페이지로 이동
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* 실행 카드 */}
           <Card className="border-green-200 bg-green-50/50">
