@@ -62,7 +62,7 @@ export const RunsTable = ({ runs }: RunsTableProps) => {
           {runs.map((run) => (
             <TableRow
               key={run.id}
-              className="cursor-pointer hover:bg-muted/50"
+              className="cursor-pointer"
               onClick={() => void navigate(`/runs/${run.id}`)}
             >
               <TableCell>
@@ -73,8 +73,8 @@ export const RunsTable = ({ runs }: RunsTableProps) => {
               <TableCell>
                 <RunStatusBadge status={run.status} />
               </TableCell>
-              <TableCell>{formatPercent(run.passRate)}%</TableCell>
-              <TableCell>{formatPercent(run.avgSemantic)}%</TableCell>
+              <TableCell className="tabular-nums">{formatPercent(run.passRate)}%</TableCell>
+              <TableCell className="tabular-nums">{formatPercent(run.avgSemantic)}%</TableCell>
               <TableCell>{formatRelativeTime(run.createdAt)}</TableCell>
               <TableCell>
                 <Button

@@ -83,7 +83,7 @@ export const RunResultsTable = ({
           <TableRow
             key={result.id}
             className={`cursor-pointer transition-colors ${
-              result.id === selectedId ? "bg-blue-50" : "hover:bg-muted/50"
+              result.id === selectedId ? "bg-blue-50" : ""
             }`}
             onClick={() => onSelect(result.id)}
           >
@@ -120,7 +120,7 @@ export const RunResultsTable = ({
                 <LayerStatusIcon status="skipped" />
               ) : (
                 <span
-                  className={`font-mono text-sm ${
+                  className={`font-mono text-sm tabular-nums ${
                     isSemanticPassed(result) ? "text-green-600" : "text-red-500"
                   }`}
                 >

@@ -78,13 +78,15 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r bg-white">
+    <aside className="flex h-full w-64 flex-col border-r bg-muted/20">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-sm ring-1 ring-primary/20">
           PRS
         </div>
-        <span className="text-sm font-medium text-muted-foreground">Prompt Regression Studio</span>
+        <span className="text-sm font-semibold tracking-tight text-foreground/80">
+          Prompt Regression Studio
+        </span>
       </div>
 
       {/* Navigation */}
@@ -100,9 +102,9 @@ export const Sidebar = () => {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/10 text-primary font-semibold"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
@@ -119,7 +121,7 @@ export const Sidebar = () => {
         {isGuest && (
           <a
             href={`${API_BASE_URL}/auth/google`}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <LogIn className="h-4 w-4" />
             Google로 로그인
@@ -127,7 +129,7 @@ export const Sidebar = () => {
         )}
 
         {isAuthenticated && !isGuest && user && (
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-3 rounded-xl px-3 py-2">
             <Avatar className="h-6 w-6">
               <AvatarImage src={user.pictureUrl ?? undefined} alt={user.name ?? ""} />
               <AvatarFallback className="text-xs">
@@ -148,9 +150,9 @@ export const Sidebar = () => {
         <Link
           to="/settings"
           className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
             location.pathname === "/settings"
-              ? "bg-primary/10 text-primary"
+              ? "bg-primary/10 text-primary font-semibold"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
@@ -159,7 +161,9 @@ export const Sidebar = () => {
           <span
             className={cn(
               "ml-auto h-2 w-2 rounded-full",
-              hasAnyKey ? "bg-green-500" : "bg-gray-300",
+              hasAnyKey
+                ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                : "bg-muted-foreground/30",
             )}
           />
         </Link>

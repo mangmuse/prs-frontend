@@ -17,14 +17,14 @@ export const SettingsPage = () => {
 
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-2xl space-y-6">
-          <Card className="border-blue-200 bg-blue-50/50">
+          <Card className="border-indigo-200 bg-indigo-50/80">
             <CardContent className="flex items-start gap-3 pt-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100">
-                <Lock className="h-4 w-4 text-blue-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-indigo-100">
+                <Lock className="h-4 w-4 text-indigo-600" />
               </div>
               <div className="text-sm">
-                <p className="font-medium text-blue-900">API Key는 브라우저에만 저장됩니다</p>
-                <p className="mt-0.5 text-blue-700">
+                <p className="font-medium text-indigo-900">API Key는 브라우저에만 저장됩니다</p>
+                <p className="mt-0.5 text-indigo-700">
                   입력한 키는 서버에 저장되지 않으며, 검증 시에만 일회성으로 전송됩니다.
                 </p>
               </div>

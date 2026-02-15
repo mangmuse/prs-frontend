@@ -64,8 +64,8 @@ export const HomePage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-16 items-center gap-4 border-b bg-white px-6">
-        <h1 className="text-xl font-semibold">Prompt Regression Studio</h1>
+      <header className="flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
+        <h1 className="text-xl font-semibold tracking-tight">Prompt Regression Studio</h1>
       </header>
 
       <div className="flex-1 overflow-y-auto p-6">

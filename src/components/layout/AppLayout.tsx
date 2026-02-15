@@ -11,7 +11,7 @@ export const AppLayout = () => {
     <>
       <MobileBlockScreen />
       <AuthInitializer>
-        <div className="hidden md:flex h-screen bg-muted/30">
+        <div className="hidden md:flex h-screen bg-background text-foreground">
           <Sidebar />
           <main className="flex-1 overflow-auto">
             <ErrorBoundary>
