@@ -7,7 +7,7 @@ import { renderWithClient } from "@/test/utils";
 import { CreateProfileModal } from "../CreateProfileModal";
 
 const defaultProps = {
-  state: { open: true, mode: "create" as const },
+  state: { open: true, mode: "create" } as const,
   onClose: vi.fn(),
   onCreated: vi.fn(),
 };

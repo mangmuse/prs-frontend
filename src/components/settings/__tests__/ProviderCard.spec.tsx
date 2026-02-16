@@ -12,10 +12,10 @@ import { ProviderCard } from "../ProviderCard";
 const API = "http://localhost:8000";
 
 const openaiProvider = {
-  id: "openai" as const,
+  id: "openai",
   name: "OpenAI",
   placeholder: "sk-...",
-};
+} as const;
 
 describe("ProviderCard - 초기 상태", () => {
   beforeEach(() => {
