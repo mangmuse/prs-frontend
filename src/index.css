@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.min.css";
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
 @layer base {
   :root {
