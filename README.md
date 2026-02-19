@@ -72,13 +72,13 @@ React Hook Form은 중첩 배열 구조에서도 `append`, `remove`와 같은 �
 
 ### 프롬프트 템플릿 버전 관리
 
-<!-- <img src="https://placehold.co/800x450/F3F4F6/9CA3AF?text=Version+Management" alt="프롬프트 버전 관리" width="100%" /> -->
+<img src="https://github.com/mangmuse/prs-frontend/releases/download/readme-assets/prompt.png" alt="프롬프트 버전 관리" width="100%" />
 
 프롬프트 템플릿을 여러 버전으로 나누어 저장하고, 이전 버전과 비교할 수 있습니다. 과거 버전이 기록에 남기 때문에 프롬프트를 수정했다가 잘 작동하던 부분이 회귀하는 것을 방지합니다.
 
 ### LLM 호출 결과 시각화
 
-<!-- <img src="https://placehold.co/800x450/F3F4F6/9CA3AF?text=Run+Results" alt="실행 결과 시각화" width="100%" /> -->
+<img src="https://github.com/mangmuse/prs-frontend/releases/download/readme-assets/run-result.png" alt="실행 결과 시각화" width="100%" />
 
 프롬프트 템플릿과 데이터셋을 조합하여 LLM을 호출하면, 각 출력 결과가 기댓값과 일치하는지 확인할 수 있습니다. 일치하지 않는 경우 원인을 출력하며, 전체 데이터셋의 통과율, 검사 항목 부분 통과와 같은 지표를 한눈에 보여줍니다.
 
@@ -86,7 +86,7 @@ React Hook Form은 중첩 배열 구조에서도 `append`, `remove`와 같은 �
 
 ### 버전 간 실행 결과 비교
 
-<!-- <img src="https://placehold.co/800x450/F3F4F6/9CA3AF?text=Version+Comparison" alt="버전 비교" width="100%" /> -->
+<img src="https://github.com/mangmuse/prs-frontend/releases/download/readme-assets/bigyo.png" alt="버전 비교" width="100%" />
 
 동일한 데이터셋에 대해 서로 다른 프롬프트 버전의 실행 결과를 나란히 비교할 수 있습니다. 각 데이터 행을 개선, 회귀, 변경, 유지로 분류하고, 카테고리별 개수를 카드로 표시합니다.
 
@@ -94,7 +94,7 @@ React Hook Form은 중첩 배열 구조에서도 `append`, `remove`와 같은 �
 
 ### 버전 간 실행 결과 상세 비교
 
-<!-- <img src="https://placehold.co/800x450/F3F4F6/9CA3AF?text=Detailed+Comparison" alt="상세 비교" width="100%" /> -->
+<img src="https://github.com/mangmuse/prs-frontend/releases/download/readme-assets/bigyo-detail.png" alt="상세 비교" width="100%" />
 
 비교 모드에서 개별 데이터 행을 선택하면, 두 버전의 실제 출력과 평가 결과(형식 검증 → 의미 유사도 → 규칙 기반 검사)를 나란히 비교할 수 있습니다.
 
