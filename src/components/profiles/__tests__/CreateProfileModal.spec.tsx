@@ -37,7 +37,8 @@ describe("CreateProfileModal", () => {
       expect(screen.queryByPlaceholderText("값")).not.toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("combobox"));
+    const updatedCombobox = await screen.findByRole("combobox");
+    await user.click(updatedCombobox);
     await user.click(await screen.findByRole("option", { name: "포함" }));
 
     const resetValueInput = await screen.findByPlaceholderText("값");
