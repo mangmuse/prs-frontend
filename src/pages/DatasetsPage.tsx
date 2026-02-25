@@ -15,6 +15,7 @@ export const DatasetsPage = () => {
 
   return (
     <div className="flex h-full flex-col">
+      <title>PRS | 데이터셋</title>
       <PageHeader title="데이터셋" />
 
       <div className="flex-1 space-y-6 p-6">

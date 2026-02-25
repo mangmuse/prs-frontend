@@ -114,6 +114,7 @@ export const RunDetailPage = () => {
 
   return (
     <div className="flex h-full flex-col">
+      <title>PRS | 실행 상세</title>
       <RunDetailHeader
         promptName={run.promptName}
         datasetName={run.datasetName}

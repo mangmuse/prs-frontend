@@ -13,6 +13,7 @@ export const SettingsPage = () => {
 
   return (
     <div className="flex h-full flex-col">
+      <title>PRS | 설정</title>
       <PageHeader title="설정" />
 
       <div className="flex-1 overflow-y-auto p-6">
