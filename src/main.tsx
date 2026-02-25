@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router";
 import "./index.css";
 import { AppProviders } from "./providers/AppProviders";
 import { router } from "./router";
+import { initializeGA } from "./utils/gtag";
 
 const enableMocking = async () => {
   if (import.meta.env.VITE_ENABLE_MOCKING === "true") {
@@ -14,6 +15,7 @@ const enableMocking = async () => {
 };
 
 void enableMocking().then(() => {
+  initializeGA();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <AppProviders>
