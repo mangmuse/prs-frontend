@@ -29,13 +29,31 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
   }, [isLiveEditorOpen, previewResults, run?.results]);
 
   const { passCount, failCount, totalCount } = useMemo(() => {
+    if (isLiveEditorOpen && previewResults) {
+      const pass = activeResults.filter((r) => r.status === "pass").length;
+      return {
+        passCount: pass,
+        failCount: activeResults.length - pass,
+        totalCount: activeResults.length,
+      };
+    }
+
+    if (run?.statusCounts && run.totalCount !== null) {
+      const pass = run.statusCounts.pass ?? 0;
+      return {
+        passCount: pass,
+        failCount: run.totalCount - pass,
+        totalCount: run.totalCount,
+      };
+    }
+
     const pass = activeResults.filter((r) => r.status === "pass").length;
     return {
       passCount: pass,
       failCount: activeResults.length - pass,
       totalCount: activeResults.length,
     };
-  }, [activeResults]);
+  }, [activeResults, isLiveEditorOpen, previewResults, run]);
 
   const metricsAsPercent = useMemo((): MetricsAsPercent => {
     if (activeResults.length === 0) {

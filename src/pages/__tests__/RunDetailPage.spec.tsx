@@ -37,6 +37,25 @@ const renderRunDetailPage = (runId = 1) =>
 const TOTAL_COUNT = PAGE_SIZE + 20;
 const allResults = generateResults(TOTAL_COUNT);
 
+beforeEach(() => {
+  intersectionCallback = () => {};
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      constructor(cb: IntersectionObserverCallback) {
+        intersectionCallback = cb;
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 const setupPaginatedHandler = () => {
   server.use(
     http.get(`${API}/runs/:id`, ({ request, params }) => {
@@ -68,25 +87,6 @@ const setupPaginatedHandler = () => {
 };
 
 describe("RunDetailPage 무한스크롤", () => {
-  beforeEach(() => {
-    intersectionCallback = () => {};
-    vi.stubGlobal(
-      "IntersectionObserver",
-      class {
-        constructor(cb: IntersectionObserverCallback) {
-          intersectionCallback = cb;
-        }
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-      },
-    );
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it("첫 로드 시 첫 페이지 결과만 표시되어야 한다", async () => {
     setupPaginatedHandler();
     renderRunDetailPage();
@@ -220,5 +220,82 @@ describe("RunDetailPage 무한스크롤", () => {
     await waitFor(() => {
       expect(screen.getAllByRole("row")).toHaveLength(TOTAL_COUNT + 1);
     });
+  });
+});
+
+describe("RunDetailPage 탭 카운트", () => {
+  it("50건만 로드된 상태에서도 전체 기준 카운트가 탭에 표시되어야 한다", async () => {
+    const PASS_COUNT = 45;
+    const FAIL_COUNT = TOTAL_COUNT - PASS_COUNT;
+
+    server.use(
+      http.get(`${API}/runs/:id`, ({ request, params }) => {
+        if (String(params.id).includes("related")) return;
+
+        const url = new URL(request.url);
+        const limit = Number(url.searchParams.get("limit") || 0);
+        const cursor = Number(url.searchParams.get("cursor") || 0);
+
+        if (limit) {
+          const start = cursor ? allResults.findIndex((r) => r.id === cursor) + 1 : 0;
+          const page = allResults.slice(start, start + limit);
+          const hasNext = start + limit < allResults.length;
+
+          return HttpResponse.json({
+            ...createMockRunDetail({ results: page }),
+            nextCursor: hasNext ? page[page.length - 1].id : null,
+            totalCount: TOTAL_COUNT,
+            statusCounts: {
+              pass: PASS_COUNT,
+              format: 10,
+              semantic: 10,
+              constraint: 5,
+            },
+          });
+        }
+
+        return HttpResponse.json(createMockRunDetail({ results: allResults }));
+      }),
+      http.get(`${API}/runs/:id/related-versions`, () =>
+        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
+      ),
+    );
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: `전체 (${TOTAL_COUNT})` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `통과 (${PASS_COUNT})` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `실패 (${FAIL_COUNT})` })).toBeInTheDocument();
+  });
+
+  it("결과가 0건이면 모든 탭 카운트가 0으로 표시되어야 한다", async () => {
+    server.use(
+      http.get(`${API}/runs/:id`, ({ params }) => {
+        if (String(params.id).includes("related")) return;
+
+        return HttpResponse.json({
+          ...createMockRunDetail({ results: [] }),
+          nextCursor: null,
+          totalCount: 0,
+          statusCounts: { pass: 0, format: 0, semantic: 0, constraint: 0 },
+        });
+      }),
+      http.get(`${API}/runs/:id/related-versions`, () =>
+        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
+      ),
+    );
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "전체 (0)" })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: "통과 (0)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "실패 (0)" })).toBeInTheDocument();
   });
 });
