@@ -3,9 +3,17 @@ import { useEffect, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { runQueries } from "@/queries/runQueries";
-import type { RunDetailData } from "@/types/runDetail";
+import type { RunDetailData, StatusFilter } from "@/types/runDetail";
 
-export const useRunDetailInfinite = (runId: number) => {
+const toApiStatus = (filter: StatusFilter): string | undefined => {
+  if (filter === "all") return undefined;
+  if (filter === "pass" || filter === "fail") return filter;
+  return undefined;
+};
+
+export const useRunDetailInfinite = (runId: number, statusFilter: StatusFilter = "all") => {
+  const apiStatus = toApiStatus(statusFilter);
+
   const {
     data: infiniteData,
     isPending,
@@ -13,7 +21,7 @@ export const useRunDetailInfinite = (runId: number) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery(runQueries.detailInfinite(runId));
+  } = useInfiniteQuery(runQueries.detailInfinite(runId, apiStatus));
 
   const run = (() => {
     if (!infiniteData?.pages.length) return undefined;

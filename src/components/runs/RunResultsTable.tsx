@@ -60,7 +60,7 @@ export const RunResultsTable = ({
   compareMode = false,
   rowChanges,
 }: RunResultsTableProps) => (
-  <Table>
+  <Table className="table-fixed">
     <TableHeader>
       <TableRow>
         <TableHead className="w-10">#</TableHead>

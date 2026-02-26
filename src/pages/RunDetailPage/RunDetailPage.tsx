@@ -27,7 +27,10 @@ export const RunDetailPage = () => {
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const { run, isPending, isError, isFetchingNextPage, loadMoreRef } = useRunDetailInfinite(runId);
+  const { run, isPending, isError, isFetchingNextPage, loadMoreRef } = useRunDetailInfinite(
+    runId,
+    statusFilter,
+  );
 
   const { data: relatedVersions } = useQuery(runQueries.relatedVersions(runId));
   const createRun = useCreateRun();
@@ -41,20 +44,17 @@ export const RunDetailPage = () => {
   });
 
   const filteredResults = useMemo(() => {
-    return liveSimulation.activeResults.filter((r) => {
-      if (statusFilter === "all") return true;
-      if (statusFilter === "pass") return r.status === "pass";
-      if (statusFilter === "fail") return r.status !== "pass";
-      if (
-        statusFilter === "regressed" ||
-        statusFilter === "improved" ||
-        statusFilter === "changed" ||
-        statusFilter === "unchanged"
-      ) {
-        return compareMode.rowChanges?.get(r.rowIndex)?.category === statusFilter;
-      }
-      return true;
-    });
+    if (
+      statusFilter === "regressed" ||
+      statusFilter === "improved" ||
+      statusFilter === "changed" ||
+      statusFilter === "unchanged"
+    ) {
+      return liveSimulation.activeResults.filter(
+        (r) => compareMode.rowChanges?.get(r.rowIndex)?.category === statusFilter,
+      );
+    }
+    return liveSimulation.activeResults;
   }, [liveSimulation.activeResults, statusFilter, compareMode.rowChanges]);
 
   const selectedResult = liveSimulation.activeResults.find((r) => r.id === selectedResultId);

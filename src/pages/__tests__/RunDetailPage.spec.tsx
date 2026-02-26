@@ -1,6 +1,7 @@
 import { MemoryRouter, Route, Routes } from "react-router";
 
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { HttpResponse, delay, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -297,5 +298,141 @@ describe("RunDetailPage 탭 카운트", () => {
 
     expect(screen.getByRole("button", { name: "통과 (0)" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "실패 (0)" })).toBeInTheDocument();
+  });
+});
+
+describe("RunDetailPage 서버 사이드 필터링", () => {
+  const PASS_COUNT = 45;
+  const FAIL_COUNT = TOTAL_COUNT - PASS_COUNT;
+
+  const mixedResults = [
+    ...Array.from({ length: PASS_COUNT }, (_, i) =>
+      createMockRunResultRow({
+        id: i + 1,
+        rowIndex: i + 1,
+        datasetRowId: i + 1,
+        status: "pass",
+        inputSnapshot: { text: `입력 ${i + 1}` },
+      }),
+    ),
+    ...Array.from({ length: FAIL_COUNT }, (_, i) =>
+      createMockRunResultRow({
+        id: PASS_COUNT + i + 1,
+        rowIndex: PASS_COUNT + i + 1,
+        datasetRowId: PASS_COUNT + i + 1,
+        status: "format",
+        inputSnapshot: { text: `입력 ${PASS_COUNT + i + 1}` },
+      }),
+    ),
+  ];
+
+  const setupFilterableHandler = () => {
+    server.use(
+      http.get(`${API}/runs/:id`, ({ request, params }) => {
+        if (String(params.id).includes("related")) return;
+
+        const url = new URL(request.url);
+        const limit = Number(url.searchParams.get("limit") || 0);
+        const cursor = Number(url.searchParams.get("cursor") || 0);
+        const statusParam = url.searchParams.get("status");
+
+        let filtered = mixedResults;
+        if (statusParam === "pass") {
+          filtered = mixedResults.filter((r) => r.status === "pass");
+        } else if (statusParam === "fail") {
+          filtered = mixedResults.filter((r) => r.status !== "pass");
+        }
+
+        if (limit) {
+          const start = cursor ? filtered.findIndex((r) => r.id === cursor) + 1 : 0;
+          const page = filtered.slice(start, start + limit);
+          const hasNext = start + limit < filtered.length;
+
+          return HttpResponse.json({
+            ...createMockRunDetail({ results: page }),
+            nextCursor: hasNext ? page[page.length - 1].id : null,
+            totalCount: TOTAL_COUNT,
+            statusCounts: {
+              pass: PASS_COUNT,
+              format: FAIL_COUNT,
+              semantic: 0,
+              constraint: 0,
+            },
+          });
+        }
+
+        return HttpResponse.json(createMockRunDetail({ results: filtered }));
+      }),
+      http.get(`${API}/runs/:id/related-versions`, () =>
+        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
+      ),
+    );
+  };
+
+  it("필터 변경 시 해당 status의 결과만 표시되어야 한다", async () => {
+    const user = userEvent.setup();
+    setupFilterableHandler();
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    await user.click(screen.getByRole("button", { name: /실패/ }));
+
+    await waitFor(() => {
+      const rows = screen.getAllByRole("row");
+      expect(rows).toHaveLength(FAIL_COUNT + 1);
+    });
+  });
+
+  it("필터와 무관하게 탭 카운트는 전체 기준으로 표시되어야 한다", async () => {
+    const user = userEvent.setup();
+    setupFilterableHandler();
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: `전체 (${TOTAL_COUNT})` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `통과 (${PASS_COUNT})` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `실패 (${FAIL_COUNT})` })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /실패/ }));
+
+    await waitFor(() => {
+      const rows = screen.getAllByRole("row");
+      expect(rows).toHaveLength(FAIL_COUNT + 1);
+    });
+
+    expect(screen.getByRole("button", { name: `전체 (${TOTAL_COUNT})` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `통과 (${PASS_COUNT})` })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `실패 (${FAIL_COUNT})` })).toBeInTheDocument();
+  });
+
+  it("필터 변경 시 첫 페이지부터 다시 로드되어야 한다", async () => {
+    const user = userEvent.setup();
+    setupFilterableHandler();
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    intersectionCallback(
+      [{ isIntersecting: true }] as IntersectionObserverEntry[],
+      {} as IntersectionObserver,
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(TOTAL_COUNT + 1);
+    });
+
+    await user.click(screen.getByRole("button", { name: /실패/ }));
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(FAIL_COUNT + 1);
+    });
   });
 });

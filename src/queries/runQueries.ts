@@ -1,4 +1,4 @@
-import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, keepPreviousData, queryOptions } from "@tanstack/react-query";
 
 import { runsApi } from "@/api/runs";
 import type { RunDetailData } from "@/types/runDetail";
@@ -22,17 +22,19 @@ export const runQueries = {
       refetchInterval: (query) => (query.state.data?.status === "running" ? 3000 : false),
     }),
 
-  detailInfinite: (id: number) =>
+  detailInfinite: (id: number, status?: string) =>
     infiniteQueryOptions({
-      queryKey: [...runQueries.all(), "detailInfinite", id],
+      queryKey: [...runQueries.all(), "detailInfinite", id, { status }],
       queryFn: ({ pageParam }) =>
         runsApi.getDetail(id, {
           limit: RUN_DETAIL_PAGE_SIZE,
           cursor: pageParam ?? undefined,
+          status,
         }),
       initialPageParam: null as number | null,
       getNextPageParam: (lastPage: RunDetailData) => lastPage.nextCursor,
       enabled: !!id,
+      placeholderData: keepPreviousData,
     }),
 
   relatedVersions: (runId: number) =>
