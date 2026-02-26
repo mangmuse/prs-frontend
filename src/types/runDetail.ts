@@ -63,6 +63,9 @@ export interface RunDetailData {
   profile: ProfileInRun;
   metrics: RunMetrics;
   results: RunResultRow[];
+  nextCursor: number | null;
+  statusCounts: Record<string, number> | null;
+  totalCount: number | null;
 }
 
 export interface ReEvaluatedRow {

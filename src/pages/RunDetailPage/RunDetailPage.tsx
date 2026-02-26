@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { LiveProfileEditor } from "@/components/runs/LiveProfileEditor";
@@ -16,7 +16,7 @@ import { useCreateRun } from "@/hooks/mutations/runMutations";
 import { useCompareMode } from "@/hooks/runDetail/useCompareMode";
 import { useLiveSimulation } from "@/hooks/runDetail/useLiveSimulation";
 import { runQueries } from "@/queries/runQueries";
-import type { StatusFilter } from "@/types/runDetail";
+import type { RunDetailData, StatusFilter } from "@/types/runDetail";
 
 export const RunDetailPage = () => {
   const navigate = useNavigate();
@@ -26,7 +26,40 @@ export const RunDetailPage = () => {
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const { data: run, isPending, isError } = useQuery(runQueries.detail(runId));
+  const {
+    data: infiniteData,
+    isPending,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(runQueries.detailInfinite(runId));
+
+  const run = (() => {
+    if (!infiniteData?.pages.length) return undefined;
+    const firstPage = infiniteData.pages[0];
+    return {
+      ...firstPage,
+      results: infiniteData.pages.flatMap((page) => page.results),
+    } as RunDetailData;
+  })();
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        void fetchNextPage();
+      }
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
   const { data: relatedVersions } = useQuery(runQueries.relatedVersions(runId));
   const createRun = useCreateRun();
 
@@ -174,6 +207,12 @@ export const RunDetailPage = () => {
               selectedResult={selectedResult}
               baseResult={baseResult}
             />
+
+            <div ref={loadMoreRef}>
+              {isFetchingNextPage && (
+                <p className="py-4 text-center text-sm text-muted-foreground">더 불러오는 중...</p>
+              )}
+            </div>
           </div>
         </div>
 

@@ -1,4 +1,52 @@
 import type { RunSummary } from "@/types/run";
+import type { RunDetailData, RunResultRow } from "@/types/runDetail";
+
+export const createMockRunResultRow = (overrides?: Partial<RunResultRow>): RunResultRow => ({
+  id: 1,
+  rowIndex: 1,
+  datasetRowId: 1,
+  inputSnapshot: { text: "테스트 입력" },
+  expectedSnapshot: "기대 출력",
+  assembledPrompt: { systemInstruction: "시스템", userMessage: "유저" },
+  status: "pass",
+  isFormatPassed: true,
+  semanticScore: 0.95,
+  logicResults: { passed: true, results: [], errorMessage: null },
+  rawOutput: "출력 텍스트",
+  parsedOutput: null,
+  ...overrides,
+});
+
+export const createMockRunDetail = (overrides?: Partial<RunDetailData>): RunDetailData => ({
+  id: 1,
+  promptId: 1,
+  promptVersionId: 1,
+  datasetId: 1,
+  profileId: 1,
+  promptName: "테스트 프롬프트",
+  versionNumber: 1,
+  datasetName: "테스트 데이터셋",
+  status: "completed",
+  createdAt: "2026-01-01T00:00:00Z",
+  profile: {
+    id: 1,
+    name: "기본 프로필",
+    semanticThreshold: 0.8,
+    globalConstraints: [],
+  },
+  metrics: {
+    passRate: 0.85,
+    avgSemantic: 0.9,
+    formatPassRate: 1.0,
+    semanticPassRate: 0.9,
+    constraintPassRate: 0.85,
+  },
+  results: [],
+  nextCursor: null,
+  statusCounts: null,
+  totalCount: null,
+  ...overrides,
+});
 
 export const createMockRunSummary = (overrides?: Partial<RunSummary>): RunSummary => ({
   id: 1,

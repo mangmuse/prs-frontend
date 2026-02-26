@@ -16,8 +16,11 @@ export const runsApi = {
     return apiClient.get("runs", { searchParams }).json<RunSummary[]>();
   },
 
-  async getDetail(id: number): Promise<RunDetailData> {
-    return apiClient.get(`runs/${id}`).json<RunDetailData>();
+  async getDetail(
+    id: number,
+    params?: { cursor?: number; limit?: number; status?: string },
+  ): Promise<RunDetailData> {
+    return apiClient.get(`runs/${id}`, { searchParams: params }).json<RunDetailData>();
   },
 
   async getRelatedVersions(runId: number): Promise<RelatedVersionsResponse> {

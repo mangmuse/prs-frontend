@@ -1,6 +1,9 @@
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
 import { runsApi } from "@/api/runs";
+import type { RunDetailData } from "@/types/runDetail";
+
+export const RUN_DETAIL_PAGE_SIZE = 50;
 
 export const runQueries = {
   all: () => ["runs"] as const,
@@ -17,6 +20,19 @@ export const runQueries = {
       queryFn: () => runsApi.getDetail(id),
       enabled: !!id,
       refetchInterval: (query) => (query.state.data?.status === "running" ? 3000 : false),
+    }),
+
+  detailInfinite: (id: number) =>
+    infiniteQueryOptions({
+      queryKey: [...runQueries.all(), "detailInfinite", id],
+      queryFn: ({ pageParam }) =>
+        runsApi.getDetail(id, {
+          limit: RUN_DETAIL_PAGE_SIZE,
+          cursor: pageParam ?? undefined,
+        }),
+      initialPageParam: null as number | null,
+      getNextPageParam: (lastPage: RunDetailData) => lastPage.nextCursor,
+      enabled: !!id,
     }),
 
   relatedVersions: (runId: number) =>
