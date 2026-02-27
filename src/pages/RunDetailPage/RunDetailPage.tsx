@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { LiveProfileEditor } from "@/components/runs/LiveProfileEditor";
@@ -24,8 +24,31 @@ export const RunDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const runId = Number(id);
 
+  const queryClient = useQueryClient();
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const { data: statusData } = useQuery(runQueries.status(runId));
+  const prevStatusRef = useRef<string>();
+
+  useEffect(() => {
+    const prevStatus = prevStatusRef.current;
+    const currentStatus = statusData?.status;
+
+    if (prevStatus === "running" && currentStatus === "completed") {
+      toast.success("실행이 완료되었습니다");
+      void queryClient.invalidateQueries({
+        queryKey: [...runQueries.all(), "detailInfinite", runId],
+      });
+    }
+
+    if (prevStatus === "running" && currentStatus === "failed") {
+      toast.error("실행이 실패했습니다");
+    }
+
+    if (currentStatus) {
+      prevStatusRef.current = currentStatus;
+    }
+  }, [statusData?.status, runId, queryClient]);
 
   const isCompareFilter =
     statusFilter === "regressed" ||
@@ -57,7 +80,7 @@ export const RunDetailPage = () => {
       );
     }
     return liveSimulation.activeResults;
-  }, [liveSimulation.activeResults, statusFilter, compareMode.rowChanges]);
+  }, [isCompareFilter, liveSimulation.activeResults, statusFilter, compareMode.rowChanges]);
 
   const selectedResult = liveSimulation.activeResults.find((r) => r.id === selectedResultId);
 

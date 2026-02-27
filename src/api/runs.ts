@@ -23,6 +23,10 @@ export const runsApi = {
     return apiClient.get(`runs/${id}`, { searchParams: params }).json<RunDetailData>();
   },
 
+  async getStatus(id: number): Promise<CreateRunResponse> {
+    return apiClient.get(`runs/${id}/status`).json<CreateRunResponse>();
+  },
+
   async getRelatedVersions(runId: number): Promise<RelatedVersionsResponse> {
     return apiClient.get(`runs/${runId}/related-versions`).json<RelatedVersionsResponse>();
   },

@@ -37,6 +37,14 @@ export const runQueries = {
       placeholderData: keepPreviousData,
     }),
 
+  status: (id: number) =>
+    queryOptions({
+      queryKey: [...runQueries.all(), "status", id],
+      queryFn: () => runsApi.getStatus(id),
+      refetchInterval: (query) => (query.state.data?.status === "running" ? 3000 : false),
+      enabled: !!id,
+    }),
+
   relatedVersions: (runId: number) =>
     queryOptions({
       queryKey: [...runQueries.all(), "relatedVersions", runId],

@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, delay, http } from "msw";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { server } from "@/mocks/server";
@@ -156,6 +157,9 @@ beforeEach(() => {
   );
 
   server.use(
+    http.get(`${API}/runs/:id/status`, () =>
+      HttpResponse.json({ id: 1, status: "completed", createdAt: "2026-01-01T00:00:00Z" }),
+    ),
     http.get(`${API}/runs/:id/related-versions`, () =>
       HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
     ),
@@ -666,5 +670,134 @@ describe("RunDetailPage Live Simulation", () => {
     const nextPageFirstRow = screen.getByText(`입력 ${PAGE_SIZE + 1}`).closest("tr");
     expect(nextPageFirstRow).not.toBeNull();
     expect(within(nextPageFirstRow as HTMLTableRowElement).getByText("유사도")).toBeInTheDocument();
+  });
+});
+
+describe("RunDetailPage 상태 폴링", () => {
+  const setupStatusPollingHandlers = ({
+    targetStatus,
+    results = generateResults(3),
+  }: {
+    targetStatus: "completed" | "failed";
+    results?: ReturnType<typeof generateResults>;
+  }) => {
+    let hasTransitioned = false;
+
+    server.use(
+      http.get(`${API}/runs/:id/status`, () =>
+        HttpResponse.json({
+          id: 1,
+          status: hasTransitioned ? targetStatus : "running",
+          createdAt: "2026-01-01T00:00:00Z",
+        }),
+      ),
+      http.get(`${API}/runs/:id`, ({ request, params }) => {
+        if (String(params.id).includes("related")) return;
+        if (String(params.id).includes("status")) return;
+
+        const url = new URL(request.url);
+        const limit = Number(url.searchParams.get("limit") || 0);
+
+        if (!hasTransitioned) {
+          return HttpResponse.json(createMockRunDetail({ status: "running", results: [] }));
+        }
+
+        if (targetStatus === "failed") {
+          return HttpResponse.json(createMockRunDetail({ status: "failed", results: [] }));
+        }
+
+        const page = limit ? results.slice(0, limit) : results;
+        return HttpResponse.json(
+          createMockRunDetail({
+            status: "completed",
+            results: page,
+            totalCount: results.length,
+            statusCounts: {
+              pass: results.length,
+              format: 0,
+              semantic: 0,
+              constraint: 0,
+            },
+          }),
+        );
+      }),
+    );
+
+    return {
+      transition: () => {
+        hasTransitioned = true;
+      },
+    };
+  };
+
+  it("running 상태의 run이 완료되면 성공 토스트와 함께 결과가 표시되어야 한다", async () => {
+    const { transition } = setupStatusPollingHandlers({ targetStatus: "completed" });
+    const toastSuccessSpy = vi.spyOn(toast, "success");
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.queryByText("로딩 중...")).not.toBeInTheDocument();
+    });
+
+    transition();
+
+    await waitFor(
+      () => {
+        expect(toastSuccessSpy).toHaveBeenCalledWith(expect.stringContaining("완료"));
+      },
+      { timeout: 5000 },
+    );
+
+    await waitFor(() => {
+      const rows = screen.getAllByRole("row");
+      expect(rows.length).toBeGreaterThan(1);
+    });
+  });
+
+  it("running 상태의 run이 실패하면 에러 토스트가 표시되어야 한다", async () => {
+    const { transition } = setupStatusPollingHandlers({ targetStatus: "failed" });
+    const toastErrorSpy = vi.spyOn(toast, "error");
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.queryByText("로딩 중...")).not.toBeInTheDocument();
+    });
+
+    transition();
+
+    await waitFor(
+      () => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(expect.stringContaining("실패"));
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  it("이미 완료된 run 상세 페이지에서는 status 폴링이 발생하지 않아야 한다", async () => {
+    let statusRequestCount = 0;
+
+    server.use(
+      http.get(`${API}/runs/:id/status`, () => {
+        statusRequestCount++;
+        return HttpResponse.json({
+          id: 1,
+          status: "completed",
+          createdAt: "2026-01-01T00:00:00Z",
+        });
+      }),
+    );
+
+    setupRunDetailHandler();
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+
+    const countAfterLoad = statusRequestCount;
+
+    await new Promise((r) => setTimeout(r, 3500));
+
+    expect(statusRequestCount).toBe(countAfterLoad);
   });
 });
