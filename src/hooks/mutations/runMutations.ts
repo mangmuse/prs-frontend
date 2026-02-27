@@ -29,7 +29,7 @@ export const useUpdateRunProfileSnapshot = () => {
     }) => runsApi.updateProfileSnapshot(runId, data),
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: runQueries.detail(variables.runId).queryKey,
+        queryKey: [...runQueries.all(), "detailInfinite", variables.runId],
       });
     },
   });

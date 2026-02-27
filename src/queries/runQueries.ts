@@ -19,7 +19,6 @@ export const runQueries = {
       queryKey: [...runQueries.all(), "detail", id],
       queryFn: () => runsApi.getDetail(id),
       enabled: !!id,
-      refetchInterval: (query) => (query.state.data?.status === "running" ? 3000 : false),
     }),
 
   detailInfinite: (id: number, status?: string) =>
