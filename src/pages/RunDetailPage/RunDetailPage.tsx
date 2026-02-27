@@ -27,9 +27,16 @@ export const RunDetailPage = () => {
   const [selectedResultId, setSelectedResultId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
+  const isCompareFilter =
+    statusFilter === "regressed" ||
+    statusFilter === "improved" ||
+    statusFilter === "changed" ||
+    statusFilter === "unchanged";
+
   const { run, isPending, isError, isFetchingNextPage, loadMoreRef } = useRunDetailInfinite(
     runId,
     statusFilter,
+    isCompareFilter,
   );
 
   const { data: relatedVersions } = useQuery(runQueries.relatedVersions(runId));
@@ -44,12 +51,7 @@ export const RunDetailPage = () => {
   });
 
   const filteredResults = useMemo(() => {
-    if (
-      statusFilter === "regressed" ||
-      statusFilter === "improved" ||
-      statusFilter === "changed" ||
-      statusFilter === "unchanged"
-    ) {
+    if (isCompareFilter) {
       return liveSimulation.activeResults.filter(
         (r) => compareMode.rowChanges?.get(r.rowIndex)?.category === statusFilter,
       );

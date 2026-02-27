@@ -387,6 +387,130 @@ describe("RunDetailPage 서버 사이드 필터링", () => {
   });
 });
 
+describe("RunDetailPage 비교 모드 무한스크롤", () => {
+  const COMPARE_TARGET_ID = 2;
+  const COMPARE_TARGET_VERSION = 2;
+
+  const setupCompareModeHandlers = ({ regressedRowIds = [] as number[] } = {}) => {
+    const regressedSet = new Set(regressedRowIds);
+
+    server.use(
+      http.get(`${API}/runs/:id/related-versions`, () =>
+        HttpResponse.json({
+          executedRuns: [
+            {
+              id: 1,
+              versionNumber: 1,
+              status: "completed",
+              passRate: 0.85,
+              createdAt: "2026-01-01T00:00:00Z",
+            },
+            {
+              id: COMPARE_TARGET_ID,
+              versionNumber: COMPARE_TARGET_VERSION,
+              status: "completed",
+              passRate: 0.8,
+              createdAt: "2026-01-02T00:00:00Z",
+            },
+          ],
+          unexecutedVersions: [],
+        }),
+      ),
+      http.get(`${API}/runs/:targetId/compare/:baseId`, () =>
+        HttpResponse.json({
+          pValue: 0.03,
+          rowComparisons: allResults.map((r) => ({
+            rowIndex: r.rowIndex,
+            datasetRowId: r.datasetRowId,
+            baseStatus: "pass",
+            targetStatus: regressedSet.has(r.rowIndex) ? "semantic" : r.status,
+            baseSemanticScore: 0.9,
+            targetSemanticScore: regressedSet.has(r.rowIndex) ? 0.5 : 0.95,
+          })),
+        }),
+      ),
+    );
+  };
+
+  it("비교 모드 '전체' 탭에서 무한스크롤이 동작해야 한다", async () => {
+    const user = userEvent.setup();
+    setupRunDetailHandler();
+    setupCompareModeHandlers();
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    await user.click(screen.getByRole("combobox"));
+    await user.click(await screen.findByText(`v${COMPARE_TARGET_VERSION}와 비교`));
+
+    await waitFor(() => {
+      expect(screen.getByText(/v1 vs v2/)).toBeInTheDocument();
+    });
+
+    intersectionCallback(
+      [{ isIntersecting: true }] as IntersectionObserverEntry[],
+      {} as IntersectionObserver,
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(TOTAL_COUNT + 1);
+    });
+  });
+
+  it("비교 전용 필터 선택 시 전체 데이터가 로드되어야 한다", async () => {
+    const user = userEvent.setup();
+    const regressedRowIds = [1, 2, 3, PAGE_SIZE + 1, PAGE_SIZE + 2, PAGE_SIZE + 3];
+    const TOTAL_REGRESSED = regressedRowIds.length;
+
+    setupRunDetailHandler();
+    setupCompareModeHandlers({ regressedRowIds });
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    await user.click(screen.getByRole("combobox"));
+    await user.click(await screen.findByText(`v${COMPARE_TARGET_VERSION}와 비교`));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: `회귀 (${TOTAL_REGRESSED})` })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: `회귀 (${TOTAL_REGRESSED})` }));
+
+    await waitFor(() => {
+      const rows = screen.getAllByRole("row");
+      expect(rows).toHaveLength(TOTAL_REGRESSED + 1);
+    });
+  });
+
+  it("첫 페이지만 로드된 상태에서 비교 모드 진입 시 회귀/개선 카운트가 전체 기준으로 표시되어야 한다", async () => {
+    const user = userEvent.setup();
+    const regressedRowIds = [1, PAGE_SIZE + 1, PAGE_SIZE + 2, PAGE_SIZE + 3, PAGE_SIZE + 4];
+    const TOTAL_REGRESSED = regressedRowIds.length;
+
+    setupRunDetailHandler();
+    setupCompareModeHandlers({ regressedRowIds });
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    await user.click(screen.getByRole("combobox"));
+    await user.click(await screen.findByText(`v${COMPARE_TARGET_VERSION}와 비교`));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: `회귀 (${TOTAL_REGRESSED})` })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: "개선 (0)" })).toBeInTheDocument();
+  });
+});
+
 describe("RunDetailPage Live Simulation", () => {
   it("패널을 열기만 하면 re-evaluate를 호출하지 않아야 한다", async () => {
     const user = userEvent.setup();

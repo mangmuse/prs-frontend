@@ -11,7 +11,11 @@ const toApiStatus = (filter: StatusFilter): string | undefined => {
   return undefined;
 };
 
-export const useRunDetailInfinite = (runId: number, statusFilter: StatusFilter = "all") => {
+export const useRunDetailInfinite = (
+  runId: number,
+  statusFilter: StatusFilter = "all",
+  fetchAll = false,
+) => {
   const apiStatus = toApiStatus(statusFilter);
 
   const {
@@ -47,6 +51,12 @@ export const useRunDetailInfinite = (runId: number, statusFilter: StatusFilter =
     observer.observe(el);
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  useEffect(() => {
+    if (fetchAll && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchAll, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return { run, isPending, isError, isFetchingNextPage, loadMoreRef };
 };
