@@ -127,7 +127,7 @@ export const RunDetailPage = () => {
       />
 
       <div className="flex flex-1 min-h-0">
-        <div className="flex-1 overflow-auto p-6 min-w-0">
+        <div role="region" aria-label="결과 영역" className="flex-1 overflow-auto p-6 min-w-0">
           <div className="space-y-6">
             <RunDetailVersionAndCompare
               runId={runId}

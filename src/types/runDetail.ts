@@ -49,6 +49,13 @@ export interface RunMetrics {
   constraintPassRate: number;
 }
 
+export interface StatusCounts {
+  pass: number;
+  format: number;
+  semantic: number;
+  constraint: number;
+}
+
 export interface RunDetailData {
   id: number;
   promptId: number;
@@ -64,7 +71,7 @@ export interface RunDetailData {
   metrics: RunMetrics;
   results: RunResultRow[];
   nextCursor: number | null;
-  statusCounts: Record<string, number> | null;
+  statusCounts: StatusCounts | null;
   totalCount: number | null;
 }
 
@@ -77,6 +84,7 @@ export interface ReEvaluatedRow {
 export interface ReEvaluateResponse {
   results: ReEvaluatedRow[];
   passRate: number;
+  statusCounts: StatusCounts | null;
 }
 
 export type StatusFilter =

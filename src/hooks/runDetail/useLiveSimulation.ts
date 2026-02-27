@@ -1,7 +1,12 @@
 import { useMemo, useState } from "react";
 
-import type { RunDetailData, RunResultRow } from "@/types/runDetail";
-import type { MetricsAsPercent } from "@/types/runDetail";
+import type {
+  MetricsAsPercent,
+  ReEvaluatedRow,
+  RunDetailData,
+  RunResultRow,
+  StatusCounts,
+} from "@/types/runDetail";
 
 interface UseLiveSimulationInput {
   run: RunDetailData | undefined;
@@ -15,21 +20,64 @@ interface UseLiveSimulationResult {
   passCount: number;
   failCount: number;
   totalCount: number;
-  setPreviewResults: (results: RunResultRow[] | null) => void;
+  setPreviewResults: (
+    results: RunResultRow[] | null,
+    statusCounts?: StatusCounts | null,
+    reEvaluatedRows?: ReEvaluatedRow[] | null,
+  ) => void;
   handleToggleLiveEditor: () => void;
   handleCloseLiveEditor: () => void;
 }
 
 export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimulationResult => {
   const [isLiveEditorOpen, setIsLiveEditorOpen] = useState(false);
-  const [previewResults, setPreviewResults] = useState<RunResultRow[] | null>(null);
+  const [previewResults, setPreviewResultsState] = useState<RunResultRow[] | null>(null);
+  const [previewStatusCounts, setPreviewStatusCounts] = useState<StatusCounts | null>(null);
+  const [previewStatusMap, setPreviewStatusMap] = useState<Map<
+    number,
+    RunResultRow["status"]
+  > | null>(null);
+
+  const setPreviewResults = (
+    results: RunResultRow[] | null,
+    statusCounts?: StatusCounts | null,
+    reEvaluatedRows?: ReEvaluatedRow[] | null,
+  ) => {
+    setPreviewResultsState(results);
+    setPreviewStatusCounts(statusCounts ?? null);
+    if (reEvaluatedRows) {
+      setPreviewStatusMap(new Map(reEvaluatedRows.map((row) => [row.id, row.status])));
+      return;
+    }
+    setPreviewStatusMap(null);
+  };
 
   const activeResults = useMemo(() => {
-    return isLiveEditorOpen && previewResults ? previewResults : run?.results || [];
-  }, [isLiveEditorOpen, previewResults, run?.results]);
+    if (isLiveEditorOpen && previewResults) {
+      if (previewStatusMap) {
+        const baseRows = run?.results || [];
+        return baseRows.map((row) => {
+          const updatedStatus = previewStatusMap.get(row.id);
+          if (!updatedStatus) return row;
+          return { ...row, status: updatedStatus };
+        });
+      }
+      return previewResults;
+    }
+    return run?.results || [];
+  }, [isLiveEditorOpen, previewResults, previewStatusMap, run?.results]);
 
   const { passCount, failCount, totalCount } = useMemo(() => {
     if (isLiveEditorOpen && previewResults) {
+      if (previewStatusCounts && run?.totalCount !== null) {
+        const pass = previewStatusCounts.pass ?? 0;
+        return {
+          passCount: pass,
+          failCount: run.totalCount - pass,
+          totalCount: run.totalCount,
+        };
+      }
+
       const pass = activeResults.filter((r) => r.status === "pass").length;
       return {
         passCount: pass,
@@ -53,7 +101,7 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
       failCount: activeResults.length - pass,
       totalCount: activeResults.length,
     };
-  }, [activeResults, isLiveEditorOpen, previewResults, run]);
+  }, [activeResults, isLiveEditorOpen, previewResults, previewStatusCounts, run]);
 
   const metricsAsPercent = useMemo((): MetricsAsPercent => {
     if (activeResults.length === 0) {

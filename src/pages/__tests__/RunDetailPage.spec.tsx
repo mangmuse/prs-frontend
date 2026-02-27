@@ -1,6 +1,6 @@
 import { MemoryRouter, Route, Routes } from "react-router";
 
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, delay, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,6 +10,7 @@ import { RunDetailPage } from "@/pages/RunDetailPage/RunDetailPage";
 import { RUN_DETAIL_PAGE_SIZE } from "@/queries/runQueries";
 import { createMockRunDetail, createMockRunResultRow } from "@/test/factories/run";
 import { renderWithClient } from "@/test/utils";
+import type { StatusCounts } from "@/types/runDetail";
 
 const API = "http://localhost:8000";
 const PAGE_SIZE = RUN_DETAIL_PAGE_SIZE;
@@ -38,6 +39,108 @@ const renderRunDetailPage = (runId = 1) =>
 const TOTAL_COUNT = PAGE_SIZE + 20;
 const allResults = generateResults(TOTAL_COUNT);
 
+type RunDetailHandlerOptions = {
+  results?: ReturnType<typeof generateResults>;
+  totalCount?: number;
+  statusCounts?: StatusCounts;
+  statusFilter?: boolean;
+  onRequest?: () => void;
+  delayMs?: number;
+  delayAfter?: number;
+};
+
+const setupRunDetailHandler = (options: RunDetailHandlerOptions = {}) => {
+  const {
+    results: sourceResults = allResults,
+    totalCount: total = TOTAL_COUNT,
+    statusCounts = { pass: total, format: 0, semantic: 0, constraint: 0 },
+    statusFilter = false,
+    onRequest,
+    delayMs,
+    delayAfter = 0,
+  } = options;
+
+  let requestCount = 0;
+
+  server.use(
+    http.get(`${API}/runs/:id`, async ({ request, params }) => {
+      if (String(params.id).includes("related")) return;
+
+      requestCount++;
+      onRequest?.();
+
+      const url = new URL(request.url);
+      const limit = Number(url.searchParams.get("limit") || 0);
+      const cursor = Number(url.searchParams.get("cursor") || 0);
+
+      let filtered = sourceResults;
+      if (statusFilter) {
+        const statusParam = url.searchParams.get("status");
+        if (statusParam === "pass") {
+          filtered = sourceResults.filter((r) => r.status === "pass");
+        } else if (statusParam === "fail") {
+          filtered = sourceResults.filter((r) => r.status !== "pass");
+        }
+      }
+
+      if (limit) {
+        const start = cursor ? filtered.findIndex((r) => r.id === cursor) + 1 : 0;
+        const page = filtered.slice(start, start + limit);
+        const hasNext = start + limit < filtered.length;
+
+        if (delayMs && requestCount > delayAfter) {
+          await delay(delayMs);
+        }
+
+        return HttpResponse.json({
+          ...createMockRunDetail({ results: page }),
+          nextCursor: hasNext ? page[page.length - 1].id : null,
+          totalCount: total,
+          statusCounts,
+        });
+      }
+
+      return HttpResponse.json(createMockRunDetail({ results: filtered }));
+    }),
+  );
+
+  return { getRequestCount: () => requestCount };
+};
+
+type ReevaluateHandlerOptions = {
+  failingIds?: number[];
+  onRequest?: (body: Record<string, unknown>) => void;
+};
+
+const setupReevaluateHandler = ({ failingIds = [], onRequest }: ReevaluateHandlerOptions = {}) => {
+  const failingSet = new Set(failingIds);
+  const failCount = failingIds.length;
+
+  server.use(
+    http.post(`${API}/runs/:id/re-evaluate`, async ({ request }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      onRequest?.(body);
+
+      const results = allResults.map((result) => ({
+        id: result.id,
+        status: failingSet.has(result.id) ? "semantic" : "pass",
+        constraintResults: { passed: true, results: [], errorMessage: null },
+      }));
+
+      return HttpResponse.json({
+        results,
+        passRate: failCount > 0 ? (TOTAL_COUNT - failCount) / TOTAL_COUNT : 1,
+        statusCounts: {
+          pass: TOTAL_COUNT - failCount,
+          format: 0,
+          semantic: failCount,
+          constraint: 0,
+        },
+      });
+    }),
+  );
+};
+
 beforeEach(() => {
   intersectionCallback = () => {};
   vi.stubGlobal(
@@ -51,45 +154,21 @@ beforeEach(() => {
       disconnect() {}
     },
   );
+
+  server.use(
+    http.get(`${API}/runs/:id/related-versions`, () =>
+      HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
+    ),
+  );
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const setupPaginatedHandler = () => {
-  server.use(
-    http.get(`${API}/runs/:id`, ({ request, params }) => {
-      if (String(params.id).includes("related")) return;
-
-      const url = new URL(request.url);
-      const limit = Number(url.searchParams.get("limit") || 0);
-      const cursor = Number(url.searchParams.get("cursor") || 0);
-
-      if (limit) {
-        const start = cursor ? allResults.findIndex((r) => r.id === cursor) + 1 : 0;
-        const page = allResults.slice(start, start + limit);
-        const hasNext = start + limit < allResults.length;
-
-        return HttpResponse.json({
-          ...createMockRunDetail({ results: page }),
-          nextCursor: hasNext ? page[page.length - 1].id : null,
-          totalCount: TOTAL_COUNT,
-          statusCounts: { pass: TOTAL_COUNT, format: 0, semantic: 0, constraint: 0 },
-        });
-      }
-
-      return HttpResponse.json(createMockRunDetail({ results: allResults }));
-    }),
-    http.get(`${API}/runs/:id/related-versions`, () =>
-      HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
-    ),
-  );
-};
-
 describe("RunDetailPage 무한스크롤", () => {
   it("첫 로드 시 첫 페이지 결과만 표시되어야 한다", async () => {
-    setupPaginatedHandler();
+    setupRunDetailHandler();
     renderRunDetailPage();
 
     await waitFor(() => {
@@ -101,7 +180,7 @@ describe("RunDetailPage 무한스크롤", () => {
   });
 
   it("테이블 하단에 스크롤하면 다음 페이지가 로드되어야 한다", async () => {
-    setupPaginatedHandler();
+    setupRunDetailHandler();
     renderRunDetailPage();
 
     await waitFor(() => {
@@ -119,32 +198,7 @@ describe("RunDetailPage 무한스크롤", () => {
   });
 
   it("마지막 페이지에 도달하면 추가 로딩이 발생하지 않아야 한다", async () => {
-    let fetchCount = 0;
-    server.use(
-      http.get(`${API}/runs/:id`, ({ request, params }) => {
-        if (String(params.id).includes("related")) return;
-
-        fetchCount++;
-        const url = new URL(request.url);
-        const limit = Number(url.searchParams.get("limit") || 0);
-        const cursor = Number(url.searchParams.get("cursor") || 0);
-
-        const start = cursor ? allResults.findIndex((r) => r.id === cursor) + 1 : 0;
-        const page = allResults.slice(start, start + limit);
-        const hasNext = start + limit < allResults.length;
-
-        return HttpResponse.json({
-          ...createMockRunDetail({ results: page }),
-          nextCursor: hasNext ? page[page.length - 1].id : null,
-          totalCount: TOTAL_COUNT,
-          statusCounts: { pass: TOTAL_COUNT, format: 0, semantic: 0, constraint: 0 },
-        });
-      }),
-      http.get(`${API}/runs/:id/related-versions`, () =>
-        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
-      ),
-    );
-
+    const { getRequestCount } = setupRunDetailHandler();
     renderRunDetailPage();
 
     await waitFor(() => {
@@ -160,7 +214,7 @@ describe("RunDetailPage 무한스크롤", () => {
       expect(screen.getAllByRole("row")).toHaveLength(TOTAL_COUNT + 1);
     });
 
-    const fetchCountAfterFullLoad = fetchCount;
+    const countAfterFullLoad = getRequestCount();
 
     intersectionCallback(
       [{ isIntersecting: true }] as IntersectionObserverEntry[],
@@ -169,40 +223,11 @@ describe("RunDetailPage 무한스크롤", () => {
 
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(fetchCount).toBe(fetchCountAfterFullLoad);
+    expect(getRequestCount()).toBe(countAfterFullLoad);
   });
 
   it("다음 페이지 로딩 중 로딩 인디케이터가 표시되어야 한다", async () => {
-    let requestCount = 0;
-    server.use(
-      http.get(`${API}/runs/:id`, async ({ request, params }) => {
-        if (String(params.id).includes("related")) return;
-
-        requestCount++;
-        const url = new URL(request.url);
-        const limit = Number(url.searchParams.get("limit") || 0);
-        const cursor = Number(url.searchParams.get("cursor") || 0);
-
-        const start = cursor ? allResults.findIndex((r) => r.id === cursor) + 1 : 0;
-        const page = allResults.slice(start, start + limit);
-        const hasNext = start + limit < allResults.length;
-
-        if (requestCount > 1) {
-          await delay(200);
-        }
-
-        return HttpResponse.json({
-          ...createMockRunDetail({ results: page }),
-          nextCursor: hasNext ? page[page.length - 1].id : null,
-          totalCount: TOTAL_COUNT,
-          statusCounts: { pass: TOTAL_COUNT, format: 0, semantic: 0, constraint: 0 },
-        });
-      }),
-      http.get(`${API}/runs/:id/related-versions`, () =>
-        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
-      ),
-    );
-
+    setupRunDetailHandler({ delayMs: 200, delayAfter: 1 });
     renderRunDetailPage();
 
     await waitFor(() => {
@@ -229,39 +254,9 @@ describe("RunDetailPage 탭 카운트", () => {
     const PASS_COUNT = 45;
     const FAIL_COUNT = TOTAL_COUNT - PASS_COUNT;
 
-    server.use(
-      http.get(`${API}/runs/:id`, ({ request, params }) => {
-        if (String(params.id).includes("related")) return;
-
-        const url = new URL(request.url);
-        const limit = Number(url.searchParams.get("limit") || 0);
-        const cursor = Number(url.searchParams.get("cursor") || 0);
-
-        if (limit) {
-          const start = cursor ? allResults.findIndex((r) => r.id === cursor) + 1 : 0;
-          const page = allResults.slice(start, start + limit);
-          const hasNext = start + limit < allResults.length;
-
-          return HttpResponse.json({
-            ...createMockRunDetail({ results: page }),
-            nextCursor: hasNext ? page[page.length - 1].id : null,
-            totalCount: TOTAL_COUNT,
-            statusCounts: {
-              pass: PASS_COUNT,
-              format: 10,
-              semantic: 10,
-              constraint: 5,
-            },
-          });
-        }
-
-        return HttpResponse.json(createMockRunDetail({ results: allResults }));
-      }),
-      http.get(`${API}/runs/:id/related-versions`, () =>
-        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
-      ),
-    );
-
+    setupRunDetailHandler({
+      statusCounts: { pass: PASS_COUNT, format: 10, semantic: 10, constraint: 5 },
+    });
     renderRunDetailPage();
 
     await waitFor(() => {
@@ -274,21 +269,11 @@ describe("RunDetailPage 탭 카운트", () => {
   });
 
   it("결과가 0건이면 모든 탭 카운트가 0으로 표시되어야 한다", async () => {
-    server.use(
-      http.get(`${API}/runs/:id`, ({ params }) => {
-        if (String(params.id).includes("related")) return;
-
-        return HttpResponse.json({
-          ...createMockRunDetail({ results: [] }),
-          nextCursor: null,
-          totalCount: 0,
-          statusCounts: { pass: 0, format: 0, semantic: 0, constraint: 0 },
-        });
-      }),
-      http.get(`${API}/runs/:id/related-versions`, () =>
-        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
-      ),
-    );
+    setupRunDetailHandler({
+      results: [],
+      totalCount: 0,
+      statusCounts: { pass: 0, format: 0, semantic: 0, constraint: 0 },
+    });
 
     renderRunDetailPage();
 
@@ -327,46 +312,11 @@ describe("RunDetailPage 서버 사이드 필터링", () => {
   ];
 
   const setupFilterableHandler = () => {
-    server.use(
-      http.get(`${API}/runs/:id`, ({ request, params }) => {
-        if (String(params.id).includes("related")) return;
-
-        const url = new URL(request.url);
-        const limit = Number(url.searchParams.get("limit") || 0);
-        const cursor = Number(url.searchParams.get("cursor") || 0);
-        const statusParam = url.searchParams.get("status");
-
-        let filtered = mixedResults;
-        if (statusParam === "pass") {
-          filtered = mixedResults.filter((r) => r.status === "pass");
-        } else if (statusParam === "fail") {
-          filtered = mixedResults.filter((r) => r.status !== "pass");
-        }
-
-        if (limit) {
-          const start = cursor ? filtered.findIndex((r) => r.id === cursor) + 1 : 0;
-          const page = filtered.slice(start, start + limit);
-          const hasNext = start + limit < filtered.length;
-
-          return HttpResponse.json({
-            ...createMockRunDetail({ results: page }),
-            nextCursor: hasNext ? page[page.length - 1].id : null,
-            totalCount: TOTAL_COUNT,
-            statusCounts: {
-              pass: PASS_COUNT,
-              format: FAIL_COUNT,
-              semantic: 0,
-              constraint: 0,
-            },
-          });
-        }
-
-        return HttpResponse.json(createMockRunDetail({ results: filtered }));
-      }),
-      http.get(`${API}/runs/:id/related-versions`, () =>
-        HttpResponse.json({ executedRuns: [], unexecutedVersions: [] }),
-      ),
-    );
+    setupRunDetailHandler({
+      results: mixedResults,
+      statusFilter: true,
+      statusCounts: { pass: PASS_COUNT, format: FAIL_COUNT, semantic: 0, constraint: 0 },
+    });
   };
 
   it("필터 변경 시 해당 status의 결과만 표시되어야 한다", async () => {
@@ -434,5 +384,163 @@ describe("RunDetailPage 서버 사이드 필터링", () => {
     await waitFor(() => {
       expect(screen.getAllByRole("row")).toHaveLength(FAIL_COUNT + 1);
     });
+  });
+});
+
+describe("RunDetailPage Live Simulation", () => {
+  it("패널을 열기만 하면 re-evaluate를 호출하지 않아야 한다", async () => {
+    const user = userEvent.setup();
+    let reevaluateCount = 0;
+
+    setupRunDetailHandler();
+    setupReevaluateHandler({
+      onRequest: () => {
+        reevaluateCount++;
+      },
+    });
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    await user.click(screen.getByRole("button", { name: "평가 기준 튜닝" }));
+    await screen.findByRole("slider");
+
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
+    expect(reevaluateCount).toBe(0);
+  });
+
+  it("임계값 변경 시 로드된 row의 status가 갱신되어야 한다", async () => {
+    const user = userEvent.setup();
+    const reevaluateThresholds: number[] = [];
+
+    setupRunDetailHandler();
+    setupReevaluateHandler({
+      failingIds: [1],
+      onRequest: (body) => {
+        reevaluateThresholds.push(body.semanticThreshold as number);
+      },
+    });
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    const beforeRow = screen.getByText("입력 1").closest("tr");
+    expect(beforeRow).not.toBeNull();
+    expect(within(beforeRow as HTMLTableRowElement).getByText("통과")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "평가 기준 튜닝" }));
+    const slider = await screen.findByRole("slider");
+    slider.focus();
+    await user.keyboard("{ArrowRight}");
+
+    await waitFor(() => {
+      const updatedRow = screen.getByText("입력 1").closest("tr");
+      expect(updatedRow).not.toBeNull();
+      expect(within(updatedRow as HTMLTableRowElement).getByText("유사도")).toBeInTheDocument();
+    });
+
+    expect(reevaluateThresholds.some((threshold) => threshold > 0.8)).toBe(true);
+  });
+
+  it("임계값 변경 시 탭 카운트가 서버 statusCounts로 갱신되어야 한다", async () => {
+    const user = userEvent.setup();
+
+    setupRunDetailHandler();
+    setupReevaluateHandler({ failingIds: [1] });
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: `통과 (${TOTAL_COUNT})` })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "실패 (0)" })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "평가 기준 튜닝" }));
+    const slider = await screen.findByRole("slider");
+    slider.focus();
+    await user.keyboard("{ArrowRight}");
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: `통과 (${TOTAL_COUNT - 1})` })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "실패 (1)" })).toBeInTheDocument();
+    });
+  });
+
+  it("임계값 변경 후 스크롤 위치가 유지되어야 한다", async () => {
+    const user = userEvent.setup();
+
+    setupRunDetailHandler();
+    setupReevaluateHandler({ failingIds: [1] });
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    const scrollContainer = screen.getByRole("region", { name: /결과 영역/i });
+
+    scrollContainer.scrollTop = 320;
+    fireEvent.scroll(scrollContainer);
+    const initialScrollTop = scrollContainer.scrollTop;
+
+    await user.click(screen.getByRole("button", { name: "평가 기준 튜닝" }));
+    const slider = await screen.findByRole("slider");
+    slider.focus();
+    await user.keyboard("{ArrowRight}");
+
+    await waitFor(() => {
+      const updatedRow = screen.getByText("입력 1").closest("tr");
+      expect(updatedRow).not.toBeNull();
+      expect(within(updatedRow as HTMLTableRowElement).getByText("유사도")).toBeInTheDocument();
+    });
+
+    const updatedScrollContainer = screen.getByRole("region", { name: /결과 영역/i });
+    expect(updatedScrollContainer).toBe(scrollContainer);
+    expect(updatedScrollContainer.scrollTop).toBe(initialScrollTop);
+  });
+
+  it("임계값 변경 후 스크롤하면 새 기준이 적용된 페이지가 로드되어야 한다", async () => {
+    const user = userEvent.setup();
+
+    setupRunDetailHandler();
+    setupReevaluateHandler({ failingIds: [1, PAGE_SIZE + 1] });
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1);
+    });
+
+    await user.click(screen.getByRole("button", { name: "평가 기준 튜닝" }));
+    const slider = await screen.findByRole("slider");
+    slider.focus();
+    await user.keyboard("{ArrowRight}");
+
+    await waitFor(() => {
+      const firstRow = screen.getByText("입력 1").closest("tr");
+      expect(firstRow).not.toBeNull();
+      expect(within(firstRow as HTMLTableRowElement).getByText("유사도")).toBeInTheDocument();
+    });
+
+    intersectionCallback(
+      [{ isIntersecting: true }] as IntersectionObserverEntry[],
+      {} as IntersectionObserver,
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(TOTAL_COUNT + 1);
+    });
+
+    const nextPageFirstRow = screen.getByText(`입력 ${PAGE_SIZE + 1}`).closest("tr");
+    expect(nextPageFirstRow).not.toBeNull();
+    expect(within(nextPageFirstRow as HTMLTableRowElement).getByText("유사도")).toBeInTheDocument();
   });
 });

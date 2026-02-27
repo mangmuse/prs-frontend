@@ -18,18 +18,34 @@ import { useUpdateProfile } from "@/hooks/mutations/profileMutations";
 import { useUpdateRunProfileSnapshot } from "@/hooks/mutations/runMutations";
 import { cn } from "@/lib/utils";
 import type { LogicConstraint } from "@/types/constraint";
-import type { ReEvaluateResponse, RunDetailData, RunResultRow } from "@/types/runDetail";
+import type {
+  ReEvaluateResponse,
+  ReEvaluatedRow,
+  RunDetailData,
+  RunResultRow,
+  StatusCounts,
+} from "@/types/runDetail";
 
 interface LiveProfileEditorProps {
   run: RunDetailData;
   onClose: () => void;
-  onPreviewUpdate: (updatedResults: RunResultRow[]) => void;
+  onPreviewUpdate: (
+    updatedResults: RunResultRow[],
+    statusCounts?: StatusCounts | null,
+    reEvaluatedRows?: ReEvaluatedRow[] | null,
+  ) => void;
 }
 
 export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfileEditorProps) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [diffStats, setDiffStats] = useState({ changed: 0, newPassRate: 0 });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRequestedSignatureRef = useRef(
+    JSON.stringify({
+      semanticThreshold: run.profile.semanticThreshold,
+      globalConstraints: run.profile.globalConstraints,
+    }),
+  );
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -71,7 +87,7 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
           newPassRate: Math.round(response.passRate * 100),
         });
 
-        onPreviewUpdate(newResults);
+        onPreviewUpdate(newResults, response.statusCounts ?? null, response.results);
       } catch {
         // API 에러 시 원래 결과 유지
       } finally {
@@ -82,11 +98,21 @@ export const LiveProfileEditor = ({ run, onClose, onPreviewUpdate }: LiveProfile
   );
 
   useEffect(() => {
+    const currentSignature = JSON.stringify({
+      semanticThreshold: watchedThreshold,
+      globalConstraints: watchedConstraints,
+    });
+
+    if (currentSignature === lastRequestedSignatureRef.current) {
+      return;
+    }
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
     debounceRef.current = setTimeout(() => {
+      lastRequestedSignatureRef.current = currentSignature;
       void reEvaluate(watchedThreshold, watchedConstraints);
     }, 300);
 
