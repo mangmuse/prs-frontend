@@ -131,16 +131,18 @@ export const Sidebar = () => {
         {isAuthenticated && !isGuest && user && (
           <div className="flex items-center gap-3 rounded-xl px-3 py-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage src={user.pictureUrl ?? undefined} alt={user.name ?? ""} />
+              <AvatarImage src={user.pictureUrl ?? undefined} alt={user.name || "사용자 프로필"} />
               <AvatarFallback className="text-xs">
                 {user.name?.charAt(0) ?? user.email.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <span className="flex-1 truncate text-sm font-medium">{user.name ?? user.email}</span>
             <button
+              type="button"
               onClick={() => void handleLogout()}
               className="text-muted-foreground hover:text-foreground transition-colors"
               title="로그아웃"
+              aria-label="로그아웃"
             >
               <LogOut className="h-4 w-4" />
             </button>
