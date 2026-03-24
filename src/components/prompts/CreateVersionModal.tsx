@@ -36,10 +36,19 @@ import { useCreateVersion } from "@/hooks/mutations/promptMutations";
 import { llmQueries } from "@/queries/llmQueries";
 import type { CreateVersionRequest, OutputSchemaType } from "@/types/prompt";
 
+export interface PrefillData {
+  model: string;
+  temperature: number;
+  outputSchema: OutputSchemaType;
+  systemInstruction: string;
+  userTemplate: string;
+}
+
 interface CreateVersionModalProps {
   open: boolean;
   promptId: number;
   onClose: () => void;
+  prefillData?: PrefillData;
 }
 
 const createVersionSchema = z.object({
@@ -53,18 +62,23 @@ const createVersionSchema = z.object({
 
 type CreateVersionFormData = z.infer<typeof createVersionSchema>;
 
-export const CreateVersionModal = ({ open, promptId, onClose }: CreateVersionModalProps) => {
+export const CreateVersionModal = ({
+  open,
+  promptId,
+  onClose,
+  prefillData,
+}: CreateVersionModalProps) => {
   const { data: modelsData, isPending: modelsLoading } = useQuery(llmQueries.models());
   const models = modelsData?.models ?? [];
 
   const form = useForm<CreateVersionFormData>({
     resolver: zodResolver(createVersionSchema),
     defaultValues: {
-      systemInstruction: "",
-      userTemplate: "",
-      model: "",
-      temperature: 1.0,
-      outputSchema: "JSON Object",
+      systemInstruction: prefillData?.systemInstruction ?? "",
+      userTemplate: prefillData?.userTemplate ?? "",
+      model: prefillData?.model ?? "",
+      temperature: prefillData?.temperature ?? 1.0,
+      outputSchema: prefillData?.outputSchema ?? "JSON Object",
       memo: "",
     },
   });

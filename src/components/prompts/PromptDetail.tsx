@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { EditMetaDialog } from "@/components/common/EditMetaDialog";
+import type { PrefillData } from "@/components/prompts/CreateVersionModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeletePrompt, useUpdatePrompt } from "@/hooks/mutations/promptMutations";
@@ -16,7 +17,7 @@ interface PromptDetailProps {
   promptId: number;
   promptName: string;
   promptDescription: string | null;
-  onCreateVersion: () => void;
+  onCreateVersion: (prefillData?: PrefillData) => void;
   onDelete: () => void;
 }
 
@@ -110,7 +111,22 @@ export const PromptDetail = ({
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
-          <Button size="sm" onClick={onCreateVersion}>
+          <Button
+            size="sm"
+            onClick={() => {
+              if (versionDetail) {
+                onCreateVersion({
+                  model: versionDetail.model,
+                  temperature: versionDetail.temperature,
+                  outputSchema: versionDetail.outputSchema,
+                  systemInstruction: versionDetail.systemInstruction,
+                  userTemplate: versionDetail.userTemplate,
+                });
+              } else {
+                onCreateVersion();
+              }
+            }}
+          >
             <Plus className="mr-1 h-4 w-4" />새 버전
           </Button>
         </div>

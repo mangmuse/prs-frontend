@@ -24,10 +24,50 @@ const defaultProps = {
   onClose: vi.fn(),
 };
 
+const prefillData = {
+  model: "gpt-4o",
+  temperature: 0.7,
+  outputSchema: "JSON Array" as const,
+  systemInstruction: "You are a helpful assistant.",
+  userTemplate: "Analyze the following: {{input}}",
+};
+
 describe("CreateVersionModal", () => {
   beforeEach(() => {
     defaultProps.onClose = vi.fn();
     server.use(http.get(`${API}/llm/models`, () => HttpResponse.json(mockModels)));
+  });
+
+  describe("prefill", () => {
+    it("prefill 데이터가 주어지면 모델, 온도, 출력형식, 지시문, 템플릿이 채워진 상태로 렌더링 되어야한다", async () => {
+      renderWithClient(<CreateVersionModal {...defaultProps} prefillData={prefillData} />);
+
+      await waitFor(() => {
+        expect(screen.getAllByText("GPT-4o").length).toBeGreaterThanOrEqual(1);
+      });
+
+      expect(screen.getByText(/Temperature \(0.7\)/)).toBeInTheDocument();
+      expect(screen.getAllByText("JSON Array").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByDisplayValue("You are a helpful assistant.")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("Analyze the following: {{input}}")).toBeInTheDocument();
+    });
+
+    it("prefill 데이터가 주어져도 메모 필드는 비어있어야한다", () => {
+      renderWithClient(<CreateVersionModal {...defaultProps} prefillData={prefillData} />);
+
+      expect(screen.getByPlaceholderText("이 버전의 변경사항")).toHaveValue("");
+    });
+
+    it("prefill 데이터가 없으면 기본값으로 렌더링 되어야한다", () => {
+      renderWithClient(<CreateVersionModal {...defaultProps} />);
+
+      expect(screen.getByText("모델을 선택하세요")).toBeInTheDocument();
+      expect(screen.getByText(/Temperature \(1\)/)).toBeInTheDocument();
+      expect(screen.getAllByText("JSON Object").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByPlaceholderText("시스템 지시사항을 입력하세요...")).toHaveValue("");
+      expect(screen.getByPlaceholderText(/사용자 템플릿을 입력하세요/)).toHaveValue("");
+      expect(screen.getByPlaceholderText("이 버전의 변경사항")).toHaveValue("");
+    });
   });
 
   it("모달이 열리면 폼 필드들이 표시되어야 한다", () => {

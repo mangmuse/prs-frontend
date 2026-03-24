@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CreatePromptModal } from "@/components/prompts/CreatePromptModal";
-import { CreateVersionModal } from "@/components/prompts/CreateVersionModal";
+import { CreateVersionModal, type PrefillData } from "@/components/prompts/CreateVersionModal";
 import { PromptDetail } from "@/components/prompts/PromptDetail";
 import { PromptList } from "@/components/prompts/PromptList";
 import { useModal } from "@/hooks/modals/useModal";
@@ -14,7 +14,7 @@ export const PromptsPage = () => {
   const [selectedPromptId, setSelectedPromptId] = useState<number | null>(null);
 
   const promptModal = useModal();
-  const versionModal = useModal<{ open: boolean; promptId: number }>({
+  const versionModal = useModal<{ open: boolean; promptId: number; prefillData?: PrefillData }>({
     open: false,
     promptId: 0,
   });
@@ -40,7 +40,9 @@ export const PromptsPage = () => {
               promptId={selectedPromptId}
               promptName={selectedPrompt.name}
               promptDescription={selectedPrompt.description}
-              onCreateVersion={() => versionModal.open({ promptId: selectedPromptId })}
+              onCreateVersion={(prefillData) =>
+                versionModal.open({ promptId: selectedPromptId, prefillData })
+              }
               onDelete={() => setSelectedPromptId(null)}
             />
           ) : (
@@ -61,6 +63,7 @@ export const PromptsPage = () => {
         <CreateVersionModal
           open={versionModal.state.open}
           promptId={versionModal.state.promptId}
+          prefillData={versionModal.state.prefillData}
           onClose={versionModal.close}
         />
       )}
