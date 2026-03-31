@@ -49,7 +49,7 @@ const toFormValues = (row: DatasetRow): DatasetRowFormData => ({
     value: typeof value === "string" ? value : JSON.stringify(value),
   })),
   expectedOutput: row.expectedOutput,
-  tags: row.tags.join(", "),
+  tags: row.tags?.join(", ") ?? "",
 });
 
 export const DatasetRowForm = ({

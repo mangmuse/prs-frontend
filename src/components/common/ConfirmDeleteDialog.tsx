@@ -16,6 +16,9 @@ interface ConfirmDeleteDialogProps {
   title: string;
   description: string;
   isPending?: boolean;
+  confirmLabel?: string;
+  pendingLabel?: string;
+  variant?: "destructive" | "default";
 }
 
 export const ConfirmDeleteDialog = ({
@@ -25,6 +28,9 @@ export const ConfirmDeleteDialog = ({
   title,
   description,
   isPending,
+  confirmLabel = "삭제하기",
+  pendingLabel = "삭제 중...",
+  variant = "destructive",
 }: ConfirmDeleteDialogProps) => (
   <AlertDialog open={open} onOpenChange={onOpenChange}>
     <AlertDialogContent>
@@ -35,11 +41,15 @@ export const ConfirmDeleteDialog = ({
       <AlertDialogFooter>
         <AlertDialogCancel>취소</AlertDialogCancel>
         <AlertDialogAction
-          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          className={
+            variant === "destructive"
+              ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              : ""
+          }
           disabled={isPending}
           onClick={onConfirm}
         >
-          {isPending ? "삭제 중..." : "삭제하기"}
+          {isPending ? pendingLabel : confirmLabel}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>

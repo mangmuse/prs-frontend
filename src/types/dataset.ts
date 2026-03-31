@@ -58,3 +58,7 @@ export interface UpdateRowRequest {
   expectedOutput: string;
   tags?: string[];
 }
+
+export interface CsvImportResponse {
+  createdCount: number;
+}

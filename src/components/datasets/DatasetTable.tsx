@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { Maximize2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Maximize2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
@@ -20,6 +20,7 @@ import { useModal } from "@/hooks/modals/useModal";
 import {
   useDeleteDataset,
   useDeleteDatasetRow,
+  useImportCsv,
   useUpdateDataset,
 } from "@/hooks/mutations/datasetMutations";
 import { datasetQueries } from "@/queries/datasetQueries";
@@ -55,6 +56,9 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
   const [isEditingDataset, setIsEditingDataset] = useState(false);
   const deleteDataset = useDeleteDataset();
   const updateDataset = useUpdateDataset();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [csvConfirm, setCsvConfirm] = useState<{ file: File; rowCount: number } | null>(null);
+  const importCsv = useImportCsv();
 
   const { data, isPending, error } = useQuery(
     datasetQueries.detail(datasetId, page, ROWS_PER_PAGE),
@@ -104,6 +108,45 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
     });
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".csv")) {
+      toast.error("CSV 파일만 업로드 가능합니다");
+      return;
+    }
+
+    if (file.size > 1_000_000) {
+      toast.error("파일 크기는 1MB 이하여야 합니다");
+      return;
+    }
+
+    const text = await file.text();
+    const lines = text.split("\n").filter((line) => line.trim());
+    const rowCount = Math.max(0, lines.length - 1);
+    setCsvConfirm({ file, rowCount });
+
+    e.target.value = "";
+  };
+
+  const handleCsvImport = () => {
+    if (!csvConfirm) return;
+    importCsv.mutate(
+      { datasetId, file: csvConfirm.file },
+      {
+        onSuccess: (data) => {
+          toast.success(`${data.createdCount}행이 추가되었습니다`);
+          setCsvConfirm(null);
+        },
+        onError: () => {
+          toast.error("CSV 가져오기에 실패했습니다");
+          setCsvConfirm(null);
+        },
+      },
+    );
+  };
+
   if (isPending) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">로딩 중...</div>
@@ -142,9 +185,22 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
-        <Button onClick={() => openRowForm({ mode: "add" })}>
-          <Plus className="mr-2 h-4 w-4" />행 추가
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+            <Upload className="mr-2 h-4 w-4" />
+            CSV 가져오기
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={(e) => void handleFileSelect(e)}
+          />
+          <Button onClick={() => openRowForm({ mode: "add" })}>
+            <Plus className="mr-2 h-4 w-4" />행 추가
+          </Button>
+        </div>
       </div>
 
       {data.rows.length === 0 ? (
@@ -213,7 +269,7 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {row.tags.map((tag) => (
+                      {row.tags?.map((tag) => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -291,6 +347,17 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
         onConfirm={handleDatasetDelete}
         title="데이터셋을 삭제하시겠습니까?"
         description="이 작업은 되돌릴 수 없습니다. 데이터셋과 모든 행이 영구적으로 삭제됩니다."
+      />
+      <ConfirmDeleteDialog
+        open={csvConfirm !== null}
+        onOpenChange={(open) => !open && setCsvConfirm(null)}
+        isPending={importCsv.isPending}
+        onConfirm={handleCsvImport}
+        title="CSV 데이터 가져오기"
+        description={`약 ${csvConfirm?.rowCount ?? 0}행의 데이터가 있습니다. 가져오시겠습니까?`}
+        confirmLabel="가져오기"
+        pendingLabel="가져오는 중..."
+        variant="default"
       />
     </div>
   );

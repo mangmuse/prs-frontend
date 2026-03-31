@@ -3,6 +3,7 @@ import type {
   CreateDatasetResponse,
   CreateRowsRequest,
   CreateRowsResponse,
+  CsvImportResponse,
   Dataset,
   DatasetDetailResponse,
   DatasetRow,
@@ -45,5 +46,13 @@ export const datasetsApi = {
 
   async delete(datasetId: number): Promise<void> {
     await apiClient.delete(`datasets/${datasetId}`);
+  },
+
+  async importCsv(datasetId: number, file: File): Promise<CsvImportResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient
+      .post(`datasets/${datasetId}/import-csv`, { body: formData })
+      .json<CsvImportResponse>();
   },
 };

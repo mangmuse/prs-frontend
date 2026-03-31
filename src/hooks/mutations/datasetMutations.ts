@@ -113,3 +113,15 @@ export const useDeleteDataset = () => {
     },
   });
 };
+
+export const useImportCsv = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ datasetId, file }: { datasetId: number; file: File }) =>
+      datasetsApi.importCsv(datasetId, file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: datasetQueries.all() });
+    },
+  });
+};

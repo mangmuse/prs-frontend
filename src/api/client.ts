@@ -41,9 +41,6 @@ export const apiClient = ky.create({
   timeout: 10000,
   retry: import.meta.env.MODE === "test" ? { limit: 0 } : undefined,
   credentials: "include",
-  headers: {
-    "Content-Type": "application/json",
-  },
   hooks: {
     beforeRequest: [
       (request) => {
