@@ -55,4 +55,9 @@ export const datasetsApi = {
       .post(`datasets/${datasetId}/import-csv`, { body: formData })
       .json<CsvImportResponse>();
   },
+
+  async exportCsv(datasetId: number): Promise<Blob> {
+    const response = await apiClient.get(`datasets/${datasetId}/export-csv`);
+    return response.blob();
+  },
 };

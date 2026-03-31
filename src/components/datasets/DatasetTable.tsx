@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { Maximize2, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { Download, Maximize2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { datasetsApi } from "@/api/datasets";
 import { ConfirmDeleteDialog } from "@/components/common/ConfirmDeleteDialog";
 import { EditMetaDialog } from "@/components/common/EditMetaDialog";
 import { Badge } from "@/components/ui/badge";
@@ -147,6 +148,21 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
     );
   };
 
+  const handleCsvExport = async () => {
+    try {
+      const blob = await datasetsApi.exportCsv(datasetId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${data?.name ?? "dataset"}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("CSV 파일이 다운로드되었습니다");
+    } catch {
+      toast.error("CSV 내보내기에 실패했습니다");
+    }
+  };
+
   if (isPending) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">로딩 중...</div>
@@ -186,6 +202,10 @@ export const DatasetTable = ({ datasetId, onDelete }: DatasetTableProps) => {
           </Button>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => void handleCsvExport()}>
+            <Download className="mr-2 h-4 w-4" />
+            CSV 내보내기
+          </Button>
           <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
             <Upload className="mr-2 h-4 w-4" />
             CSV 가져오기
