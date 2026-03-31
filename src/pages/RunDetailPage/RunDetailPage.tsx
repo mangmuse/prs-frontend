@@ -96,6 +96,26 @@ export const RunDetailPage = () => {
     );
   };
 
+  const handleRerun = () => {
+    if (!run) return;
+    createRun.mutate(
+      {
+        promptVersionId: run.promptVersionId,
+        datasetId: run.datasetId,
+        profileId: run.profileId,
+      },
+      {
+        onSuccess: (newRun) => {
+          toast.success("실행이 시작되었습니다");
+          void navigate(`/runs/${newRun.id}`);
+        },
+        onError: () => {
+          toast.error("실행에 실패했습니다");
+        },
+      },
+    );
+  };
+
   const handleCompareSelect = (targetId: string) => {
     compareMode.handleCompareSelect(targetId);
     setStatusFilter("all");
@@ -130,7 +150,9 @@ export const RunDetailPage = () => {
         datasetName={run.datasetName}
         versionNumber={run.versionNumber}
         isLiveEditorOpen={liveSimulation.isLiveEditorOpen}
+        isRerunning={createRun.isPending}
         onBack={handleBackToList}
+        onRerun={handleRerun}
         onToggleLiveEditor={liveSimulation.handleToggleLiveEditor}
       />
 

@@ -801,3 +801,88 @@ describe("RunDetailPage 상태 폴링", () => {
     expect(statusRequestCount).toBe(countAfterLoad);
   });
 });
+
+describe("RunDetailPage 재실행", () => {
+  it("재실행 버튼 클릭 시 동일 조합으로 POST /runs가 호출되어야 한다", async () => {
+    const user = userEvent.setup();
+    let capturedBody: Record<string, unknown> | null = null;
+
+    setupRunDetailHandler();
+    server.use(
+      http.post(`${API}/runs`, async ({ request }) => {
+        capturedBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(
+          { id: 99, status: "running", createdAt: "2026-04-01T00:00:00Z" },
+          { status: 201 },
+        );
+      }),
+    );
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "재실행" }));
+
+    await waitFor(() => {
+      expect(capturedBody).toEqual({
+        promptVersionId: 1,
+        datasetId: 1,
+        profileId: 1,
+      });
+    });
+  });
+
+  it("재실행 성공 시 새 Run 페이지로 이동하고 성공 토스트가 표시되어야 한다", async () => {
+    const user = userEvent.setup();
+    const toastSuccessSpy = vi.spyOn(toast, "success");
+
+    setupRunDetailHandler();
+    server.use(
+      http.post(`${API}/runs`, () =>
+        HttpResponse.json(
+          { id: 99, status: "running", createdAt: "2026-04-01T00:00:00Z" },
+          { status: 201 },
+        ),
+      ),
+    );
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "재실행" }));
+
+    await waitFor(() => {
+      expect(toastSuccessSpy).toHaveBeenCalledWith("실행이 시작되었습니다");
+    });
+  });
+
+  it("재실행 실패 시 에러 토스트가 표시되어야 한다", async () => {
+    const user = userEvent.setup();
+    const toastErrorSpy = vi.spyOn(toast, "error");
+
+    setupRunDetailHandler();
+    server.use(
+      http.post(`${API}/runs`, () =>
+        HttpResponse.json({ detail: "API Key가 필요합니다" }, { status: 400 }),
+      ),
+    );
+
+    renderRunDetailPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("table")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "재실행" }));
+
+    await waitFor(() => {
+      expect(toastErrorSpy).toHaveBeenCalledWith("실행에 실패했습니다");
+    });
+  });
+});

@@ -1,4 +1,4 @@
-import { ArrowLeft, Settings2 } from "lucide-react";
+import { ArrowLeft, RotateCcw, Settings2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,18 @@ export const RunDetailHeader = ({
   datasetName,
   versionNumber,
   isLiveEditorOpen,
+  isRerunning,
   onBack,
+  onRerun,
   onToggleLiveEditor,
 }: {
   promptName: string;
   datasetName: string;
   versionNumber: number;
   isLiveEditorOpen: boolean;
+  isRerunning: boolean;
   onBack: () => void;
+  onRerun: () => void;
   onToggleLiveEditor: () => void;
 }) => (
   <header className="flex h-16 items-center gap-4 border-b bg-white px-6 justify-between shrink-0">
@@ -34,6 +38,16 @@ export const RunDetailHeader = ({
     </div>
 
     <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onRerun}
+        disabled={isRerunning}
+        className="gap-2"
+      >
+        <RotateCcw className="h-4 w-4" />
+        {isRerunning ? "실행 중..." : "재실행"}
+      </Button>
       <Button
         variant={isLiveEditorOpen ? "secondary" : "outline"}
         size="sm"
