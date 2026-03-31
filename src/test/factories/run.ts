@@ -26,6 +26,7 @@ export const createMockRunDetail = (overrides?: Partial<RunDetailData>): RunDeta
   promptName: "테스트 프롬프트",
   versionNumber: 1,
   datasetName: "테스트 데이터셋",
+  model: "openai/gpt-4o",
   status: "completed",
   createdAt: "2026-01-01T00:00:00Z",
   profile: {

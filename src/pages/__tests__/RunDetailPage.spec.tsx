@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { server } from "@/mocks/server";
 import { RunDetailPage } from "@/pages/RunDetailPage/RunDetailPage";
 import { RUN_DETAIL_PAGE_SIZE } from "@/queries/runQueries";
+import { useApiKeyStore } from "@/stores/apiKeyStore";
 import { createMockRunDetail, createMockRunResultRow } from "@/test/factories/run";
 import { renderWithClient } from "@/test/utils";
 import type { StatusCounts } from "@/types/runDetail";
@@ -168,6 +169,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  useApiKeyStore.setState({ keys: {} });
 });
 
 describe("RunDetailPage 무한스크롤", () => {
@@ -803,9 +805,11 @@ describe("RunDetailPage 상태 폴링", () => {
 });
 
 describe("RunDetailPage 재실행", () => {
-  it("재실행 버튼 클릭 시 동일 조합으로 POST /runs가 호출되어야 한다", async () => {
+  it("재실행 버튼 클릭 시 동일 조합과 API Key로 POST /runs가 호출되어야 한다", async () => {
     const user = userEvent.setup();
     let capturedBody: Record<string, unknown> | null = null;
+
+    useApiKeyStore.setState({ keys: { openai: "test-openai-key" } });
 
     setupRunDetailHandler();
     server.use(
@@ -831,6 +835,7 @@ describe("RunDetailPage 재실행", () => {
         promptVersionId: 1,
         datasetId: 1,
         profileId: 1,
+        apiKey: "test-openai-key",
       });
     });
   });

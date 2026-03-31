@@ -18,7 +18,9 @@ import { useLiveSimulation } from "@/hooks/runDetail/useLiveSimulation";
 import { useRunDetailInfinite } from "@/hooks/runDetail/useRunDetailInfinite";
 import { useRunStatusPolling } from "@/hooks/runDetail/useRunStatusPolling";
 import { runQueries } from "@/queries/runQueries";
+import { useApiKeyByProvider } from "@/stores/apiKeyStore";
 import type { StatusFilter } from "@/types/runDetail";
+import { extractProvider } from "@/utils/provider";
 
 export const RunDetailPage = () => {
   const navigate = useNavigate();
@@ -47,6 +49,8 @@ export const RunDetailPage = () => {
 
   const { data: relatedVersions } = useQuery(runQueries.relatedVersions(runId));
   const createRun = useCreateRun();
+  const provider = run ? extractProvider(run.model) : null;
+  const apiKey = useApiKeyByProvider(provider);
 
   const liveSimulation = useLiveSimulation({ run });
 
@@ -83,6 +87,7 @@ export const RunDetailPage = () => {
         promptVersionId: versionId,
         datasetId: run.datasetId,
         profileId: run.profileId,
+        ...(apiKey && { apiKey }),
       },
       {
         onSuccess: (newRun) => {
@@ -103,6 +108,7 @@ export const RunDetailPage = () => {
         promptVersionId: run.promptVersionId,
         datasetId: run.datasetId,
         profileId: run.profileId,
+        ...(apiKey && { apiKey }),
       },
       {
         onSuccess: (newRun) => {

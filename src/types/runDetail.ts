@@ -65,6 +65,7 @@ export interface RunDetailData {
   promptName: string;
   versionNumber: number;
   datasetName: string;
+  model: string;
   status: RunStatus;
   createdAt: string;
   profile: ProfileInRun;
