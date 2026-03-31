@@ -69,7 +69,7 @@ export const useLiveSimulation = ({ run }: UseLiveSimulationInput): UseLiveSimul
 
   const { passCount, failCount, totalCount } = useMemo(() => {
     if (isLiveEditorOpen && previewResults) {
-      if (previewStatusCounts && run?.totalCount !== null) {
+      if (previewStatusCounts && run && run.totalCount !== null) {
         const pass = previewStatusCounts.pass ?? 0;
         return {
           passCount: pass,

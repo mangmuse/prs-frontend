@@ -12,7 +12,7 @@ type UseRunStatusPollingCallbacks = {
 export const useRunStatusPolling = (runId: number, callbacks: UseRunStatusPollingCallbacks) => {
   const queryClient = useQueryClient();
   const { data: statusData } = useQuery(runQueries.status(runId));
-  const prevStatusRef = useRef<string>();
+  const prevStatusRef = useRef<string | null>(null);
 
   useEffect(() => {
     const prevStatus = prevStatusRef.current;

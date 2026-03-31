@@ -81,7 +81,7 @@ export const PromptDetail = ({
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
         <p className="mb-4 text-muted-foreground">버전이 없습니다.</p>
-        <Button onClick={onCreateVersion}>
+        <Button onClick={() => onCreateVersion()}>
           <Plus className="mr-1 h-4 w-4" />첫 버전 생성
         </Button>
       </div>
