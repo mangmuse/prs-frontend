@@ -109,6 +109,7 @@ describe("CreateVersionModal", () => {
 
     await user.click(screen.getByRole("combobox", { name: "모델" }));
     await user.click(screen.getByRole("option", { name: "GPT-4o" }));
+    await user.type(screen.getByPlaceholderText(/사용자 템플릿을 입력하세요/), "{{input}}");
 
     await user.click(screen.getByRole("button", { name: "저장" }));
 
@@ -134,6 +135,7 @@ describe("CreateVersionModal", () => {
 
     await user.click(screen.getByRole("combobox", { name: "모델" }));
     await user.click(screen.getByRole("option", { name: "GPT-4o" }));
+    await user.type(screen.getByPlaceholderText(/사용자 템플릿을 입력하세요/), "{{input}}");
 
     await user.click(screen.getByRole("button", { name: "저장" }));
 
