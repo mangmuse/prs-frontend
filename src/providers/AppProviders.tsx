@@ -12,7 +12,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <QueryProvider>
       {children}
-      <Toaster position="top-right" />
+      <Toaster position="bottom-right" />
     </QueryProvider>
   );
 };
