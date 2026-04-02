@@ -21,7 +21,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCreatePrompt } from "@/hooks/mutations/promptMutations";
+import { useCreatePrompt, useCreateVersion } from "@/hooks/mutations/promptMutations";
+import type { CreateVersionRequest, OutputSchemaType } from "@/types/prompt";
+
+import { VersionFormFields } from "./VersionFormFields";
+import { versionFormDefaults, versionFormSchema } from "./versionFormSchema";
 
 interface CreatePromptModalProps {
   open: boolean;
@@ -29,33 +33,62 @@ interface CreatePromptModalProps {
   onCreated: (id: number) => void;
 }
 
-const createPromptSchema = z.object({
-  name: z.string().min(1, "프롬프트 이름을 입력하세요"),
-});
+const createPromptWithVersionSchema = z
+  .object({
+    name: z.string().min(1, "프롬프트 이름을 입력하세요"),
+  })
+  .merge(versionFormSchema);
 
-type CreatePromptFormData = z.infer<typeof createPromptSchema>;
+type CreatePromptWithVersionFormData = z.infer<typeof createPromptWithVersionSchema>;
 
 export const CreatePromptModal = ({ open, onClose, onCreated }: CreatePromptModalProps) => {
-  const form = useForm<CreatePromptFormData>({
-    resolver: zodResolver(createPromptSchema),
-    defaultValues: { name: "" },
+  const form = useForm<CreatePromptWithVersionFormData>({
+    resolver: zodResolver(createPromptWithVersionSchema),
+    defaultValues: {
+      name: "",
+      ...versionFormDefaults,
+    },
   });
 
   const createPromptMutation = useCreatePrompt();
+  const createVersionMutation = useCreateVersion();
+
+  const isPending = createPromptMutation.isPending || createVersionMutation.isPending;
 
   const handleClose = () => {
     form.reset();
     onClose();
   };
 
-  const onSubmit = (data: CreatePromptFormData) => {
+  const onSubmit = (data: CreatePromptWithVersionFormData) => {
     createPromptMutation.mutate(
       { name: data.name },
       {
         onSuccess: (created) => {
-          toast.success("프롬프트가 생성되었습니다");
-          onCreated(created.id);
-          handleClose();
+          const versionData: CreateVersionRequest = {
+            systemInstruction: data.systemInstruction,
+            userTemplate: data.userTemplate,
+            model: data.model,
+            temperature: data.temperature,
+            outputSchema: data.outputSchema as OutputSchemaType,
+            memo: data.memo || undefined,
+          };
+
+          createVersionMutation.mutate(
+            { promptId: created.id, data: versionData },
+            {
+              onSuccess: () => {
+                toast.success("프롬프트와 첫 번째 버전이 생성되었습니다");
+                onCreated(created.id);
+                handleClose();
+              },
+              onError: () => {
+                toast.error("버전 생성에 실패했습니다. 프롬프트는 생성되었습니다.");
+                onCreated(created.id);
+                handleClose();
+              },
+            },
+          );
         },
         onError: () => {
           toast.error("프롬프트 생성에 실패했습니다");
@@ -66,7 +99,7 @@ export const CreatePromptModal = ({ open, onClose, onCreated }: CreatePromptModa
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>새 프롬프트 생성</DialogTitle>
         </DialogHeader>
@@ -87,12 +120,14 @@ export const CreatePromptModal = ({ open, onClose, onCreated }: CreatePromptModa
               )}
             />
 
+            <VersionFormFields control={form.control} />
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleClose}>
                 취소
               </Button>
-              <Button type="submit" disabled={createPromptMutation.isPending}>
-                {createPromptMutation.isPending ? "저장 중..." : "저장"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "생성 중..." : "생성"}
               </Button>
             </DialogFooter>
           </form>
